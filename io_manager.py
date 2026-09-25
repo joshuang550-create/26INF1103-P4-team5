@@ -27,6 +27,17 @@ def print_update_user_profile_menu():
     pass
 
 
-# example for now, make this better
-def print_food_item_check_menu():
+def print_check_food_item_input():
+    # this is a big thing on its own, this is just a placeholder function for now.
+    pass
+
+
+def print_follow_up_request_input():
+    # for the user to enter more information that the AI requested.
+    # the format for this should
+    pass
+
+
+def print_final_output():
+    # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
     pass

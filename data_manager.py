@@ -57,6 +57,3 @@ def change_profile_weight():
 
 def change_profile_height():
     pass
-
-
-
