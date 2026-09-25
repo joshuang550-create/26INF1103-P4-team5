@@ -1,0 +1,28 @@
+{
+    "nutrients":{
+        "sodium_mg": {
+            "moderate": 300,
+            "high" : 600,
+            "relevant_conditions": ["hypertension, kidney condition"]
+        },
+        "sugars_g": {
+            "moderate": 10,
+            "high": 22.5,
+            "relevant_conditions": ["diabetes"]
+        },
+        "saturated_fat_g": {
+            "moderate": 1.5,
+            "high": 5,
+            "relevant_conditions": ["cardiovascular condition"]
+        },
+        "trans_fat_g": {
+            "moderate": 0.1,
+            "high": 0.5,
+            "relevant_conditions": ["cardiovascular condition"]
+        }
+    },
+    "allergen_synonyms": {
+        "shellfish_crustacean": ["shrimp", "crab", "prawn", "lobster"],
+        "shellfish_mollusk": ["clam", "mussel", "oyster", "scallop"]
+    }
+}
