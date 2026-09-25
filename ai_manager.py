@@ -36,3 +36,4 @@ def check_response_schema():
 def generate_follow_up_prompt():
     # send this string output to prompt_ai() same as before. Only thing to note is how to handle the chat session, make sure u stay in the same session.
     pass
+
