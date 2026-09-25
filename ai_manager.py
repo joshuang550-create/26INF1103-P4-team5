@@ -33,11 +33,6 @@ def check_response_schema():
     pass
 
 
-def calculate_response_confidence():
-    # From the JSON response, take the key-value pairs that store all the confidence/risk scores and do some math to calculate an overall respose confidence score from 0.0 to 10.0
-    pass
-
-
 def generate_follow_up_prompt():
     # send this string output to prompt_ai() same as before. Only thing to note is how to handle the chat session, make sure u stay in the same session.
     pass
