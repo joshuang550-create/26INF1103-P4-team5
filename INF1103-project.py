@@ -2,10 +2,13 @@ print("Hello, World!")
 print("Testing")
 print("testing")
 
-def test_function(value):
+def multiply(value):
     return value * 2
     
+print(multiply(5))
 
-print(test_function(5))
+def square(x):
+    return x ** 2
+print(square(5))
 
 
