@@ -171,7 +171,7 @@ def get_new_profile_info():
         break
 
     password_input = getpass.getpass(" Choose a password: ", echo_char="*")
-    hashed_password = data_manager.hash_password(password_input)
+    hashed_password_input = data_manager.hash_password(password_input)
 
     gender_input = ask_for_valid_gender()
     age_input = ask_for_valid_age()
@@ -182,7 +182,7 @@ def get_new_profile_info():
 
     user_profile = {
         "username": username_input,
-        "password_hash": hashed_password,
+        "password_hash": hashed_password_input,
         "gender": gender_input,
         "age": age_input,
         "race": race_input,

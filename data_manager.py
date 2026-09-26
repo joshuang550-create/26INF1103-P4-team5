@@ -1,13 +1,81 @@
 """System memory across runs.
 """
-
+#                      AFTER LOGICAL FLOW IS CONFIRMED AND WORKS, CREATE FUNCTION THAT READS DATABASE FILES AND VALIDATES IF UNCORRUPTED, THEN RETURNS PYTHON DICT
 import hashlib
 import csv
 import json
 import os
+import pathlib
 
 
 USER_PROFILES = "./user_profiles.json"
+
+
+def get_all_user_profiles():
+    """Load data from user_profiles JSON file and return it as a dictionary.
+
+    If the specified file does not exist, a new file is created.
+
+    If the file exists but cannot be read or contains invalid JSON,
+    the function attempts to use a new filename by adding an
+    incrementing number to the original filename.
+
+    For example:
+        user_profiles.json
+        user_profiles1.json
+        user_profiles2.json
+        user_profiles3.json
+
+    Args:
+        filename (str): Name or path of the JSON file.
+
+    Returns:
+        dict: The data stored in the JSON file. Returns an empty
+            dictionary if a new file is created.
+    """
+    original_path = pathlib.Path(USER_PROFILES)
+    counter = 0
+
+    while True:
+        if counter == 0:
+            current_path = original_path
+        else:
+            current_path = (
+                original_path.parent
+                / f"{original_path.stem}{counter}{original_path.suffix}"
+            )
+
+        # Try to read the file if it already exists.
+        if current_path.exists():
+            try:
+                with current_path.open("r", encoding="utf-8") as file:
+                    data = json.load(file)
+
+                if not isinstance(data, dict):
+                    raise ValueError(
+                        "JSON file does not contain a dictionary."
+                    )
+
+                return data
+
+            except (
+                OSError,
+                json.JSONDecodeError,
+                UnicodeDecodeError,
+                ValueError,
+            ):
+                counter += 1
+                continue
+
+        # File does not exist, so create it.
+        try:
+            with current_path.open("w", encoding="utf-8") as file:
+                json.dump({}, file, indent=4)
+
+            return {}
+
+        except OSError:
+            counter += 1
 
 
 def hash_password(password_input):
@@ -16,6 +84,7 @@ def hash_password(password_input):
 
 
 def search_csv_for_string(search_string, search_csv):
+    """Searches for a string within a CSV file."""
     with open(search_csv, mode="r", encoding="utf-8") as file:
         reader = csv.reader(file)
 
@@ -27,56 +96,45 @@ def search_csv_for_string(search_string, search_csv):
 
 
 def check_taken_username(username_input):
-    if not os.path.exists(USER_PROFILES) or os.path.getsize(USER_PROFILES) == 0:
-        return False
+    user_profiles = get_all_user_profiles()
 
-    try:
-        with open(USER_PROFILES, "r", encoding="utf-8") as file:
-            profiles = json.load(file)
-
-        for profile_info in profiles.values():
-            if profile_info.get("username", "").strip().lower() == username_input.strip().lower():
-                return True
-
-    except (json.JSONDecodeError, ValueError):
-            # future implementation to send a notification to admin. For now still works by overwriting with fresh data. admin should backup databases frequently. (maybe after every edit to database)
-            pass
-
-    return False
+    for user_profile in user_profiles.values():
+        if user_profile.get("username", "").strip().lower() == username_input.strip().lower():
+            return True # username taken already
+        
+    return False # username not taken yet
 
 
-def get_user_profile_from_database(username_input, hashed_password):
-    # this will read a database "user_profiles.json" file (docker volume) and return the specific key-value pair for the user trying to log in. this will run with arg as get_login_credentials()
-    pass
+def get_user_profile_from_database(username_input, password_input):
+    user_profiles = get_all_user_profiles()
 
+    hashed_password_input = hash_password(password_input)
 
+    for user_profile in user_profiles.values():
+        stored_username = user_profile.get("username", "").strip().lower()
+        stored_hashed_password = user_profile.get("password_hash", "")
+
+        if stored_username == username_input.strip().lower():
+            if stored_hashed_password == hashed_password_input:
+                return user_profile # successful login
+
+    return None # failed login
+
+    
 def save_user_profile_to_database(user_profile):
     """Saves a user profile dictionary into a JSON file as a dict of dicts.
 
     This function reads existing profiles from the JSON database, appends or
-    updates the profile using the user's ID as the master lookup key, and
+    updates the profile using the username as the master lookup key, and
     saves the file.
     """
-    master_profiles = {}
-
-    if os.path.exists(USER_PROFILES) and os.path.getsize(USER_PROFILES) > 0: # if false, it will create a new USER_PROFILE JSON file
-        try:
-            with open(USER_PROFILES, "r", encoding="utf-8") as file:
-                master_profiles = json.load(file)
-        except json.JSONDecodeError:
-            # future implementation to send a notification to admin of this error. admin can then fix it manually. admin will backup the databases every so often as well.
-            pass
+    user_profiles = get_all_user_profiles()
 
     username = str(user_profile["username"])
-    master_profiles[username] = user_profile
+    user_profiles[username] = user_profile
 
     with open(USER_PROFILES, "w", encoding="utf-8") as file:
-        json.dump(master_profiles, file, indent=4)
-
-
-def get_user_profile():
-    # should return the currently logged in user's profile. The profile should be stored as a dictionary.
-    pass
+        json.dump(user_profiles, file, indent=4)
     
 
 def delete_user_profile():
