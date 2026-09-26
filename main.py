@@ -11,9 +11,8 @@ def main():
         chosen_option = io_manager.get_login_menu_choice()
 
         if chosen_option == 1: # Login
-            user_profile = data_manager.get_user_profile_from_database(*io_manager.get_login_credentials())
+            user_profile = data_manager.login_user_profile_from_database(*io_manager.get_login_credentials())
             if user_profile == None:
-                print(user_profile)
                 continue # login failed
             break # login successful
 

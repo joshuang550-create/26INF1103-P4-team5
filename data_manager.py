@@ -1,6 +1,6 @@
 """System memory across runs.
 """
-#                      AFTER LOGICAL FLOW IS CONFIRMED AND WORKS, CREATE FUNCTION THAT READS DATABASE FILES AND VALIDATES IF UNCORRUPTED, THEN RETURNS PYTHON DICT
+
 import hashlib
 import csv
 import json
@@ -105,7 +105,7 @@ def check_taken_username(username_input):
     return False # username not taken yet
 
 
-def get_user_profile_from_database(username_input, password_input):
+def login_user_profile_from_database(username_input, password_input):
     user_profiles = get_all_user_profiles()
 
     hashed_password_input = hash_password(password_input)
