@@ -1,9 +1,27 @@
 """The boundary between the user and the application.
 """
 
-green_color = ""
+import data_manager
 
-def show_startup_banner():
+import sys
+#import hashlib
+import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
+
+COLOR_SUFFIX = "\033[0m"
+ERROR_COLOR_PREFIX = "\033[91m"
+APP_COLOR_PREFIX = "\033[92m"
+
+COUNTRIES_CSV = "./countries.csv"
+RACES_CSV = "./races.csv"
+
+
+def clear_terminal():
+    """Clears the terminal screen using ANSI escape code."""
+    sys.stdout.write("\033[H\033[2J")
+    sys.stdout.flush()
+
+
+def show_app_banner():
     """Prints the SmartBite ASCII art banner to the terminal.
 
     This function prints a stylized, multi-line ASCII art title banner 
@@ -18,7 +36,7 @@ def show_startup_banner():
  |_____/|_| |_| |_|\__,_|_|   \__|____/|_|\__\___|
     """
 
-    print("\033[92m" + banner + "\033[0m")
+    print(APP_COLOR_PREFIX + banner + COLOR_SUFFIX)
 
 
 def ask_for_valid_menu_choice(num_options):
@@ -31,10 +49,10 @@ def ask_for_valid_menu_choice(num_options):
         int: Valid menu choice between 1 and num_options.
     """
     while True:
-        user_input = input("\033[92mSmartBite> \033[0m")
+        user_input = input(f"{APP_COLOR_PREFIX}SmartBite> {COLOR_SUFFIX}")
 
         if not user_input.isdigit():
-            print("Please select one of the option numbers.")
+            print(f"{ERROR_COLOR_PREFIX}Please select one of the option numbers.{COLOR_SUFFIX}")
             continue
 
         chosen_option = int(user_input)
@@ -42,16 +60,82 @@ def ask_for_valid_menu_choice(num_options):
         if 1 <= chosen_option <= num_options:
             return chosen_option
 
-        print(f"Please select one of the available options between 1 and {num_options}.")
+        print(f"{ERROR_COLOR_PREFIX}Please select one of the available options between 1 and {num_options}.{COLOR_SUFFIX}")
+
+
+def ask_for_valid_gender():
+    """Loops until the user enters 'male' or 'female'."""
+    while True:
+        gender_input = input(" Gender (Male/Female): ").strip().lower()
+        if gender_input in ("male", "female"):
+            return gender_input
+        print(f"{ERROR_COLOR_PREFIX}Gender must be 'Male' or 'Female'.{COLOR_SUFFIX}")
+
+
+def ask_for_valid_age():
+    """Loops until a valid age between 1 and 120 is provided."""
+    while True:
+        try:
+            age_input = int(input(" Age: ").strip())
+            if 1 <= age_input <= 120:
+                return age_input
+            print(f"{ERROR_COLOR_PREFIX}Age must be a positive integer up to 120.{COLOR_SUFFIX}")
+        except ValueError:
+            print(f"{ERROR_COLOR_PREFIX}Please enter a valid age number.{COLOR_SUFFIX}")
+
+
+def ask_for_valid_height():
+    """Loops until a valid height between 0.1 and 259.9 is provided."""
+    while True:
+        try:
+            height_input = float(input(" Height (cm): ").strip())
+            if 0 < height_input < 260:
+                return height_input
+            print(f"{ERROR_COLOR_PREFIX}Height must be greater than 0 and less than 260 cm.{COLOR_SUFFIX}")
+        except ValueError:
+            print(f"{ERROR_COLOR_PREFIX}Please enter a valid number for height.{COLOR_SUFFIX}")
+
+
+def ask_for_valid_weight():
+    """Loops until a valid weight between 0.1 and 699.9 is provided."""
+    while True:
+        try:
+            weight_input = float(input(" Weight (kg): ").strip())
+            if 0 < weight_input < 700:
+                return weight_input
+            print(f"{ERROR_COLOR_PREFIX}Weight must be greater than 0 and less than 700 kg.{COLOR_SUFFIX}")
+        except ValueError:
+            print(f"{ERROR_COLOR_PREFIX}Please enter a valid number for weight.{COLOR_SUFFIX}")
+            
+
+def ask_for_valid_race():
+    """Loops until a valid race found in RACES_CSV is provided."""
+    while True:
+        race_input = input(" Race: ").strip()
+        if data_manager.search_csv_for_string(race_input, RACES_CSV):
+            return race_input
+        print(f"{ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
+    
+
+def ask_for_valid_country():
+    """Loops until a valid country found in COUNTIRES_CSV is provided."""
+    while True:
+        country_input = input(" Race: ").strip()
+        if data_manager.search_csv_for_string(country_input, COUNTRIES_CSV):
+            return country_input
+        print(f"{ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
 
 
 def get_login_menu_choice():
+    clear_terminal()
+    show_app_banner()
+
     print("\n═══════════════════════════════════════════════════")
     print(" Welcome to SmartBite!")
     print("═══════════════════════════════════════════════════\n")
     
     print(" \033[92m[1]\033[0m Login")
-    print(" \033[92m[2]\033[0m Create Account\n")
+    print(" \033[92m[2]\033[0m New Profile\n")
 
     chosen_option = ask_for_valid_menu_choice(2)
 
@@ -59,14 +143,55 @@ def get_login_menu_choice():
 
 
 def get_login_credentials():
-    pass
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Login")
+    print("═══════════════════════════════════════════════════\n")
+
+    username_input = input(" Username: ")
+    password_input = getpass.getpass(" Password: ", echo_char="*")
+
+    return username_input, password_input
 
 
-def print_create_user_profile_menu():
-    # note that this function will just print the menu and get the user inputs, then call create_user_profile() and pass these inputs as arguments.
-    # input from user, save into a dictionary, output the dictionary.
-    # the user will not be asked to enter a UID, the function will automatically create one. check against the user_profiles.json to ensure the UID doesnt already exist. (check if this UID is an existing key in the JSON file)
-    pass
+def get_new_profile_info():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Create a new profile")
+    print("═══════════════════════════════════════════════════\n")
+
+    profile_id = 1000000 # read user_profiles.JSON, get the largest number key and add 1 to it.
+
+    username_input = input(" Choose a username: ").strip()
+    password_input = getpass.getpass(" Choose a password: ", echo_char="*")
+    hashed_password = data_manager.hash_password(password_input)
+
+    gender_input = ask_for_valid_gender()
+    age_input = ask_for_valid_age()
+    race_input = ask_for_valid_race()
+    country_input = ask_for_valid_country()
+    height_input = ask_for_valid_height()
+    weight_input = ask_for_valid_weight()
+
+    user_profile = {
+        "id": profile_id,
+        "username": username_input,
+        "password_hash": hashed_password,
+        "gender": gender_input,
+        "age": age_input,
+        "race": race_input,
+        "country": country_input,
+        "height": height_input,
+        "weight": weight_input
+    }
+
+    print(" Your new profile has been created successfully!")
+
+    return user_profile
 
 
 def print_main_menu():

@@ -1,6 +1,27 @@
 """System memory across runs.
 """
 
+import hashlib
+import csv
+import json
+
+
+def hash_password(password_input):
+    """Converts a plain-text password into a secure SHA-256 hex string."""
+    return hashlib.sha256(password_input.encode()).hexdigest()
+
+
+def search_csv_for_string(search_string, search_csv):
+    with open(search_csv, mode="r", encoding="utf-8") as file:
+        reader = csv.reader(file)
+
+        for row in reader:
+            if row and row[0] == search_string:
+                return True
+
+        return False
+
+
 def get_user_profile_from_database():
     # this will read a database "user_profiles.json" file (docker volume) and return the specific key-value pair for the user trying to log in.
     pass
@@ -13,11 +34,6 @@ def save_user_profile_to_database():
 
 def get_user_profile():
     # should return the currently logged in user's profile. The profile should be stored as a dictionary.
-    pass
-
-
-def create_user_profile():
-    # this function is not entirely necessary but i will use it just to keep the structure clean. print_create_user_profile_menu() will get the user inputs, then pass them as arguments to this function to then create the profile and save it to the database user_profiles.json
     pass
     
 
