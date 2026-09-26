@@ -31,7 +31,7 @@ def main():
 
             if chosen_option == 1: # View Profile
                 io_manager.show_user_profile(user_profile)
-                continue
+                continue # back to main menu
 
             elif chosen_option == 2: # Edit Profile
                 pass

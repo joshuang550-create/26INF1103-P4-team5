@@ -263,7 +263,7 @@ def show_user_profile(user_profile):
     input(f"\n {APP_COLOR_PREFIX}<Press enter to exit>{COLOR_SUFFIX} ")
 
 
-def print_update_user_profile_menu():
+def get_edit_user_profile_choice():
     # show an options menu list 1, 2, 3, 4, 5  -- user will enter 1 to add medical condition, 2 to remove medical condition, 3 to change age, 4 to change race, 5 to change country of residence etc.
     # then, ask for the value to add/remove/change to stored as its own variable eg. edit_value.
     # then, call update_user_profile() and pass the chosen option number and the edit_value as an argument to actually update the info. The logic will be in update_user_profile().
@@ -284,3 +284,4 @@ def print_follow_up_request_input():
 def print_final_output():
     # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
     pass
+
