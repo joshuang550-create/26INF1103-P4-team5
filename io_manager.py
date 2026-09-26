@@ -1,7 +1,64 @@
 """The boundary between the user and the application.
 """
 
-def print_login_menu():
+green_color = ""
+
+def show_startup_banner():
+    """Prints the SmartBite ASCII art banner to the terminal.
+
+    This function prints a stylized, multi-line ASCII art title banner 
+    colored green using ANSI escape codes.
+    """
+    banner = r"""
+   _____                      _   ____  _ _       
+  / ____|                    | | |  _ \(_) |      
+ | (___  _ __ ___   __ _ _ __| |_| |_) |_| |_ ___ 
+  \___ \| '_ ` _ \ / _` | '__| __|  _ <| | __/ _ \
+  ____) | | | | | | (_| | |  | |_| |_) | | ||  __/
+ |_____/|_| |_| |_|\__,_|_|   \__|____/|_|\__\___|
+    """
+
+    print("\033[92m" + banner + "\033[0m")
+
+
+def ask_for_valid_menu_choice(num_options):
+    """Ask user for an input and validate their input.
+
+    Args:
+        num_options (int): Number of available menu options.
+
+    Returns:
+        int: Valid menu choice between 1 and num_options.
+    """
+    while True:
+        user_input = input("\033[92mSmartBite> \033[0m")
+
+        if not user_input.isdigit():
+            print("Please select one of the option numbers.")
+            continue
+
+        chosen_option = int(user_input)
+
+        if 1 <= chosen_option <= num_options:
+            return chosen_option
+
+        print(f"Please select one of the available options between 1 and {num_options}.")
+
+
+def get_login_menu_choice():
+    print("\n═══════════════════════════════════════════════════")
+    print(" Welcome to SmartBite!")
+    print("═══════════════════════════════════════════════════\n")
+    
+    print(" \033[92m[1]\033[0m Login")
+    print(" \033[92m[2]\033[0m Create Account\n")
+
+    chosen_option = ask_for_valid_menu_choice(2)
+
+    return chosen_option
+
+
+def get_login_credentials():
     pass
 
 
