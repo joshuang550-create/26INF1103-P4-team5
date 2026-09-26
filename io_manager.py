@@ -62,6 +62,16 @@ def ask_for_valid_menu_choice(num_options):
         print(f" {ERROR_COLOR_PREFIX}Please select one of the available options between 1 and {num_options}.{COLOR_SUFFIX}")
 
 
+def ask_for_valid_username():
+    """Loops until the user enters a username that has not already been taken."""
+    while True:
+        username_input = input(" Choose a username: ").strip()
+        if data_manager.check_taken_username(username_input):
+            print(f" {ERROR_COLOR_PREFIX}Username taken, please try another username.{COLOR_SUFFIX}")
+            continue
+        return username_input
+    
+
 def ask_for_valid_gender():
     """Loops until the user enters 'male' or 'female'."""
     while True:
@@ -125,6 +135,23 @@ def ask_for_valid_country():
         print(f" {ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
 
 
+def ask_for_medical_conditions():
+    medical_conditions = []
+    i = 0
+
+    print(f"\n {APP_COLOR_PREFIX}<Once you are done, enter 'done'>{COLOR_SUFFIX}")
+
+    while True:
+        i += 1
+        medical_condition_input = input(f" Medical Condition {i}: ").strip().lower()
+
+        if medical_condition_input == "done":
+            return medical_conditions
+
+        if medical_condition_input != "" and len(medical_condition_input) > 1:
+            medical_conditions.append(medical_condition_input)
+
+
 def get_login_menu_choice():
     clear_terminal()
     show_app_banner()
@@ -164,12 +191,8 @@ def get_new_profile_info():
     print(" Create a new profile")
     print("═══════════════════════════════════════════════════\n")
 
-    while True:
-        username_input = input(" Choose a username: ").strip()
-        if data_manager.check_taken_username(username_input):
-            print(f" {ERROR_COLOR_PREFIX}Username taken, please try another username.{COLOR_SUFFIX}")
-            continue
-        break
+
+    username_input = ask_for_valid_username()
 
     password_input = getpass.getpass(" Choose a password: ", echo_char="*")
     hashed_password_input = data_manager.hash_password(password_input)
@@ -181,6 +204,8 @@ def get_new_profile_info():
     height_input = ask_for_valid_height()
     weight_input = ask_for_valid_weight()
 
+    medical_conditions_input = ask_for_medical_conditions()
+
     user_profile = {
         "username": username_input,
         "password_hash": hashed_password_input,
@@ -189,7 +214,8 @@ def get_new_profile_info():
         "race": race_input,
         "country": country_input,
         "height": height_input,
-        "weight": weight_input
+        "weight": weight_input,
+        "medical_conditions": medical_conditions_input
     }
 
     print(" Your new profile has been created successfully!")
@@ -231,7 +257,10 @@ def show_user_profile(user_profile):
     print(f" Height: {user_profile.get("height", "")}cm")
     print(f" Weight: {user_profile.get("weight", "")}kg\n")
 
-    input(f" {APP_COLOR_PREFIX}<Press enter to exit>{COLOR_SUFFIX} ")
+    for i, mc in enumerate(user_profile.get("medical_conditions", ""), start=1):
+        print(f" Medical Condition {i}: {mc}")
+
+    input(f"\n {APP_COLOR_PREFIX}<Press enter to exit>{COLOR_SUFFIX} ")
 
 
 def print_update_user_profile_menu():
