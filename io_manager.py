@@ -4,7 +4,6 @@
 import data_manager
 
 import sys
-#import hashlib
 import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
 
 COLOR_SUFFIX = "\033[0m"

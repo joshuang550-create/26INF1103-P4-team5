@@ -4,6 +4,10 @@
 import hashlib
 import csv
 import json
+import os
+
+
+USER_PROFILES = "./user_profiles.json"
 
 
 def hash_password(password_input):
@@ -27,9 +31,28 @@ def get_user_profile_from_database():
     pass
 
 
-def save_user_profile_to_database():
-    # should the user make any changes, this function can overwrite the values in the "user_profiles.json" file for the current logged in user. the key should be a Unique ID.
-    pass
+def save_user_profile_to_database(user_profile):
+    """Saves a user profile dictionary into a JSON file as a dict of dicts.
+
+    This function reads existing profiles from the JSON database, appends or
+    updates the profile using the user's ID as the master lookup key, and
+    saves the file.
+    """
+    master_profiles = {}
+
+    if os.path.exists(USER_PROFILES) and os.path.getsize(USER_PROFILES) > 0: # if false, it will create a new USER_PROFILE JSON file
+        try:
+            with open(USER_PROFILES, "r", encoding="utf-8") as file:
+                master_profiles = json.load(file)
+        except json.JSONDecodeError:
+            # future implementation to send a notification to admin of this error. admin can then fix it manually. admin will backup the databases every so often as well.
+            pass
+
+    profile_id = str(user_profile["id"])
+    master_profiles[profile_id] = user_profile
+
+    with open(USER_PROFILES, "w", encoding="utf-8") as file:
+        json.dump(master_profiles, file, indent=4)
 
 
 def get_user_profile():
