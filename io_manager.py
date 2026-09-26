@@ -51,7 +51,7 @@ def ask_for_valid_menu_choice(num_options):
         user_input = input(f"{APP_COLOR_PREFIX}SmartBite> {COLOR_SUFFIX}")
 
         if not user_input.isdigit():
-            print(f"{ERROR_COLOR_PREFIX}Please select one of the option numbers.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Please select one of the option numbers.{COLOR_SUFFIX}")
             continue
 
         chosen_option = int(user_input)
@@ -59,7 +59,7 @@ def ask_for_valid_menu_choice(num_options):
         if 1 <= chosen_option <= num_options:
             return chosen_option
 
-        print(f"{ERROR_COLOR_PREFIX}Please select one of the available options between 1 and {num_options}.{COLOR_SUFFIX}")
+        print(f" {ERROR_COLOR_PREFIX}Please select one of the available options between 1 and {num_options}.{COLOR_SUFFIX}")
 
 
 def ask_for_valid_gender():
@@ -68,7 +68,7 @@ def ask_for_valid_gender():
         gender_input = input(" Gender (Male/Female): ").strip().lower()
         if gender_input in ("male", "female"):
             return gender_input
-        print(f"{ERROR_COLOR_PREFIX}Gender must be 'Male' or 'Female'.{COLOR_SUFFIX}")
+        print(f" {ERROR_COLOR_PREFIX}Gender must be 'Male' or 'Female'.{COLOR_SUFFIX}")
 
 
 def ask_for_valid_age():
@@ -78,9 +78,9 @@ def ask_for_valid_age():
             age_input = int(input(" Age: ").strip())
             if 1 <= age_input <= 120:
                 return age_input
-            print(f"{ERROR_COLOR_PREFIX}Age must be a positive integer up to 120.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Age must be a positive integer up to 120.{COLOR_SUFFIX}")
         except ValueError:
-            print(f"{ERROR_COLOR_PREFIX}Please enter a valid age number.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Please enter a valid age number.{COLOR_SUFFIX}")
 
 
 def ask_for_valid_height():
@@ -90,9 +90,9 @@ def ask_for_valid_height():
             height_input = float(input(" Height (cm): ").strip())
             if 0 < height_input < 260:
                 return height_input
-            print(f"{ERROR_COLOR_PREFIX}Height must be greater than 0 and less than 260 cm.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Height must be greater than 0 and less than 260 cm.{COLOR_SUFFIX}")
         except ValueError:
-            print(f"{ERROR_COLOR_PREFIX}Please enter a valid number for height.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Please enter a valid number for height.{COLOR_SUFFIX}")
 
 
 def ask_for_valid_weight():
@@ -102,9 +102,9 @@ def ask_for_valid_weight():
             weight_input = float(input(" Weight (kg): ").strip())
             if 0 < weight_input < 700:
                 return weight_input
-            print(f"{ERROR_COLOR_PREFIX}Weight must be greater than 0 and less than 700 kg.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Weight must be greater than 0 and less than 700 kg.{COLOR_SUFFIX}")
         except ValueError:
-            print(f"{ERROR_COLOR_PREFIX}Please enter a valid number for weight.{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Please enter a valid number for weight.{COLOR_SUFFIX}")
             
 
 def ask_for_valid_race():
@@ -113,16 +113,16 @@ def ask_for_valid_race():
         race_input = input(" Race: ").strip()
         if data_manager.search_csv_for_string(race_input, RACES_CSV):
             return race_input
-        print(f"{ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
+        print(f" {ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
     
 
 def ask_for_valid_country():
     """Loops until a valid country found in COUNTIRES_CSV is provided."""
     while True:
-        country_input = input(" Race: ").strip()
+        country_input = input(" Country: ").strip()
         if data_manager.search_csv_for_string(country_input, COUNTRIES_CSV):
             return country_input
-        print(f"{ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
+        print(f" {ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
 
 
 def get_login_menu_choice():
@@ -163,7 +163,7 @@ def get_new_profile_info():
     print(" Create a new profile")
     print("═══════════════════════════════════════════════════\n")
 
-    profile_id = 1000000 # read user_profiles.JSON, get the largest number key and add 1 to it.
+    profile_id = data_manager.get_unique_profile_id()
 
     username_input = input(" Choose a username: ").strip()
     password_input = getpass.getpass(" Choose a password: ", echo_char="*")

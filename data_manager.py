@@ -20,14 +20,37 @@ def search_csv_for_string(search_string, search_csv):
         reader = csv.reader(file)
 
         for row in reader:
-            if row and row[0] == search_string:
+            if row and row[0].lower() == search_string.lower():
                 return True
 
         return False
 
 
-def get_user_profile_from_database():
-    # this will read a database "user_profiles.json" file (docker volume) and return the specific key-value pair for the user trying to log in.
+def get_unique_profile_id(): # dont need anymore if username is unique
+    """Reads the user_profiles json file, finds the largest integer key, and returns it + 1.
+
+    If the file does not exist, is empty, or contains no profiles, it defaults to 1.
+    """
+    if not os.path.exists(USER_PROFILES) or os.path.getsize(USER_PROFILES) == 0:
+        return 1
+
+    try:
+        with open(USER_PROFILES, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        if not data:
+            return 1
+
+        largest_id = max(int(key) for key in data.keys())
+        return largest_id + 1
+
+    except (json.JSONDecodeError, ValueError):
+        # future implementation to send a notification to admin.
+        pass
+
+
+def get_user_profile_from_database(username_input, hashed_password):
+    # this will read a database "user_profiles.json" file (docker volume) and return the specific key-value pair for the user trying to log in. this will run with arg as get_login_credentials()
     pass
 
 
