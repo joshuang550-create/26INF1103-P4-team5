@@ -65,7 +65,7 @@ def ask_for_valid_menu_choice(num_options):
 def ask_for_valid_username():
     """Loops until the user enters a username that has not already been taken."""
     while True:
-        username_input = input(" Choose a username: ").strip()
+        username_input = input(f" {APP_COLOR_PREFIX}Choose a username:{COLOR_SUFFIX} ").strip()
         if data_manager.check_taken_username(username_input):
             print(f" {ERROR_COLOR_PREFIX}Username taken, please try another username.{COLOR_SUFFIX}")
             continue
@@ -75,17 +75,28 @@ def ask_for_valid_username():
 def ask_for_valid_gender():
     """Loops until the user enters 'male' or 'female'."""
     while True:
-        gender_input = input(" Gender (Male/Female): ").strip().lower()
+        gender_input = input(f" {APP_COLOR_PREFIX}Gender (Male/Female):{COLOR_SUFFIX} ").strip().lower()
         if gender_input in ("male", "female"):
             return gender_input
         print(f" {ERROR_COLOR_PREFIX}Gender must be 'Male' or 'Female'.{COLOR_SUFFIX}")
 
 
-def ask_for_valid_age():
-    """Loops until a valid age between 1 and 120 is provided."""
+def ask_for_valid_age(standalone=False):
+    """Loops until a valid age between 1 and 120 is provided.
+
+    standalone set to True will show a full UI page.
+    """
+    if standalone == True:
+        clear_terminal()
+        show_app_banner()
+
+        print("\n═══════════════════════════════════════════════════")
+        print(" Enter your new age.")
+        print("═══════════════════════════════════════════════════\n")
+
     while True:
         try:
-            age_input = int(input(" Age: ").strip())
+            age_input = int(input(f" {APP_COLOR_PREFIX}Age:{COLOR_SUFFIX} ").strip())
             if 1 <= age_input <= 120:
                 return age_input
             print(f" {ERROR_COLOR_PREFIX}Age must be a positive integer up to 120.{COLOR_SUFFIX}")
@@ -93,11 +104,22 @@ def ask_for_valid_age():
             print(f" {ERROR_COLOR_PREFIX}Please enter a valid age number.{COLOR_SUFFIX}")
 
 
-def ask_for_valid_height():
-    """Loops until a valid height between 0.1 and 259.9 is provided."""
+def ask_for_valid_height(standalone=False):
+    """Loops until a valid height between 0.1 and 259.9 is provided.
+    
+    standalone set to True will show a full UI page.
+    """
+    if standalone == True:
+        clear_terminal()
+        show_app_banner()
+
+        print("\n═══════════════════════════════════════════════════")
+        print(" Enter your new height.")
+        print("═══════════════════════════════════════════════════\n")
+
     while True:
         try:
-            height_input = float(input(" Height (cm): ").strip())
+            height_input = float(input(f" {APP_COLOR_PREFIX}Height (cm):{COLOR_SUFFIX} ").strip())
             if 0 < height_input < 260:
                 return height_input
             print(f" {ERROR_COLOR_PREFIX}Height must be greater than 0 and less than 260 cm.{COLOR_SUFFIX}")
@@ -105,11 +127,22 @@ def ask_for_valid_height():
             print(f" {ERROR_COLOR_PREFIX}Please enter a valid number for height.{COLOR_SUFFIX}")
 
 
-def ask_for_valid_weight():
-    """Loops until a valid weight between 0.1 and 699.9 is provided."""
+def ask_for_valid_weight(standalone=False):
+    """Loops until a valid weight between 0.1 and 699.9 is provided.
+    
+    standalone set to True will show a full UI page.
+    """
+    if standalone == True:
+        clear_terminal()
+        show_app_banner()
+
+        print("\n═══════════════════════════════════════════════════")
+        print(" Enter your new weight.")
+        print("═══════════════════════════════════════════════════\n")
+
     while True:
         try:
-            weight_input = float(input(" Weight (kg): ").strip())
+            weight_input = float(input(f" {APP_COLOR_PREFIX}Weight (kg):{COLOR_SUFFIX} ").strip())
             if 0 < weight_input < 700:
                 return weight_input
             print(f" {ERROR_COLOR_PREFIX}Weight must be greater than 0 and less than 700 kg.{COLOR_SUFFIX}")
@@ -120,16 +153,27 @@ def ask_for_valid_weight():
 def ask_for_valid_race():
     """Loops until a valid race found in RACES_CSV is provided."""
     while True:
-        race_input = input(" Race: ").strip()
+        race_input = input(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} ").strip()
         if data_manager.search_csv_for_string(race_input, RACES_CSV):
             return race_input
         print(f" {ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
     
 
-def ask_for_valid_country():
-    """Loops until a valid country found in COUNTIRES_CSV is provided."""
+def ask_for_valid_country(standalone=False):
+    """Loops until a valid country found in COUNTIRES_CSV is provided.
+        
+    standalone set to True will show a full UI page.
+    """
+    if standalone == True:
+        clear_terminal()
+        show_app_banner()
+
+        print("\n═══════════════════════════════════════════════════")
+        print(" Enter your new country of residence.")
+        print("═══════════════════════════════════════════════════\n")
+        
     while True:
-        country_input = input(" Country: ").strip()
+        country_input = input(f" {APP_COLOR_PREFIX}Country:{COLOR_SUFFIX} ").strip()
         if data_manager.search_csv_for_string(country_input, COUNTRIES_CSV):
             return country_input
         print(f" {ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
@@ -137,7 +181,7 @@ def ask_for_valid_country():
 
 def show_list_of_medical_conditions(user_profile):
     for i, mc in enumerate(user_profile.get("medical_conditions", ""), start=1):
-        print(f" Medical Condition {i}: {mc}")
+        print(f" {APP_COLOR_PREFIX}Medical Condition {i}:{COLOR_SUFFIX} {mc}")
 
 
 def ask_for_medical_conditions(user_profile):
@@ -150,19 +194,21 @@ def ask_for_medical_conditions(user_profile):
     show_list_of_medical_conditions(user_profile)
 
     medical_conditions = []
-    i = 0
+    i = len(user_profile.get("medical_conditions", "")) + 1
 
     print(f"\n {APP_COLOR_PREFIX}<Once you are done, enter 'done'>{COLOR_SUFFIX}")
 
     while True:
-        i += 1
-        medical_condition_input = input(f" Medical Condition {i}: ").strip().lower()
+        medical_condition_input = input(f" {APP_COLOR_PREFIX}Medical Condition {i}:{COLOR_SUFFIX} ").strip().lower()
 
         if medical_condition_input == "done":
             return medical_conditions
 
-        if medical_condition_input != "" and len(medical_condition_input) > 1:
+        if len(medical_condition_input) > 1:
             medical_conditions.append(medical_condition_input)
+            i += 1
+        else:
+            print(f" {ERROR_COLOR_PREFIX}Please try to enter a recognised name for your medical condition.{COLOR_SUFFIX}")
 
 
 def ask_for_medical_conditions_to_remove(user_profile):
@@ -180,7 +226,7 @@ def ask_for_medical_conditions_to_remove(user_profile):
     number_of_existing_conditions = len(user_profile.get("medical_conditions", ""))
 
     while True:
-        medical_condition_input = input(f" Medical Condition Number: ").strip().lower()
+        medical_condition_input = input(f" {APP_COLOR_PREFIX}Medical Condition Number:{COLOR_SUFFIX} ").strip().lower()
 
         if medical_condition_input == "done":
             return medical_conditions_to_remove
@@ -222,8 +268,8 @@ def get_login_credentials():
     print(" Login")
     print("═══════════════════════════════════════════════════\n")
 
-    username_input = input(" Username: ")
-    password_input = getpass.getpass(" Password: ", echo_char="*")
+    username_input = input(f" {APP_COLOR_PREFIX}Username:{COLOR_SUFFIX} ")
+    password_input = getpass.getpass(f" {APP_COLOR_PREFIX}Password:{COLOR_SUFFIX} ", echo_char="*")
 
     return username_input, password_input
 
@@ -239,7 +285,7 @@ def get_new_profile_info():
 
     username_input = ask_for_valid_username()
 
-    password_input = getpass.getpass(" Choose a password: ", echo_char="*")
+    password_input = getpass.getpass(f" {APP_COLOR_PREFIX}Choose a password:{COLOR_SUFFIX}  ", echo_char="*")
     hashed_password_input = data_manager.hash_password(password_input)
 
     gender_input = ask_for_valid_gender()
@@ -294,13 +340,13 @@ def show_user_profile(user_profile):
     print(f" Here is your profile, {user_profile.get("username", "")}")
     print("═══════════════════════════════════════════════════\n")
 
-    print(f" Username: {user_profile.get("username", "")}")
-    print(f" Gender: {user_profile.get("gender", "")}")
-    print(f" Age: {user_profile.get("age", "")}")
-    print(f" Race: {user_profile.get("race", "")}")
-    print(f" Country of Residence: {user_profile.get("country", "")}")
-    print(f" Height: {user_profile.get("height", "")}cm")
-    print(f" Weight: {user_profile.get("weight", "")}kg\n")
+    print(f" {APP_COLOR_PREFIX}Username:{COLOR_SUFFIX} {user_profile.get("username", "")}")
+    print(f" {APP_COLOR_PREFIX}Gender:{COLOR_SUFFIX} {user_profile.get("gender", "")}")
+    print(f" {APP_COLOR_PREFIX}Age:{COLOR_SUFFIX} {user_profile.get("age", "")}")
+    print(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} {user_profile.get("race", "")}")
+    print(f" {APP_COLOR_PREFIX}Country of Residence:{COLOR_SUFFIX} {user_profile.get("country", "")}")
+    print(f" {APP_COLOR_PREFIX}Height:{COLOR_SUFFIX} {user_profile.get("height", "")}cm")
+    print(f" {APP_COLOR_PREFIX}Weight:{COLOR_SUFFIX} {user_profile.get("weight", "")}kg\n")
 
     show_list_of_medical_conditions(user_profile)
 
@@ -323,7 +369,7 @@ def get_edit_user_profile_choice():
     print(f" {APP_COLOR_PREFIX}[5]{COLOR_SUFFIX} Update Height")
     print(f" {APP_COLOR_PREFIX}[6]{COLOR_SUFFIX} Update Weight")
 
-    print(f" {APP_COLOR_PREFIX}[7]{COLOR_SUFFIX} Exit\n")
+    print(f" {APP_COLOR_PREFIX}[7]{COLOR_SUFFIX} Save & Exit\n")
 
     chosen_option = ask_for_valid_menu_choice(7)
 
