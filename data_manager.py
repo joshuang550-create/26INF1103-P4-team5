@@ -26,27 +26,23 @@ def search_csv_for_string(search_string, search_csv):
         return False
 
 
-def get_unique_profile_id(): # dont need anymore if username is unique
-    """Reads the user_profiles json file, finds the largest integer key, and returns it + 1.
-
-    If the file does not exist, is empty, or contains no profiles, it defaults to 1.
-    """
+def check_taken_username(username_input):
     if not os.path.exists(USER_PROFILES) or os.path.getsize(USER_PROFILES) == 0:
-        return 1
+        return False
 
     try:
         with open(USER_PROFILES, "r", encoding="utf-8") as file:
-            data = json.load(file)
+            profiles = json.load(file)
 
-        if not data:
-            return 1
-
-        largest_id = max(int(key) for key in data.keys())
-        return largest_id + 1
+        for profile_info in profiles.values():
+            if profile_info.get("username", "").strip().lower() == username_input.strip().lower():
+                return True
 
     except (json.JSONDecodeError, ValueError):
-        # future implementation to send a notification to admin.
-        pass
+            # future implementation to send a notification to admin. For now still works by overwriting with fresh data. admin should backup databases frequently. (maybe after every edit to database)
+            pass
+
+    return False
 
 
 def get_user_profile_from_database(username_input, hashed_password):
@@ -71,8 +67,8 @@ def save_user_profile_to_database(user_profile):
             # future implementation to send a notification to admin of this error. admin can then fix it manually. admin will backup the databases every so often as well.
             pass
 
-    profile_id = str(user_profile["id"])
-    master_profiles[profile_id] = user_profile
+    username = str(user_profile["username"])
+    master_profiles[username] = user_profile
 
     with open(USER_PROFILES, "w", encoding="utf-8") as file:
         json.dump(master_profiles, file, indent=4)

@@ -163,9 +163,13 @@ def get_new_profile_info():
     print(" Create a new profile")
     print("═══════════════════════════════════════════════════\n")
 
-    profile_id = data_manager.get_unique_profile_id()
+    while True:
+        username_input = input(" Choose a username: ").strip()
+        if data_manager.check_taken_username(username_input):
+            print(f" {ERROR_COLOR_PREFIX}Username taken, please try another username.{COLOR_SUFFIX}")
+            continue
+        break
 
-    username_input = input(" Choose a username: ").strip()
     password_input = getpass.getpass(" Choose a password: ", echo_char="*")
     hashed_password = data_manager.hash_password(password_input)
 
@@ -177,7 +181,6 @@ def get_new_profile_info():
     weight_input = ask_for_valid_weight()
 
     user_profile = {
-        "id": profile_id,
         "username": username_input,
         "password_hash": hashed_password,
         "gender": gender_input,

@@ -1,0 +1,22 @@
+{
+    "John": {
+        "username": "John",
+        "password_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "gender": "male",
+        "age": 40,
+        "race": "indian",
+        "country": "india",
+        "height": 170.0,
+        "weight": 70.0
+    },
+    "jill": {
+        "username": "jill",
+        "password_hash": "d8e7b51360c1ba8244c1e9cc912e5837196e6775f029369991173dbdfd38a061",
+        "gender": "male",
+        "age": 20,
+        "race": "chinese",
+        "country": "singapore",
+        "height": 180.0,
+        "weight": 70.0
+    }
+}
