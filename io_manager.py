@@ -184,7 +184,7 @@ def show_list_of_medical_conditions(user_profile):
         print(f" {APP_COLOR_PREFIX}Medical Condition {i}:{COLOR_SUFFIX} {mc}")
 
 
-def ask_for_medical_conditions(user_profile):
+def ask_for_medical_conditions(user_profile={}):
     clear_terminal()
     show_app_banner()
 
@@ -285,7 +285,7 @@ def get_new_profile_info():
 
     username_input = ask_for_valid_username()
 
-    password_input = getpass.getpass(f" {APP_COLOR_PREFIX}Choose a password:{COLOR_SUFFIX}  ", echo_char="*")
+    password_input = getpass.getpass(f" {APP_COLOR_PREFIX}Choose a password:{COLOR_SUFFIX} ", echo_char="*")
     hashed_password_input = data_manager.hash_password(password_input)
 
     gender_input = ask_for_valid_gender()
