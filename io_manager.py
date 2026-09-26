@@ -133,10 +133,11 @@ def get_login_menu_choice():
     print(" Welcome to SmartBite!")
     print("═══════════════════════════════════════════════════\n")
     
-    print(" \033[92m[1]\033[0m Login")
-    print(" \033[92m[2]\033[0m New Profile\n")
+    print(f" {APP_COLOR_PREFIX}[1]{COLOR_SUFFIX} Login")
+    print(f" {APP_COLOR_PREFIX}[2]{COLOR_SUFFIX} New Profile")
+    print(f" {APP_COLOR_PREFIX}[3]{COLOR_SUFFIX} Close\n")
 
-    chosen_option = ask_for_valid_menu_choice(2)
+    chosen_option = ask_for_valid_menu_choice(3)
 
     return chosen_option
 
@@ -196,12 +197,41 @@ def get_new_profile_info():
     return user_profile
 
 
-def print_main_menu():
-    pass
+def get_main_menu_choice(user_profile):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(f" What would you like to do today, {user_profile.get("username", "")}")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {APP_COLOR_PREFIX}[1]{COLOR_SUFFIX} View Profile")
+    print(f" {APP_COLOR_PREFIX}[2]{COLOR_SUFFIX} Edit Profile")
+    print(f" {APP_COLOR_PREFIX}[3]{COLOR_SUFFIX} Check Food")
+    print(f" {APP_COLOR_PREFIX}[4]{COLOR_SUFFIX} Log Out\n")
+
+    chosen_option = ask_for_valid_menu_choice(4)
+
+    return chosen_option
 
 
-def print_user_profile():
-    pass
+def show_user_profile(user_profile):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(f" Here is your profile, {user_profile.get("username", "")}")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" Username: {user_profile.get("username", "")}")
+    print(f" Gender: {user_profile.get("gender", "")}")
+    print(f" Age: {user_profile.get("age", "")}")
+    print(f" Race: {user_profile.get("race", "")}")
+    print(f" Country of Residence: {user_profile.get("country", "")}")
+    print(f" Height: {user_profile.get("height", "")}cm")
+    print(f" Weight: {user_profile.get("weight", "")}kg\n")
+
+    input(f" {APP_COLOR_PREFIX}<Press enter to exit>{COLOR_SUFFIX} ")
 
 
 def print_update_user_profile_menu():

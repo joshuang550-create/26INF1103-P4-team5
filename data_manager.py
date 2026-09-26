@@ -135,7 +135,7 @@ def save_user_profile_to_database(user_profile):
 
     with open(USER_PROFILES, "w", encoding="utf-8") as file:
         json.dump(user_profiles, file, indent=4)
-    
+
 
 def delete_user_profile():
     # if called by print_update_user_profile_menu(), delete the dictionary key-value pair for currently logged in user.
