@@ -1,15 +1,15 @@
 """The boundary between the user and the application.
 """
 
-import data_manager
-
 import sys
+
 import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
+
+import data_manager
 
 COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
 APP_COLOR_PREFIX = "\033[92m"
-
 COUNTRIES_CSV = "./countries.csv"
 RACES_CSV = "./races.csv"
 
@@ -371,9 +371,30 @@ def get_edit_user_profile_choice():
 
     print(f" {APP_COLOR_PREFIX}[7]{COLOR_SUFFIX} Save & Exit\n")
 
-    chosen_option = ask_for_valid_menu_choice(7)
+    print(f" {ERROR_COLOR_PREFIX}[8] Delete Profile{COLOR_SUFFIX}\n")
+
+    chosen_option = ask_for_valid_menu_choice(8)
 
     return chosen_option
+
+
+def get_delete_user_profile_confirmation():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Are you sure you want to delete this profile?")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f"\n                      {ERROR_COLOR_PREFIX}<y/n>{COLOR_SUFFIX} ")
+
+    while True:
+        confirm = input(f"{APP_COLOR_PREFIX}SmartBite> {COLOR_SUFFIX}")
+
+        if confirm in ['yes', 'y', 'no', 'n']:
+            return confirm
+
+        print(f" {ERROR_COLOR_PREFIX}Please enter either 'yes' or 'no'.")
 
 
 def print_check_food_item_input():

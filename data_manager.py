@@ -1,12 +1,10 @@
 """System memory across runs.
 """
 
-import hashlib
 import csv
+import hashlib
 import json
-import os
 import pathlib
-
 
 USER_PROFILES = "./user_profiles.json"
 
@@ -122,7 +120,7 @@ def login_user_profile_from_database(username_input, password_input):
 
     
 def save_user_profile_to_database(user_profile):
-    """Saves a user profile dictionary into a JSON file as a dict of dicts.
+    """Saves a user profile dictionary into the JSON file as a dict of dicts.
 
     This function reads existing profiles from the JSON database, appends or
     updates the profile using the username as the master lookup key, and
@@ -137,10 +135,21 @@ def save_user_profile_to_database(user_profile):
         json.dump(user_profiles, file, indent=4)
 
 
-def delete_user_profile():
-    # if called by print_update_user_profile_menu(), delete the dictionary key-value pair for currently logged in user.
-    pass
+def delete_user_profile_from_database(user_profile, confirm):
+    """Deletes a user profile dictionary from the JSON file.
 
+    This function reads existing profiles from the JSON database, deletes 
+    the target profile using the username as the master lookup key, and
+    saves the file.
+    """
+    user_profiles = get_all_user_profiles()
+
+    username = str(user_profile["username"])
+    del user_profiles[username]
+
+    with open(USER_PROFILES, "w", encoding="utf-8") as file:
+        json.dump(user_profiles, file, indent=4)
+    
 
 def add_profile_medical_condition(user_profile, medical_conditions_input):
     user_profile["medical_conditions"].extend(medical_conditions_input)
@@ -152,28 +161,3 @@ def remove_profile_medical_condition(user_profile, medical_conditions_to_remove_
         for i, mc in enumerate(user_profile["medical_conditions"])
         if i not in medical_conditions_to_remove_input
     ]
-
-
-def change_profile_age():
-    pass
-
-
-def change_profile_race():
-    pass
-
-
-def change_profile_gender():
-    pass
-
-
-def change_profile_country_of_residence():
-    pass
-
-
-def change_profile_weight():
-    # maybe dont need a funtion to calculate BMI since we can just send the weight and height to the prompt as text and let the AI figure it out.
-    pass
-
-
-def change_profile_height():
-    pass

@@ -39,16 +39,6 @@
         "height": 160.0,
         "weight": 50.0
     },
-    "sue": {
-        "username": "sue",
-        "password_hash": "0d015bafffbb48c3cb2022491bc112a5b3897a0c7ea6508b27916c803b83d1c4",
-        "gender": "female",
-        "age": 23,
-        "race": "chinese",
-        "country": "singapore",
-        "height": 164.0,
-        "weight": 60.0
-    },
     "ride": {
         "username": "ride",
         "password_hash": "e049bd056f936d1b39b704abcf824eaef39bd8877fcbb82b2a213ceec82bdf26",

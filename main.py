@@ -5,15 +5,13 @@ import io_manager
 import data_manager
 
 
-def main():
-    # after running prompt_ai(), read the output to see if it is a follow-up request or a final response. if it is a follow-up request, run print_follow_up_request_input() function from io_manager for the user to enter more information that the AI requested.
-    
+def main():    
     while True:
         chosen_option = io_manager.get_login_menu_choice()
 
         if chosen_option == 1: # Login
             user_profile = data_manager.login_user_profile_from_database(*io_manager.get_login_credentials())
-            if user_profile == None:
+            if user_profile is None:
                 continue # login failed. go to back to login page
             # login successful. move on to main menu page
 
@@ -61,20 +59,16 @@ def main():
                         data_manager.save_user_profile_to_database(user_profile)
                         break # back to main menu
 
+                    elif chosen_option == 8: # Delete Profile
+                        data_manager.delete_user_profile_from_database(user_profile, io_manager.get_delete_user_profile_confirmation())
+                        # this is where i want to break all the way out to login page at the start of this main function
+                        return # ill just return for now. Reopen app to create new account.
+
             elif chosen_option == 3: # Check Food
                 pass
 
             elif chosen_option == 4: # Log Out
                 break # goes back to login page
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -83,5 +77,16 @@ if __name__ == "__main__":
 
 
 
-# IDEAS
-# log out option? unneccessary but it is a common function to have in an app
+
+
+
+
+
+
+
+
+
+
+# after running prompt_ai(), read the output to see if it is a follow-up request or a final response. 
+# if it is a follow-up request, run print_follow_up_request_input() function from io_manager for the 
+# user to enter more information that the AI requested.
