@@ -34,7 +34,34 @@ def main():
                 continue # back to main menu
 
             elif chosen_option == 2: # Edit Profile
-                pass
+                chosen_option = io_manager.get_edit_user_profile_choice()
+
+                if chosen_option == 1: # Add Medical Condition
+                    medical_conditions_input = io_manager.ask_for_medical_conditions(user_profile)
+                    data_manager.add_profile_medical_condition(user_profile, medical_conditions_input)
+                    data_manager.save_user_profile_to_database(user_profile)
+
+                elif chosen_option == 2: # Remove Medical Condition
+                    medical_conditions_to_remove_input = io_manager.ask_for_medical_conditions_to_remove(user_profile)
+                    data_manager.remove_profile_medical_condition(user_profile, medical_conditions_to_remove_input)
+                    data_manager.save_user_profile_to_database(user_profile)
+
+                elif chosen_option == 3: # Update Age
+                    user_profile["age"] = io_manager.ask_for_valid_age()
+
+                elif chosen_option == 4: # Update Country of Residence
+                    user_profile["country"] = io_manager.ask_for_valid_country()
+
+                elif chosen_option == 5: # Update Height
+                    user_profile["height"] = io_manager.ask_for_valid_height()
+
+                elif chosen_option == 6: # Update Weight
+                    user_profile["weight"] = io_manager.ask_for_valid_weight()
+
+                elif chosen_option == 7: # Exit
+                    break # back to main menu
+            
+
 
             elif chosen_option == 3: # Check Food
                 pass

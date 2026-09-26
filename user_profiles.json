@@ -60,7 +60,8 @@
         "weight": 80.0,
         "medical_conditions": [
             "diabetes",
-            "ms"
+            "high blood pressure",
+            "peanut allergy"
         ]
     }
 }

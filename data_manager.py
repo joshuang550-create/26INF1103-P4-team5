@@ -142,12 +142,16 @@ def delete_user_profile():
     pass
 
 
-def add_profile_medical_condition():
-    pass
+def add_profile_medical_condition(user_profile, medical_conditions_input):
+    user_profile["medical_conditions"].extend(medical_conditions_input)
 
 
-def remove_profile_medical_condition():
-    pass
+def remove_profile_medical_condition(user_profile, medical_conditions_to_remove_input):
+    user_profile["medical_conditions"] = [
+        mc
+        for i, mc in enumerate(user_profile["medical_conditions"])
+        if i not in medical_conditions_to_remove_input
+    ]
 
 
 def change_profile_age():

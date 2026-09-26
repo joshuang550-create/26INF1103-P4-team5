@@ -135,7 +135,20 @@ def ask_for_valid_country():
         print(f" {ERROR_COLOR_PREFIX}{country_input} is not a valid country.{COLOR_SUFFIX}")
 
 
-def ask_for_medical_conditions():
+def show_list_of_medical_conditions(user_profile):
+    for i, mc in enumerate(user_profile.get("medical_conditions", ""), start=1):
+        print(f" Medical Condition {i}: {mc}")
+
+
+def ask_for_medical_conditions(user_profile):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Enter your new medical conditions.")
+    print("═══════════════════════════════════════════════════\n") 
+    show_list_of_medical_conditions(user_profile)
+
     medical_conditions = []
     i = 0
 
@@ -150,6 +163,38 @@ def ask_for_medical_conditions():
 
         if medical_condition_input != "" and len(medical_condition_input) > 1:
             medical_conditions.append(medical_condition_input)
+
+
+def ask_for_medical_conditions_to_remove(user_profile):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Enter the medical condition number to remove it.")
+    print("═══════════════════════════════════════════════════\n") 
+    show_list_of_medical_conditions(user_profile)
+
+    print(f"\n {APP_COLOR_PREFIX}<Once you are done, enter 'done'>{COLOR_SUFFIX}")
+
+    medical_conditions_to_remove = []
+    number_of_existing_conditions = len(user_profile.get("medical_conditions", ""))
+
+    while True:
+        medical_condition_input = input(f" Medical Condition Number: ").strip().lower()
+
+        if medical_condition_input == "done":
+            return medical_conditions_to_remove
+
+        if not medical_condition_input.isdigit():
+            print(f" {ERROR_COLOR_PREFIX}Please select one of the medical condition numbers.{COLOR_SUFFIX}")
+            continue
+
+        chosen_option = int(medical_condition_input)
+
+        if 1 <= chosen_option <= number_of_existing_conditions:
+            medical_conditions_to_remove.append(chosen_option-1) 
+        else:
+            print(f" {ERROR_COLOR_PREFIX}Please select one of the available options between 1 and {number_of_existing_conditions}.{COLOR_SUFFIX}")
 
 
 def get_login_menu_choice():
@@ -257,17 +302,32 @@ def show_user_profile(user_profile):
     print(f" Height: {user_profile.get("height", "")}cm")
     print(f" Weight: {user_profile.get("weight", "")}kg\n")
 
-    for i, mc in enumerate(user_profile.get("medical_conditions", ""), start=1):
-        print(f" Medical Condition {i}: {mc}")
+    show_list_of_medical_conditions(user_profile)
 
     input(f"\n {APP_COLOR_PREFIX}<Press enter to exit>{COLOR_SUFFIX} ")
 
 
 def get_edit_user_profile_choice():
-    # show an options menu list 1, 2, 3, 4, 5  -- user will enter 1 to add medical condition, 2 to remove medical condition, 3 to change age, 4 to change race, 5 to change country of residence etc.
-    # then, ask for the value to add/remove/change to stored as its own variable eg. edit_value.
-    # then, call update_user_profile() and pass the chosen option number and the edit_value as an argument to actually update the info. The logic will be in update_user_profile().
-    pass
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" What would you like to edit?")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {APP_COLOR_PREFIX}[1]{COLOR_SUFFIX} Add Medical Condition")
+    print(f" {APP_COLOR_PREFIX}[2]{COLOR_SUFFIX} Remove Medical Condition")
+
+    print(f" {APP_COLOR_PREFIX}[3]{COLOR_SUFFIX} Update Age")
+    print(f" {APP_COLOR_PREFIX}[4]{COLOR_SUFFIX} Update Country of Residence")
+    print(f" {APP_COLOR_PREFIX}[5]{COLOR_SUFFIX} Update Height")
+    print(f" {APP_COLOR_PREFIX}[6]{COLOR_SUFFIX} Update Weight")
+
+    print(f" {APP_COLOR_PREFIX}[7]{COLOR_SUFFIX} Exit\n")
+
+    chosen_option = ask_for_valid_menu_choice(7)
+
+    return chosen_option
 
 
 def print_check_food_item_input():
