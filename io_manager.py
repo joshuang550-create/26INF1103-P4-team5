@@ -279,7 +279,7 @@ def get_new_profile_info():
     show_app_banner()
 
     print("\n═══════════════════════════════════════════════════")
-    print(" Create a new profile")
+    print(" Create a new profile.")
     print("═══════════════════════════════════════════════════\n")
 
 
@@ -319,7 +319,7 @@ def get_main_menu_choice(user_profile):
     show_app_banner()
 
     print("\n═══════════════════════════════════════════════════")
-    print(f" What would you like to do today, {user_profile.get("username", "")}")
+    print(f" What would you like to do?")
     print("═══════════════════════════════════════════════════\n")
 
     print(f" {APP_COLOR_PREFIX}[1]{COLOR_SUFFIX} View Profile")
@@ -337,7 +337,7 @@ def show_user_profile(user_profile):
     show_app_banner()
 
     print("\n═══════════════════════════════════════════════════")
-    print(f" Here is your profile, {user_profile.get("username", "")}")
+    print(f" Here is your profile, {user_profile.get("username", "")}.")
     print("═══════════════════════════════════════════════════\n")
 
     print(f" {APP_COLOR_PREFIX}Username:{COLOR_SUFFIX} {user_profile.get("username", "")}")
