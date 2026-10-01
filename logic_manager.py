@@ -10,9 +10,9 @@ MOCK_AI_RESPONSE = {
         "condition_relevance": 0.40,
     },
     "nutrional_info": {
-        "sugar_g": 3.0,
+        "sugar_g": 6.0,
         "sodium_mg": 150.0,
-        "carbs_g": 8.0,
+        "carbs_g": 20.0,
     },
 }
 
@@ -96,7 +96,7 @@ def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -
     if not user_conditions:
         return 0.0
 
-    risk_points = sum(get_condition_risk(condition, food_item) for condition in user_conditions)
+    risk_points = sum(get_condition_risk(food_item, condition) for condition in user_conditions)
     max_possible_points = len(user_conditions) * 10  # Assuming each condition can contribute a maximum of 10 points to the risk score
     return round((risk_points / max_possible_points) * 10, 1)  # Scale to 0.0 - 10.0
 
