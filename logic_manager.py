@@ -96,11 +96,27 @@ def get_condition_risk(food_item: dict, condition: str) -> int:
     
     return 0 # unknown condition - no risk data available
 
-def generate_generic_response_prompt():
+
+#===================================================
+# NOTE: the two function below should belong to ai_manager - they generate prompts
+# and fetch/produce content rather than making decisions.
+def generate_generic_response_prompt(user_profile: dict = None) -> str:
     # should the response confidence be poor even after reprompt, call this function to generate a response ignoring the food they wanted to check, and just recommend food to eat based on the user profile's medical conditions.
     # This function will generate a prompt roughly saying the user's profile info, medical conditions, then ask "What are the best foods i should eat given my medical conditions."
-    pass
+    
+    if user_profile is None:
+        user_profile = MOCK_USER_PROFILE # CHANGE ACCORDINGLY, WAIT FOR AI
 
+    age = user_profile.get("age")
+    gender = user_profile.get("gender")
+    country = user_profile.get("country")
+    conditions = ", ".join(user_profile.get("conditions", []))
+
+    prompt = (
+        f"I am a {age}-year-old {gender} from {country} with the following medical conditions: {conditions}. "
+        f"What are the best foods I should eat given my medical conditions?"
+    )
+    return prompt
 
 def generate_generic_response():
     # use a database to find the best foods to eat based on medical conditions. Ranked database. Issue is conflictions, what if best for this is bad for that and you have both this and that?
