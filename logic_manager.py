@@ -56,6 +56,30 @@ def calculate_response_confidence(ai_response: dict = None, low_field_threshold:
         "low_confidence_fields": low_confidence_fields
     }
 
+def evaluate_response_confidence(
+        confidence_result: dict,
+        attempt_number: int,
+        min_accpetable_score: float = 5.0,
+) -> ResponseAction:
+    """
+    Decide what should happen next based on the confidence result and how many
+    attempts have already been made
+    - score acceptable -> ACCEPT, continue with normal flow
+    - score too low, have not reprompted yet -> REPROMPT once
+    - score too low, have already reprompted -> FALLBACK, give generic response:
+    "We are unable to confidently determine ... We do however, recommend 
+    that you eat ____ as you have ____. This will help lower your ..."
+    
+    Decision logic
+    """
+    if confidence_result["overall_score"] >= min_accpetable_score:
+        return ResponseAction.ACCEPT
+
+    elif attempt_number < MAX_REPROMPT_ATTEMPTS + 1:
+        return ResponseAction.REPROMPT
+
+    return ResponseAction.FALLBACK
+
 
 def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -> float:
     # I think the risk score is something like from a scale of 0.0 to 10.0, how risky is it for you to eat this food item based on your conditions.
