@@ -158,3 +158,21 @@ def generate_generic_response(user_profile: dict = None) -> dict:
         "that has not been built yet. Also needs a decided conflict-resolution "
         "strategy before implementation." 
     )
+
+# ===================================================
+# TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
+# ===================================================
+
+if __name__ == "__main__":
+    confidence_result = calculate_response_confidence()
+    print("Confidence Result:", confidence_result)
+
+    action = evaluate_response_confidence(confidence_result, attempt_number=1)
+    print("Next Action:", action)
+
+    risk = calculate_risk_score()
+    print("Risk Score:", risk)
+
+    if action == ResponseAction.FALLBACK:
+        prompt = generate_generic_response_prompt()
+        print("Generic fallback prompt:", prompt)
