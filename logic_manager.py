@@ -100,6 +100,7 @@ def get_condition_risk(food_item: dict, condition: str) -> int:
 #===================================================
 # NOTE: the two function below should belong to ai_manager - they generate prompts
 # and fetch/produce content rather than making decisions.
+#===================================================
 def generate_generic_response_prompt(user_profile: dict = None) -> str:
     # should the response confidence be poor even after reprompt, call this function to generate a response ignoring the food they wanted to check, and just recommend food to eat based on the user profile's medical conditions.
     # This function will generate a prompt roughly saying the user's profile info, medical conditions, then ask "What are the best foods i should eat given my medical conditions."
@@ -118,7 +119,18 @@ def generate_generic_response_prompt(user_profile: dict = None) -> str:
     )
     return prompt
 
-def generate_generic_response():
-    # use a database to find the best foods to eat based on medical conditions. Ranked database. Issue is conflictions, what if best for this is bad for that and you have both this and that?
-    pass
+def generate_generic_response(user_profile: dict = None) -> dict:
+    # use a database to find the best foods to eat based on medical conditions.
+    # Ranked database. Issue is conflictions, what if best for this is bad for that 
+    # and you have both this and that?
+    
+    # CHANGE ACCORDINGLY, WAIT FOR AI
+    # requires actual an actual food/conditions database that doesnt exist yet,
+    # Raises explicitly rather than returning fake data, since faking a health
+    # recommendation is dangerous and irresponsible.
 
+    raise NotImplementedError(
+        "generate_generic_response() requires a ranked food/conditions database "
+        "that has not been built yet. Also needs a decided conflict-resolution "
+        "strategy before implementation." 
+    )
