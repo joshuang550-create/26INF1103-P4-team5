@@ -77,9 +77,25 @@ def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -
     return round((risk_points / max_possible_points) * 10, 1)  # Scale to 0.0 - 10.0
 
 
-
 # Definitely should add more work for the logic_manager to do, currently all it does is check confidence and risk scores, which are simple < > comparisons.
 # POSSIBLE IDEAS  --  neither are good cause not really logic_manager, more ai_manager and io_manager
+
+def get_condition_risk(food_item: dict, condition: str) -> int:
+    """
+    RETURN RISK CONTRIBUTIION (0-10) FOR A SINGLE CONDITION AGAINST FOOD
+    
+    CHANGE ACCORDINGLY, WAIT FOR AI
+    THROWAWAY PLACEHOLDER SO calculate_risk_score() CAN BE TESTED
+    """
+    nutritional_info = food_item.get("nutrional_info", {})
+
+    if condition == "diabetes":
+        return min(10, int(nutritional_info.get("sugar_g", 0)))  # Example: sugar content contributes to risk
+    if condition == "hypertension":
+        return min(10, int(nutritional_info.get("sodium_mg", 0) / 100))  # Example: sodium content contributes to risk
+    
+    return 0 # unknown condition - no risk data available
+
 def generate_generic_response_prompt():
     # should the response confidence be poor even after reprompt, call this function to generate a response ignoring the food they wanted to check, and just recommend food to eat based on the user profile's medical conditions.
     # This function will generate a prompt roughly saying the user's profile info, medical conditions, then ask "What are the best foods i should eat given my medical conditions."
