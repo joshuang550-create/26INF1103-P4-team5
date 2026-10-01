@@ -17,10 +17,10 @@ MOCK_AI_RESPONSE = {
 }
 
 MOCK_USER_PROFILE = {
-    "age": 30,
+    "age": 45,
     "gender": "female",
     "country": "Singapore",
-    "medical_conditions": ["diabetes", "hypertension"],
+    "conditions": ["diabetes", "hypertension"],
 }
 
 class ResponseAction(Enum):
