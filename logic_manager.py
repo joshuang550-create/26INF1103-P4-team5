@@ -61,12 +61,20 @@ def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -
     # I think the risk score is something like from a scale of 0.0 to 10.0, how risky is it for you to eat this food item based on your conditions.
     # This risk score does not affect logic at all, it is purely a number we show the user to tell them whether they should eat the food or not.
     
+    """ CHANGE ACCORDINGLY, WAIT FOR AI 
+    get_codition_risk() placeholder ; real version needs a lookup table or data base keyed by condition + nutrient thresholds """
 
-    
-    
-    pass
+    if food_item is None:
+        food_item = MOCK_AI_RESPONSE # CHANGE ACCORDINGLY, WAIT FOR AI
+    if user_conditions is None:
+        user_conditions = MOCK_USER_PROFILE.get("conditions", []) # CHANGE ACCORDINGLY, WAIT FOR AI
 
+    if not user_conditions:
+        return 0.0
 
+    risk_points = sum(get_condition_risk(condition, food_item) for condition in user_conditions)
+    max_possible_points = len(user_conditions) * 10  # Assuming each condition can contribute a maximum of 10 points to the risk score
+    return round((risk_points / max_possible_points) * 10, 1)  # Scale to 0.0 - 10.0
 
 
 
