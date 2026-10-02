@@ -203,3 +203,39 @@ def validate_response(data):
         return False
 
     return True
+
+# Main testing flow
+def main():
+
+    print("Original record:")
+    print(record)
+
+    prompt = build_prompt(record)
+
+    print("\nCalling AI...")
+
+    try:
+        raw_response = call_ai_api(prompt)
+
+    except Exception as error:
+        print("\nAPI call failed:")
+        print(error)
+        return
+
+    print("\nRaw AI response:")
+    print(raw_response)
+
+    parsed_response = parse_response(raw_response)
+
+    print("\nParsed response:")
+    print(parsed_response)
+
+    if validate_response(parsed_response):
+        print("\nResponse is VALID.")
+
+    else:
+        print("\nResponse is INVALID.")
+
+
+
+main()
