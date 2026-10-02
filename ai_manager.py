@@ -39,34 +39,22 @@ def generate_follow_up_prompt():
 
 
 
+
+"""Food-analysis API demo using Google AI Studio (Gemini).
+
+Install the SDK: python -m pip install --upgrade google-genai
+Paste your own API key below, then run: python food_analysis_gemini.py
+"""
+
 import json
-from openai import OpenAI
-#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
-from openai import OpenAI
+from google import genai
 
-#client = OpenAI(
-    #api_key="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"
-#)
 
-from cryptography.fernet import Fernet
-from openai import OpenAI
+# Paste your Google AI Studio API key between the quotation marks.
+# Keep this local test file private after adding your key.
+api_key = "AQ.Ab8RN6LTLlp3LMUyXaJ3Lw4iJgASqDBH-Wd7ATwaNcUqmYOM_w"
+MODEL_NAME = "gemini-3.5-flash-lite"
 
-def load_decrypted_api_key(
-    key_path: str = "secret.key",
-    encrypted_key_path: str = "encrypted_api_key.bin",
-) -> str:
-    """Read the encryption key and encrypted API key from disk, then decrypt."""
-    with open(key_path, "rb") as key_file:
-        key = key_file.read()
- 
-    with open(encrypted_key_path, "rb") as enc_file:
-        encrypted_key = enc_file.read()
- 
-    fernet = Fernet(key)
-    decrypted_key = fernet.decrypt(encrypted_key).decode()
-    return decrypted_key
-api_key = load_decrypted_api_key()
-client = OpenAI(api_key=api_key)
 
 # 1. Example input record
 record = {
@@ -75,11 +63,9 @@ record = {
         "whey protein",
         "maltitol",
         "peanuts",
-        "caffeine"
+        "caffeine",
     ],
-    "health_conditions": [
-        "hypertension"
-    ]
+    "health_conditions": ["hypertension"],
 }
 
 
@@ -104,93 +90,61 @@ Do not make a medical diagnosis.
 
 Return the requested structured output.
 """
-
     return prompt
 
-# 3. Call the AI API
+
+# 3. Call the Google Gemini API
 def call_ai_api(prompt):
+    schema = {
+        "type": "object",
+        "properties": {
+            "status": {
+                "type": "string",
+                "enum": ["complete", "needs_follow_up"],
+            },
+            "potential_concern": {"type": "boolean"},
+            "reason": {"type": "string"},
+        },
+        "required": ["status", "potential_concern", "reason"],
+        "additionalProperties": False,
+    }
 
-    response = client.responses.create(
-        model="gpt-5.6-luna",
-
-        input=[
-            {
-                "role": "system",
-                "content": (
+    with genai.Client(api_key=api_key) as client:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config={
+                "system_instruction": (
                     "You analyse food ingredient information and return "
                     "structured information only."
-                )
+                ),
+                "response_mime_type": "application/json",
+                "response_json_schema": schema,
             },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+        )
 
-        text={
-            "format": {
-                "type": "json_schema",
-                "name": "food_analysis",
-                "schema": {
-                    "type": "object",
+    response_text = response.text
+    if not response_text or not response_text.strip():
+        raise ValueError("Gemini returned no text to parse.")
 
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "enum": [
-                                "complete",
-                                "needs_follow_up"
-                            ]
-                        },
+    return response_text
 
-                        "potential_concern": {
-                            "type": "boolean"
-                        },
-
-                        "reason": {
-                            "type": "string"
-                        }
-                    },
-
-                    "required": [
-                        "status",
-                        "potential_concern",
-                        "reason"
-                    ],
-
-                    "additionalProperties": False
-                },
-
-                "strict": True
-            }
-        }
-    )
-
-    return response.output_text
 
 # 4. Parse JSON response
 def parse_response(response_text):
-
     try:
         return json.loads(response_text)
-
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
         return None
 
 
 # 5. Validate the parsed response
 def validate_response(data):
-
     if not isinstance(data, dict):
         return False
 
-    if "status" not in data:
-        return False
-
-    if "potential_concern" not in data:
-        return False
-
-    if "reason" not in data:
+    expected_keys = {"status", "potential_concern", "reason"}
+    if set(data) != expected_keys:
         return False
 
     if data["status"] not in ["complete", "needs_follow_up"]:
@@ -204,38 +158,38 @@ def validate_response(data):
 
     return True
 
+
 # Main testing flow
 def main():
+    if not api_key.strip() or api_key == "PASTE_YOUR_GOOGLE_AI_STUDIO_KEY_HERE":
+        print("Add your Google AI Studio API key to api_key near the top first.")
+        return
 
     print("Original record:")
-    print(record)
+    print(json.dumps(record, indent=2))
 
     prompt = build_prompt(record)
-
-    print("\nCalling AI...")
+    print("\nCalling Gemini...")
 
     try:
         raw_response = call_ai_api(prompt)
-
     except Exception as error:
         print("\nAPI call failed:")
-        print(error)
+        print(str(error).replace(api_key, "[REDACTED]"))
         return
 
     print("\nRaw AI response:")
     print(raw_response)
 
     parsed_response = parse_response(raw_response)
-
     print("\nParsed response:")
     print(parsed_response)
 
     if validate_response(parsed_response):
         print("\nResponse is VALID.")
-
     else:
         print("\nResponse is INVALID.")
 
 
-
-main()
+if __name__ == "__main__":
+    main()
