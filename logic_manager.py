@@ -1,6 +1,5 @@
 """The domain brain acting on the AI's output.
 """
-from enum import Enum
 
 MOCK_AI_RESPONSE = {
     "food_item": "Peanut Butter",
@@ -23,10 +22,10 @@ MOCK_USER_PROFILE = {
     "conditions": ["diabetes", "hypertension"],
 }
 
-class ResponseAction(Enum):
-    ACCEPT = "accept"
-    REJECT = "reject"
-    FALLBACK = "fallback"
+ACTION_ACCEPT = "accept"
+ACTION_REJECT = "reject"
+ACTION_FALLBACK = "fallback"
+ACTION_REPROMPT = "reprompt"
 
 MAX_REPROMPT_ATTEMPTS = 1
 
@@ -60,7 +59,7 @@ def evaluate_response_confidence(
         confidence_result: dict,
         attempt_number: int,
         min_accpetable_score: float = 5.0,
-) -> ResponseAction:
+) -> str:
     """
     Decide what should happen next based on the confidence result and how many
     attempts have already been made
@@ -73,12 +72,12 @@ def evaluate_response_confidence(
     Decision logic
     """
     if confidence_result["overall_score"] >= min_accpetable_score:
-        return ResponseAction.ACCEPT
+        return ACTION_ACCEPT
 
     elif attempt_number < MAX_REPROMPT_ATTEMPTS + 1:
-        return ResponseAction.REPROMPT
+        return ACTION_REPROMPT
 
-    return ResponseAction.FALLBACK
+    return ACTION_FALLBACK
 
 
 def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -> float:
@@ -173,6 +172,6 @@ if __name__ == "__main__":
     risk = calculate_risk_score()
     print("Risk Score:", risk)
 
-    if action == ResponseAction.FALLBACK:
+    if action == ACTION_FALLBACK:
         prompt = generate_generic_response_prompt()
         print("Generic fallback prompt:", prompt)
