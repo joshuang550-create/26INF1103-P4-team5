@@ -50,3 +50,20 @@ from openai import OpenAI
 
 from cryptography.fernet import Fernet
 from openai import OpenAI
+
+def load_decrypted_api_key(
+    key_path: str = "secret.key",
+    encrypted_key_path: str = "encrypted_api_key.bin",
+) -> str:
+    """Read the encryption key and encrypted API key from disk, then decrypt."""
+    with open(key_path, "rb") as key_file:
+        key = key_file.read()
+ 
+    with open(encrypted_key_path, "rb") as enc_file:
+        encrypted_key = enc_file.read()
+ 
+    fernet = Fernet(key)
+    decrypted_key = fernet.decrypt(encrypted_key).decode()
+    return decrypted_key
+api_key = load_decrypted_api_key()
+client = OpenAI(api_key=api_key)
