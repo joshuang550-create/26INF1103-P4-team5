@@ -37,3 +37,16 @@ def generate_follow_up_prompt():
     # send this string output to prompt_ai() same as before. Only thing to note is how to handle the chat session, make sure u stay in the same session.
     pass
 
+
+
+import json
+from openai import OpenAI
+#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
+from openai import OpenAI
+
+#client = OpenAI(
+    #api_key="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"
+#)
+
+from cryptography.fernet import Fernet
+from openai import OpenAI
