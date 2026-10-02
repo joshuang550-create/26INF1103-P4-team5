@@ -67,3 +67,103 @@ def load_decrypted_api_key(
     return decrypted_key
 api_key = load_decrypted_api_key()
 client = OpenAI(api_key=api_key)
+
+# 1. Example input record
+record = {
+    "food_name": "Chocolate Protein Bar",
+    "ingredients": [
+        "whey protein",
+        "maltitol",
+        "peanuts",
+        "caffeine"
+    ],
+    "health_conditions": [
+        "hypertension"
+    ]
+}
+
+
+# 2. Build the prompt
+def build_prompt(record):
+    prompt = f"""
+You are analysing a food product for possible health concerns.
+
+Food name:
+{record["food_name"]}
+
+Ingredients:
+{", ".join(record["ingredients"])}
+
+Existing health conditions:
+{", ".join(record["health_conditions"])}
+
+Analyse whether any ingredient may be relevant to the user's health condition.
+
+This is only a test of the AI processing system.
+Do not make a medical diagnosis.
+
+Return the requested structured output.
+"""
+
+    return prompt
+
+# 3. Call the AI API
+def call_ai_api(prompt):
+
+    response = client.responses.create(
+        model="gpt-5.6-luna",
+
+        input=[
+            {
+                "role": "system",
+                "content": (
+                    "You analyse food ingredient information and return "
+                    "structured information only."
+                )
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "food_analysis",
+                "schema": {
+                    "type": "object",
+
+                    "properties": {
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "complete",
+                                "needs_follow_up"
+                            ]
+                        },
+
+                        "potential_concern": {
+                            "type": "boolean"
+                        },
+
+                        "reason": {
+                            "type": "string"
+                        }
+                    },
+
+                    "required": [
+                        "status",
+                        "potential_concern",
+                        "reason"
+                    ],
+
+                    "additionalProperties": False
+                },
+
+                "strict": True
+            }
+        }
+    )
+
+    return response.output_text
