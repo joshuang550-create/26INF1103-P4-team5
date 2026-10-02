@@ -274,6 +274,40 @@ def get_login_credentials():
     return username_input, password_input
 
 
+def show_failed_login_message():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Login Failed.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {ERROR_COLOR_PREFIX}Incorrect username or password. Please try again.{COLOR_SUFFIX}")
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
+def show_successful_profile_creation_message():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Profile Created Successfully!")
+    print("═══════════════════════════════════════════════════\n")
+
+    input(f"\n           {APP_COLOR_PREFIX}<Press enter to continue>{COLOR_SUFFIX} ")
+
+
+def show_successful_profile_deletion_message():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Profile Deleted Successfully!")
+    print("═══════════════════════════════════════════════════\n")
+
+    input(f"\n      {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
 def get_new_profile_info():
     clear_terminal()
     show_app_banner()
@@ -397,9 +431,21 @@ def get_delete_user_profile_confirmation():
         print(f" {ERROR_COLOR_PREFIX}Please enter either 'yes' or 'no'.")
 
 
-def print_check_food_item_input():
-    # this is a big thing on its own, this is just a placeholder function for now.
-    pass
+def ask_for_check_food_item_name():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Please enter the name and brand of the food item.")
+    print("═══════════════════════════════════════════════════\n")
+
+    while True:
+        food_item_name_input = input(f" {APP_COLOR_PREFIX}Food Item:{COLOR_SUFFIX} ").strip()
+
+        if len(food_item_name_input) > 1: # proof of concept. In a real scenario, this would check against a database of food items
+            return food_item_name_input
+        
+        print(f" {ERROR_COLOR_PREFIX}Please try to enter a recognised name for the food item.{COLOR_SUFFIX}")   
 
 
 def print_follow_up_request_input():
