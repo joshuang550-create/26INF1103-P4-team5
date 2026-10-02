@@ -167,3 +167,39 @@ def call_ai_api(prompt):
     )
 
     return response.output_text
+
+# 4. Parse JSON response
+def parse_response(response_text):
+
+    try:
+        return json.loads(response_text)
+
+    except json.JSONDecodeError:
+        return None
+
+
+# 5. Validate the parsed response
+def validate_response(data):
+
+    if not isinstance(data, dict):
+        return False
+
+    if "status" not in data:
+        return False
+
+    if "potential_concern" not in data:
+        return False
+
+    if "reason" not in data:
+        return False
+
+    if data["status"] not in ["complete", "needs_follow_up"]:
+        return False
+
+    if not isinstance(data["potential_concern"], bool):
+        return False
+
+    if not isinstance(data["reason"], str):
+        return False
+
+    return True
