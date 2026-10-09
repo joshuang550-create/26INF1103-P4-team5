@@ -6,6 +6,8 @@ import time
 from cryptography.fernet import Fernet
 from google import genai
 from google.genai import types
+import logging
+from ai_manager_error_handling import send_validated
 from openfoodfacts_prompt import (
     build_food_prompt,
     SCHEMA,
@@ -154,26 +156,6 @@ def resume_chat(client, profile, history):
         },
     )
 
-def send_message(chat, history, message):
-    response = chat.send_message(message)
-    text = (response.text or "").strip()
-    now = int(time.time())
-    history.append({"role": "user", "text": message, "time": now})
-    history.append({"role": "model", "text": text, "time": now})
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        return None
-
-
-def send_validated(chat, history, message, max_retries=2):
-    for _ in range(max_retries + 1):
-        data = send_message(chat, history, message)
-        if validate_response(data):
-            return data
-        message = ("Your last response did not match the required schema. Resend it with "
-                   "exactly these keys: " + ", ".join(sorted(EXPECTED_KEYS)))
-    return None
 
 
 def assess_food(chat, history, food, max_follow_ups=3):
@@ -236,7 +218,20 @@ def main():
     profile = profiles[username]
     all_chats = load_chats()
     all_chats.setdefault(username, [])
-    client = genai.Client(api_key=load_decrypted_api_key())
+    client = genai.Client(
+    api_key=load_decrypted_api_key(),
+    http_options=types.HttpOptions(
+        timeout=30000,  # 30 seconds, specified in milliseconds
+        retry_options=types.HttpRetryOptions(attempts=1),
+    ),
+)
+    logging.basicConfig(
+     filename="ai_manager_errors.log",
+     level=logging.WARNING,
+    format="%(asctime)s %(name)s %(levelname)s: %(message)s",
+     encoding="utf-8",
+
+ )
 
     try:
         while True:
