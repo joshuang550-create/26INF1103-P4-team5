@@ -6,7 +6,12 @@ import time
 from cryptography.fernet import Fernet
 from google import genai
 from google.genai import types
-from openfoodfacts_prompt import build_food_prompt
+from openfoodfacts_prompt import (
+    build_food_prompt,
+    SCHEMA,
+    EXPECTED_KEYS,
+    validate_response,
+)
 
 MODEL_NAME = "gemini-3.5-flash-lite"
 CHATS_FILE = "chats.json"
@@ -43,13 +48,8 @@ PROFILES = {
     },
 }
 
-# Hard-coded test foods. Each "New chat" checks the next one in the list.
-#TEST_FOODS = [
-    #{"food_name": "Chocolate Protein Bar", "ingredients": ["whey protein", "maltitol", "peanuts", "caffeine"]},
-    #{"food_name": "Teh Tarik", "ingredients": ["black tea", "condensed milk", "sugar"]},
-    #{"food_name": "Chicken Rice", "ingredients": ["chicken", "rice", "soy sauce", "chilli sauce"]},
-#]
-TEST_FOODS = [
+
+TEST_FOODS = [ #hard-coded test foods to link with opoenfoodfacts_prompt.py
     {
         "food_name": "Nutella",
         "barcode": "3017624010701",
@@ -81,19 +81,6 @@ TEST_FOODS = [
         "ingredients": [],
     },
 ]
-
-SCHEMA = {
-    "type": "object",
-    "properties": {
-        "status": {"type": "string", "enum": ["complete", "needs_follow_up"]},
-        "potential_concern": {"type": "boolean"},
-        "reason": {"type": "string"},
-        "information_needed": {"type": "array", "items": {"type": "string"}},
-    },
-    "required": ["status", "potential_concern", "reason", "information_needed"],
-    "additionalProperties": False,
-}
-EXPECTED_KEYS = set(SCHEMA["properties"])
 
 
 # ---------- Storage: {username: [{"role", "text", "time"}, ...]} ----------
@@ -147,11 +134,6 @@ def build_system_instruction(profile):
     )
 
 
-#def build_food_prompt(food):
-    #return (f"Give a risk assessment for this food: {food['food_name']}\n"
-            #f"Ingredients: {', '.join(food['ingredients'])}")
-
-
 def build_follow_up_reply(requests):
     """No user input: every request is answered with 'unknown'."""
     return json.dumps({r: "unknown" for r in requests})
@@ -171,19 +153,6 @@ def resume_chat(client, profile, history):
             "response_json_schema": SCHEMA,
         },
     )
-
-
-def validate_response(data):
-    if not isinstance(data, dict) or set(data) != EXPECTED_KEYS:
-        return False
-    return (
-        data["status"] in ("complete", "needs_follow_up")
-        and isinstance(data["potential_concern"], bool)
-        and isinstance(data["reason"], str)
-        and isinstance(data["information_needed"], list)
-        and all(isinstance(i, str) for i in data["information_needed"])
-    )
-
 
 def send_message(chat, history, message):
     response = chat.send_message(message)
@@ -223,19 +192,23 @@ def count_foods(history):
 
 
 def new_chat(client, all_chats, profile):
-    """Continue the user's existing AI session (history + profile) with the next test food."""
     history = all_chats[profile["username"]]
     chat = resume_chat(client, profile, history)
 
     food = TEST_FOODS[count_foods(history) % len(TEST_FOODS)]
     print(f"\nChecking: {food['food_name']}")
+
     result = assess_food(chat, history, food)
 
-    if result:
-        print(f"Potential concern: {'YES' if result['potential_concern'] else 'no'}")
-        print(f"Reason: {result['reason']}")
-    else:
+    if result is None:
         print("No valid response.")
+    else:
+        if result["status"] == "needs_follow_up":
+            print("Assessment incomplete - more information is needed.")
+
+        # Display the full JSON, including the confidence score.
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+
     save_chats(all_chats)
 
 
