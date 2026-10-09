@@ -54,7 +54,7 @@ TEST_FOODS = [
         "food_name": "Nutella",
         "barcode": "3017624010701",
         "ingredients": [],
-    }
+    },
     {
         "food_name": "Coca-Cola Original",
         "barcode": "5449000000996",
