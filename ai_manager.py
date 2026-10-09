@@ -6,6 +6,7 @@ import time
 from cryptography.fernet import Fernet
 from google import genai
 from google.genai import types
+from openfoodfacts_prompt import build_food_prompt
 
 MODEL_NAME = "gemini-3.5-flash-lite"
 CHATS_FILE = "chats.json"
@@ -43,10 +44,17 @@ PROFILES = {
 }
 
 # Hard-coded test foods. Each "New chat" checks the next one in the list.
+#TEST_FOODS = [
+    #{"food_name": "Chocolate Protein Bar", "ingredients": ["whey protein", "maltitol", "peanuts", "caffeine"]},
+    #{"food_name": "Teh Tarik", "ingredients": ["black tea", "condensed milk", "sugar"]},
+    #{"food_name": "Chicken Rice", "ingredients": ["chicken", "rice", "soy sauce", "chilli sauce"]},
+#]
 TEST_FOODS = [
-    {"food_name": "Chocolate Protein Bar", "ingredients": ["whey protein", "maltitol", "peanuts", "caffeine"]},
-    {"food_name": "Teh Tarik", "ingredients": ["black tea", "condensed milk", "sugar"]},
-    {"food_name": "Chicken Rice", "ingredients": ["chicken", "rice", "soy sauce", "chilli sauce"]},
+    {
+        "food_name": "Nutella",
+        "barcode": "3017624010701",
+        "ingredients": [],
+    }
 ]
 
 SCHEMA = {
@@ -114,9 +122,9 @@ def build_system_instruction(profile):
     )
 
 
-def build_food_prompt(food):
-    return (f"Give a risk assessment for this food: {food['food_name']}\n"
-            f"Ingredients: {', '.join(food['ingredients'])}")
+#def build_food_prompt(food):
+    #return (f"Give a risk assessment for this food: {food['food_name']}\n"
+            #f"Ingredients: {', '.join(food['ingredients'])}")
 
 
 def build_follow_up_reply(requests):
