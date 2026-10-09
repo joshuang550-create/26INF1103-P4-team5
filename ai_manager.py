@@ -55,6 +55,31 @@ TEST_FOODS = [
         "barcode": "3017624010701",
         "ingredients": [],
     }
+    {
+        "food_name": "Coca-Cola Original",
+        "barcode": "5449000000996",
+        "ingredients": [],
+    },
+    {
+        "food_name": "Philadelphia Original",
+        "barcode": "7622300441937",
+        "ingredients": [],
+    },
+    {
+        "food_name": "Heinz Beanz in Tomato Sauce",
+        "barcode": "5000157024671",
+        "ingredients": [],
+    },
+    {
+        "food_name": "Lotus Biscoff",
+        "barcode": "5410126716016",
+        "ingredients": [],
+    },
+    {
+        "food_name": "Ritter Sport Marzipan Chocolate",
+        "barcode": "4000417025005",
+        "ingredients": [],
+    },
 ]
 
 SCHEMA = {
