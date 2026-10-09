@@ -1,194 +1,243 @@
-"""Core engine of the application.
-"""
-
-
-def generate_prompt():
-    # idea is for this function to output a single text string prompt that will be sent to the AI.
-    # this function should take in data such as: user's profile info like medical conditions and also take in the food item the user wants to check.
-    # the prompt can be stored like this: f"I am a {profile_age} year old {profile_gender} from {profile_country}. I have {profile_medical_conditions}. Give me a risk assessment of eating {user_input_food}. Provide a confidence score based on factual data for every piece of information you give me. ...
-    # note that the prompt should include a line like this: "If you need more information about me, instead of giving me the full response JSON, give me a JSON file where each key is a piece of information you require, and the values are empty strings that i will fill up. I will then send this JSON file back to you, after which you can send me the final full response JSON file. Should you need to clarify things or ask for more information, we will repeat this process until you are satisfied, just ensure that your request JSON file is always with empty values that i will fill in, no adding on to previous information."
-    pass
-
-
-def prompt_ai():
-    # pass the text string prompt and AI API to this function to send to the API.
-    # returns a JSON formatted AI response     OR     a JSON formatted request for more information. Ensure we keep the formatting identical throughout so the user input will just be filled into each key-value pair in the JSON file and sent straight back to the AI.
-    pass
-
-
-def check_response_type():
-    # to keep to the requirement of 1 function do 1 thing. i separated this function from check_response_schema()
-    # this function will be run immediately after prompt_ai(), before check_response_schema().
-    # this function will check if the JSON response from the ai is a full response or a request for more information.
-    # the check can be done by seeing if all the values are empty strings "". (I can see potential issues with this check but not sure what else would work better. Maybe in the end need the ai to respond with not just 1 JSON file but a text saying Response/Request.)
-    # if reponse_type == "request" then call print_follow_up_request_input() then generate_follow_up_prompt() then prompt_ai(). as many times as needed.
-    # if response_type == "response" then call check_response_schema() then calculate_response_confidence(). ...
-    pass
-
-
-def check_response_schema():
-    # takes in the JSON ai response to check if it is correctly formatted. eg. if the keys are all correct, and the values are all the right data type. (maybe we can create a predefined template that we send with the prompt.)
-    # if the check returns that the JSON is malformed/errornous, we have to decide if we want to regenerate the prompt and try a new one, or create a function that will generate a prompt specifying the error.
-    # i am thinking that we can do something like: if key == "Risk Score" and value != float then return f"The {key}'s value you provided in the response JSON file was not a float datatype. Please amend this error and comply with the template provided."
-    pass
-
-
-def generate_follow_up_prompt():
-    # send this string output to prompt_ai() same as before. Only thing to note is how to handle the chat session, make sure u stay in the same session.
-    pass
-
-
-
-
-"""Food-analysis API demo using Google AI Studio (Gemini).
-
-Install the SDK: python -m pip install --upgrade google-genai
-Paste your own API key below, then run: python food_analysis_gemini.py
-"""
-
+"""Food risk analysis with a persistent Gemini chat session per user.
+Only input: menu choice. Foods are hard-coded test data."""
 import json
+import os
+import time
+from cryptography.fernet import Fernet
 from google import genai
+from google.genai import types
 
-
-# Paste your Google AI Studio API key between the quotation marks.
-# Keep this local test file private after adding your key.
-api_key = "AQ.Ab8RN6LTLlp3LMUyXaJ3Lw4iJgASqDBH-Wd7ATwaNcUqmYOM_w"
 MODEL_NAME = "gemini-3.5-flash-lite"
+CHATS_FILE = "chats.json"
+
+PROFILES_FILE = "user_profiles.json"
 
 
-# 1. Example input record
-record = {
-    "food_name": "Chocolate Protein Bar",
-    "ingredients": [
-        "whey protein",
-        "maltitol",
-        "peanuts",
-        "caffeine",
-    ],
-    "health_conditions": ["hypertension"],
+def load_profiles(path=PROFILES_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def choose_username(profiles):
+    names = ", ".join(profiles)
+    while True:
+        name = input(f"Username ({names}): ").strip()
+        for valid in profiles:
+            if valid.lower() == name.lower():
+                return valid
+        print("Unknown user.")
+
+PROFILES = {
+    "John": {
+        "username": "John",
+        "password_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "gender": "male", "age": 40, "race": "indian", "country": "india",
+        "height": 170.0, "weight": 70.0,
+    },
+    "ride": {
+        "username": "ride",
+        "password_hash": "e049bd056f936d1b39b704abcf824eaef39bd8877fcbb82b2a213ceec82bdf26",
+        "gender": "male", "age": 22, "race": "caucasian", "country": "Singapore",
+        "height": 190.0, "weight": 80.0,
+        "medical_conditions": ["diabetes", "high blood pressure", "peanut allergy"],
+    },
 }
 
+# Hard-coded test foods. Each "New chat" checks the next one in the list.
+TEST_FOODS = [
+    {"food_name": "Chocolate Protein Bar", "ingredients": ["whey protein", "maltitol", "peanuts", "caffeine"]},
+    {"food_name": "Teh Tarik", "ingredients": ["black tea", "condensed milk", "sugar"]},
+    {"food_name": "Chicken Rice", "ingredients": ["chicken", "rice", "soy sauce", "chilli sauce"]},
+]
 
-# 2. Build the prompt
-def build_prompt(record):
-    prompt = f"""
-You are analysing a food product for possible health concerns.
-
-Food name:
-{record["food_name"]}
-
-Ingredients:
-{", ".join(record["ingredients"])}
-
-Existing health conditions:
-{", ".join(record["health_conditions"])}
-
-Analyse whether any ingredient may be relevant to the user's health condition.
-
-This is only a test of the AI processing system.
-Do not make a medical diagnosis.
-
-Return the requested structured output.
-"""
-    return prompt
+SCHEMA = {
+    "type": "object",
+    "properties": {
+        "status": {"type": "string", "enum": ["complete", "needs_follow_up"]},
+        "potential_concern": {"type": "boolean"},
+        "reason": {"type": "string"},
+        "information_needed": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["status", "potential_concern", "reason", "information_needed"],
+    "additionalProperties": False,
+}
+EXPECTED_KEYS = set(SCHEMA["properties"])
 
 
-# 3. Call the Google Gemini API
-def call_ai_api(prompt):
-    schema = {
-        "type": "object",
-        "properties": {
-            "status": {
-                "type": "string",
-                "enum": ["complete", "needs_follow_up"],
-            },
-            "potential_concern": {"type": "boolean"},
-            "reason": {"type": "string"},
+# ---------- Storage: {username: [{"role", "text", "time"}, ...]} ----------
+
+def load_chats():
+    if not os.path.exists(CHATS_FILE):
+        return {}
+    with open(CHATS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_chats(all_chats):
+    with open(CHATS_FILE, "w", encoding="utf-8") as f:
+        json.dump(all_chats, f, indent=2)
+
+
+def load_decrypted_api_key(key_path="secret.key", encrypted_key_path="encrypted_api_key.bin"):
+    with open(key_path, "rb") as f:
+        key = f.read()
+    with open(encrypted_key_path, "rb") as f:
+        encrypted_key = f.read()
+    return Fernet(key).decrypt(encrypted_key).decode()
+
+
+# ---------- Prompts ----------
+
+def build_system_instruction(profile):
+    bmi = round(profile["weight"] / ((profile["height"] / 100) ** 2), 1)
+    if "medical_conditions" not in profile:
+        conditions = "not provided (unknown, NOT confirmed as none)"
+    else:
+        conditions = ", ".join(profile["medical_conditions"]) or "none reported"
+    return (
+        "You analyse food products for possible health concerns. Do not make a medical "
+        "diagnosis. Return structured output only.\n\n"
+        "User profile:\n"
+        f"- Age: {profile['age']}\n"
+        f"- Gender: {profile['gender']}\n"
+        f"- Ethnicity: {profile['race']}\n"
+        f"- Country: {profile['country']}\n"
+        f"- Height: {profile['height']} cm\n"
+        f"- Weight: {profile['weight']} kg\n"
+        f"- BMI: {bmi}\n"
+        f"- Medical conditions: {conditions}\n\n"
+    )
+
+
+def build_food_prompt(food):
+    return (f"Give a risk assessment for this food: {food['food_name']}\n"
+            f"Ingredients: {', '.join(food['ingredients'])}")
+
+
+def build_follow_up_reply(requests):
+    """No user input: every request is answered with 'unknown'."""
+    return json.dumps({r: "unknown" for r in requests})
+
+
+# ---------- Gemini session ----------
+
+def resume_chat(client, profile, history):
+    """Rebuild the user's AI chat session from saved history + profile."""
+    past = [types.Content(role=m["role"], parts=[types.Part(text=m["text"])]) for m in history]
+    return client.chats.create(
+        model=MODEL_NAME,
+        history=past,
+        config={
+            "system_instruction": build_system_instruction(profile),
+            "response_mime_type": "application/json",
+            "response_json_schema": SCHEMA,
         },
-        "required": ["status", "potential_concern", "reason"],
-        "additionalProperties": False,
-    }
-
-    with genai.Client(api_key=api_key) as client:
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
-            config={
-                "system_instruction": (
-                    "You analyse food ingredient information and return "
-                    "structured information only."
-                ),
-                "response_mime_type": "application/json",
-                "response_json_schema": schema,
-            },
-        )
-
-    response_text = response.text
-    if not response_text or not response_text.strip():
-        raise ValueError("Gemini returned no text to parse.")
-
-    return response_text
+    )
 
 
-# 4. Parse JSON response
-def parse_response(response_text):
+def validate_response(data):
+    if not isinstance(data, dict) or set(data) != EXPECTED_KEYS:
+        return False
+    return (
+        data["status"] in ("complete", "needs_follow_up")
+        and isinstance(data["potential_concern"], bool)
+        and isinstance(data["reason"], str)
+        and isinstance(data["information_needed"], list)
+        and all(isinstance(i, str) for i in data["information_needed"])
+    )
+
+
+def send_message(chat, history, message):
+    response = chat.send_message(message)
+    text = (response.text or "").strip()
+    now = int(time.time())
+    history.append({"role": "user", "text": message, "time": now})
+    history.append({"role": "model", "text": text, "time": now})
     try:
-        return json.loads(response_text)
-    except (json.JSONDecodeError, TypeError):
+        return json.loads(text)
+    except json.JSONDecodeError:
         return None
 
 
-# 5. Validate the parsed response
-def validate_response(data):
-    if not isinstance(data, dict):
-        return False
-
-    expected_keys = {"status", "potential_concern", "reason"}
-    if set(data) != expected_keys:
-        return False
-
-    if data["status"] not in ["complete", "needs_follow_up"]:
-        return False
-
-    if not isinstance(data["potential_concern"], bool):
-        return False
-
-    if not isinstance(data["reason"], str):
-        return False
-
-    return True
+def send_validated(chat, history, message, max_retries=2):
+    for _ in range(max_retries + 1):
+        data = send_message(chat, history, message)
+        if validate_response(data):
+            return data
+        message = ("Your last response did not match the required schema. Resend it with "
+                   "exactly these keys: " + ", ".join(sorted(EXPECTED_KEYS)))
+    return None
 
 
-# Main testing flow
-def main():
-    if not api_key.strip() or api_key == "PASTE_YOUR_GOOGLE_AI_STUDIO_KEY_HERE":
-        print("Add your Google AI Studio API key to api_key near the top first.")
+def assess_food(chat, history, food, max_follow_ups=3):
+    reply = send_validated(chat, history, build_food_prompt(food))
+    rounds = 0
+    while reply and reply["status"] == "needs_follow_up" and rounds < max_follow_ups:
+        reply = send_validated(chat, history, build_follow_up_reply(reply["information_needed"]))
+        rounds += 1
+    return reply
+
+
+# ---------- Menu actions ----------
+
+def count_foods(history):
+    return sum(1 for m in history if m["role"] == "user" and "risk assessment" in m["text"])
+
+
+def new_chat(client, all_chats, profile):
+    """Continue the user's existing AI session (history + profile) with the next test food."""
+    history = all_chats[profile["username"]]
+    chat = resume_chat(client, profile, history)
+
+    food = TEST_FOODS[count_foods(history) % len(TEST_FOODS)]
+    print(f"\nChecking: {food['food_name']}")
+    result = assess_food(chat, history, food)
+
+    if result:
+        print(f"Potential concern: {'YES' if result['potential_concern'] else 'no'}")
+        print(f"Reason: {result['reason']}")
+    else:
+        print("No valid response.")
+    save_chats(all_chats)
+
+
+def view_past_chats(all_chats, profile):
+    history = all_chats[profile["username"]]
+    if not history:
+        print("\nNo past chats yet.")
         return
+    print(f"\n--- All chats for {profile['username']} ---")
+    for m in history:
+        when = time.strftime("%d %b %Y %H:%M", time.localtime(m.get("time", 0)))
+        if m["role"] == "user":
+            print(f"\n[{when}] You: {m['text'].splitlines()[0]}")
+        else:
+            try:
+                data = json.loads(m["text"])
+                print(f"   AI ({'concern' if data['potential_concern'] else 'no concern'}): {data['reason']}")
+            except (json.JSONDecodeError, KeyError):
+                print("   AI: (unreadable response)")
 
-    print("Original record:")
-    print(json.dumps(record, indent=2))
 
-    prompt = build_prompt(record)
-    print("\nCalling Gemini...")
+def main():
+    profiles = load_profiles()
+    username = choose_username(profiles)
+    profile = profiles[username]
+    all_chats = load_chats()
+    all_chats.setdefault(username, [])
+    client = genai.Client(api_key=load_decrypted_api_key())
 
     try:
-        raw_response = call_ai_api(prompt)
-    except Exception as error:
-        print("\nAPI call failed:")
-        print(str(error).replace(api_key, "[REDACTED]"))
-        return
-
-    print("\nRaw AI response:")
-    print(raw_response)
-
-    parsed_response = parse_response(raw_response)
-    print("\nParsed response:")
-    print(parsed_response)
-
-    if validate_response(parsed_response):
-        print("\nResponse is VALID.")
-    else:
-        print("\nResponse is INVALID.")
+        while True:
+            print(f"\nUser: {username}\n1. New chat\n2. Past chats\n3. Quit")
+            choice = input("Choose: ").strip()
+            if choice == "1":
+                new_chat(client, all_chats, profile)
+            elif choice == "2":
+                view_past_chats(all_chats, profile)
+            elif choice == "3":
+                break
+    finally:
+        client.close()
 
 
 if __name__ == "__main__":
