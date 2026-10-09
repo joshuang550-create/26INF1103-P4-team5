@@ -105,6 +105,12 @@ def build_system_instruction(profile):
         f"- Weight: {profile['weight']} kg\n"
         f"- BMI: {bmi}\n"
         f"- Medical conditions: {conditions}\n\n"
+        "Tailor each assessment to this profile and to everything earlier in this "
+        "conversation (previous foods and any information the user gave). If you need more "
+        "information about the user, set status to 'needs_follow_up' and list each piece of "
+        "information in information_needed; the user will reply with a JSON object where "
+        "each key is one of your requests, filled in. Otherwise set status to 'complete' and "
+        "leave information_needed empty."
     )
 
 

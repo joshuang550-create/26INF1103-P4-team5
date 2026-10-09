@@ -32,5 +32,17 @@
       "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"The chocolate protein bar contains caffeine, which can potentially raise blood pressure, a concern given your medical history of high blood pressure. Additionally, maltitol is a sugar alcohol that can sometimes cause gastrointestinal distress, and the peanuts are a hard texture that might aggravate TMJ symptoms.\",\n  \"information_needed\": []\n}",
       "time": 1791527388
     }
+  ],
+  "jane": [
+    {
+      "role": "user",
+      "text": "Give a risk assessment for this food: Chocolate Protein Bar\nIngredients: whey protein, maltitol, peanuts, caffeine",
+      "time": 1791528240
+    },
+    {
+      "role": "model",
+      "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"The protein bar contains caffeine, which may cause sensitivity or sleep disturbances depending on your tolerance and consumption time, and maltitol, a sugar alcohol that can cause digestive discomfort such as bloating or laxative effects for some individuals. Additionally, it contains peanuts, which are a common allergen.\",\n  \"information_needed\": []\n}",
+      "time": 1791528240
+    }
   ]
 }
