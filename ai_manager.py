@@ -34,21 +34,6 @@ def choose_username(profiles):
                 return valid
         print("Unknown user.")
 
-PROFILES = {
-    "John": {
-        "username": "John",
-        "password_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
-        "gender": "male", "age": 40, "race": "indian", "country": "india",
-        "height": 170.0, "weight": 70.0,
-    },
-    "ride": {
-        "username": "ride",
-        "password_hash": "e049bd056f936d1b39b704abcf824eaef39bd8877fcbb82b2a213ceec82bdf26",
-        "gender": "male", "age": 22, "race": "caucasian", "country": "Singapore",
-        "height": 190.0, "weight": 80.0,
-        "medical_conditions": ["diabetes", "high blood pressure", "peanut allergy"],
-    },
-}
 
 
 TEST_FOODS = [ #hard-coded test foods to link with opoenfoodfacts_prompt.py
@@ -76,12 +61,22 @@ TEST_FOODS = [ #hard-coded test foods to link with opoenfoodfacts_prompt.py
         "food_name": "Lotus Biscoff",
         "barcode": "5410126716016",
         "ingredients": [],
-    },
+   },
     {
         "food_name": "Ritter Sport Marzipan Chocolate",
         "barcode": "4000417025005",
         "ingredients": [],
     },
+    {
+        "food_name": "Nasi Lemak",
+        "barcode": "0000000000000",
+        "ingredients": [],
+    },
+    {
+        "food_name": "Hokkien Mee",
+        "barcode": "0000000000000",
+        "ingredients": [],
+    }
 ]
 
 
