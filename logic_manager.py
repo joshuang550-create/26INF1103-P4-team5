@@ -45,7 +45,7 @@ def evaluate_response_confidence(
         confidence_result: dict,
         attempt_number: int,
         min_accpetable_score: float = 5.0,
-) -> ResponseAction:
+) -> str:
     """
     Decide what should happen next based on the confidence result and how many
     attempts have already been made
@@ -58,12 +58,12 @@ def evaluate_response_confidence(
     Decision logic
     """
     if confidence_result["overall_score"] >= min_accpetable_score:
-        return ResponseAction.ACCEPT
+        return RESPONSE_ACCEPT
 
     elif attempt_number < MAX_REPROMPT_ATTEMPTS + 1:
-        return ResponseAction.REPROMPT
+        return RESPONSE_REPROMPT
 
-    return ResponseAction.FALLBACK
+    return RESPONSE_FALLBACK
 
 
 def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -> float:
