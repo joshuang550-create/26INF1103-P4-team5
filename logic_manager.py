@@ -1,6 +1,11 @@
 """The domain brain acting on the AI's output.
 """
-from enum import Enum
+
+
+# RESPONSE ACTION CONSTANTS
+RESPONSE_ACCEPT = "accept"
+RESPONSE_REPROMPT = "reprompt"
+RESPONSE_FALLBACK = "fallback"
 
 MOCK_AI_RESPONSE = {
     "food_item": "Peanut Butter",
@@ -22,11 +27,6 @@ MOCK_USER_PROFILE = {
     "country": "Singapore",
     "conditions": ["diabetes", "hypertension"],
 }
-
-class ResponseAction(Enum):
-    ACCEPT = "accept"
-    REJECT = "reject"
-    FALLBACK = "fallback"
 
 MAX_REPROMPT_ATTEMPTS = 1
 
