@@ -138,7 +138,7 @@ def generate_generic_response_prompt(user_profile: dict = None) -> str:
     country = user_profile.get("country")
     conditions = ", ".join(user_profile.get("conditions", []))
 
-    return = (
+    return (
         f"I am a {age}-year-old {gender} from {country} with the following medical conditions: {conditions}. "
         f"What are the best foods I should eat given my medical conditions?"
     )
@@ -170,6 +170,6 @@ if __name__ == "__main__":
     risk = calculate_risk_score()
     print("Risk Score:", risk)
 
-    if action == ResponseAction.FALLBACK:
+    if action == RESPONSE_FALLBACK:
         prompt = generate_generic_response_prompt()
         print("Generic fallback prompt:", prompt)
