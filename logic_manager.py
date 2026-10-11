@@ -8,17 +8,14 @@ RESPONSE_REPROMPT = "reprompt"
 RESPONSE_FALLBACK = "fallback"
 
 MOCK_AI_RESPONSE = {
-    "food_item": "Peanut Butter",
-    "confidence score": {
-        "source_reliability": 0.82,
-        "nutritional match": 0.65,
-        "condition_relevance": 0.40,
-    },
-    "nutrional_info": {
-        "sugar_g": 6.0,
-        "sodium_mg": 150.0,
-        "carbs_g": 20.0,
-    },
+    "status": "complete",
+    "potential_concern": True,
+    "confidence_score": 90,
+    "reason": (
+        "According to Open Food Facts, Heinz Beanz in Tomato Sauce contains "
+        "added sugar and salt, and is classifed as an ultra-processed food. "
+    ),
+    "information_needed":[] 
 }
 
 MOCK_USER_PROFILE = {
