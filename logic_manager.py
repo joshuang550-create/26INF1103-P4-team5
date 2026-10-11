@@ -70,20 +70,17 @@ def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -
     # I think the risk score is something like from a scale of 0.0 to 10.0, how risky is it for you to eat this food item based on your conditions.
     # This risk score does not affect logic at all, it is purely a number we show the user to tell them whether they should eat the food or not.
     
-    """ CHANGE ACCORDINGLY, WAIT FOR AI 
-    get_codition_risk() placeholder ; real version needs a lookup table or data base keyed by condition + nutrient thresholds """
+    """ PARTNER-DEPENDENT/ BLOCKED: the real ai_manager sample does not include
+    any nutrional data (n sugar/sodium fields) This function cannot run
+    correctly until WE confirm where nutrition numbers come from -
+    e.g. a separate food/nutrition database lookup, or an added field in
+    the AI response. Raising explicitly instead of faking a number, since a
+    wrong risk score in a health context is worse than no risk score."""
 
-    if food_item is None:
-        food_item = MOCK_AI_RESPONSE # CHANGE ACCORDINGLY, WAIT FOR AI
-    if user_conditions is None:
-        user_conditions = MOCK_USER_PROFILE.get("conditions", []) # CHANGE ACCORDINGLY, WAIT FOR AI
-
-    if not user_conditions:
-        return 0.0
-
-    risk_points = sum(get_condition_risk(food_item, condition) for condition in user_conditions)
-    max_possible_points = len(user_conditions) * 10  # Assuming each condition can contribute a maximum of 10 points to the risk score
-    return round((risk_points / max_possible_points) * 10, 1)  # Scale to 0.0 - 10.0
+    raise NotImplementedError(
+        "calculate_risk_score() is blocked: no nutrional data present in "
+        "the real ai_manager response sample. Confrim data source with team"
+    )
 
 
 # Definitely should add more work for the logic_manager to do, currently all it does is check confidence and risk scores, which are simple < > comparisons.
