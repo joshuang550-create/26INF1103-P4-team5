@@ -443,9 +443,17 @@ def ask_for_check_food_item_name():
         food_item_name_input = input(f" {APP_COLOR_PREFIX}Food Item:{COLOR_SUFFIX} ").strip()
 
         if len(food_item_name_input) > 1: # proof of concept. In a real scenario, this would check against a database of food items
-            return food_item_name_input
+            break
         
         print(f" {ERROR_COLOR_PREFIX}Please try to enter a recognised name for the food item.{COLOR_SUFFIX}")   
+
+    while True:
+        food_item_barcode_input = input(f" {APP_COLOR_PREFIX}Barcode (Optional):{COLOR_SUFFIX} ").strip()
+
+        if len(food_item_barcode_input) in [0, 12, 13]: # standard barcode length for food items. For real application, scan the barcode with camera.
+            return food_item_name_input, food_item_barcode_input
+        
+        print(f" {ERROR_COLOR_PREFIX}Please enter a valid barcode number for a food item or leave it blank.{COLOR_SUFFIX}") 
 
 
 def show_api_error_message(e):

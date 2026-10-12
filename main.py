@@ -41,10 +41,14 @@ def main_menu(user_profile):
                 return # go back to login page
 
         elif chosen_option == 3: # Check Food
-            check_food_process(user_profile)
+            ai_response = check_food_process(user_profile)
+            print(ai_response) # DELETE LATER. just to see
 
 
             # LOGIC MANAGER FROM HERE ONWARDS...
+
+            # if not ai_response:
+            #     break # ai did not return a good response. go back to main menu.
 
             # confidence_score = logic_manager.calculate_response_confidence(ai_response)
 
@@ -101,12 +105,16 @@ def edit_profile_menu(user_profile):
 
 
 def check_food_process(user_profile):
-    food_to_check = io_manager.ask_for_check_food_item_name() # user will input a food name
-    prompt_string = ai_manager_jeff.generate_first_prompt(user_profile, food_to_check) # returns a full llm prompt as a string
+    food_to_check, food_item_barcode = io_manager.ask_for_check_food_item_name() # user will input a food name and an optional barcode number
+    prompt_string = ai_manager_jeff.generate_first_prompt(user_profile, food_to_check, food_item_barcode) # returns a full llm prompt as a string
 
     retry = 2
     while retry > 0:
-        response = ai_manager_jeff.send_prompt_to_ai(prompt_string) # returns the GenerateContentResponse's text attribute
+        response = ai_manager_jeff.send_prompt_to_ai(user_profile, prompt_string) # returns the GenerateContentResponse's text attribute
+
+        if not response: # send_prompt_to_ai failed.
+            return # go back to main menu
+
         validation_result = ai_manager_jeff.validate_ai_response(response) # checks if the response has valid structure, content etc.
 
         if validation_result != "No Errors": # invalid response
@@ -121,9 +129,9 @@ def check_food_process(user_profile):
 
         else:
             return response #successfully obtained json response from ai
-
-        io_manager.show_generic_error_message()
-        return # unsuccessful
+        
+    io_manager.show_generic_error_message()
+    return # unsuccessful
 
 
 def main():    
@@ -132,20 +140,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# after running prompt_ai(), read the output to see if it is a follow-up request or a final response. 
-# if it is a follow-up request, run print_follow_up_request_input() function from io_manager for the 
-# user to enter more information that the AI requested.

@@ -2,23 +2,19 @@
   "ride": [
     {
       "role": "user",
-      "text": "Give a risk assessment for this food: Chocolate Protein Bar\nIngredients: whey protein, maltitol, peanuts, caffeine",
-      "time": 1791526652
+      "text": "Give a risk assessment for this food: Chocolate Protein Bar\nIngredients: whey protein, maltitol, peanuts, caffeine"
     },
     {
       "role": "model",
-      "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"This chocolate protein bar contains peanuts, which poses a severe health risk given your diagnosed peanut allergy. Additionally, it contains maltitol (a sugar alcohol that can still affect blood glucose levels) and caffeine, which should be monitored considering your diabetes and high blood pressure.\",\n  \"information_needed\": []\n}",
-      "time": 1791526652
+      "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"This chocolate protein bar contains peanuts, which poses a severe health risk given your diagnosed peanut allergy. Additionally, it contains maltitol (a sugar alcohol that can still affect blood glucose levels) and caffeine, which should be monitored considering your diabetes and high blood pressure.\",\n  \"information_needed\": []\n}"
     },
     {
       "role": "user",
-      "text": "Give a risk assessment for this food: Teh Tarik\nIngredients: black tea, condensed milk, sugar",
-      "time": 1791527434
+      "text": "Give a risk assessment for this food: Teh Tarik\nIngredients: black tea, condensed milk, sugar"
     },
     {
       "role": "model",
-      "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"Teh Tarik contains condensed milk and sugar, both of which can cause rapid and significant spikes in blood glucose levels, presenting a major concern for your diabetes. High sugar and sweetened condensed milk intake can also negatively impact your high blood pressure.\",\n  \"information_needed\": []\n}",
-      "time": 1791527434
+      "text": "{\n  \"status\": \"complete\",\n  \"potential_concern\": true,\n  \"reason\": \"Teh Tarik contains condensed milk and sugar, both of which can cause rapid and significant spikes in blood glucose levels, presenting a major concern for your diabetes. High sugar and sweetened condensed milk intake can also negatively impact your high blood pressure.\",\n  \"information_needed\": []\n}"
     }
   ],
   "mary": [
