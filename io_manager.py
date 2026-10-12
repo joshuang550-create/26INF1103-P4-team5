@@ -448,6 +448,41 @@ def ask_for_check_food_item_name():
         print(f" {ERROR_COLOR_PREFIX}Please try to enter a recognised name for the food item.{COLOR_SUFFIX}")   
 
 
+def show_api_error_message(e):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    match e:
+        case 401:
+            print(f" {ERROR_COLOR_PREFIX}API Error 401 (Unauthorized): Check if your API Key is valid and exported correctly. Message: {e.message}{COLOR_SUFFIX}")
+        case 403:
+            print(f" {ERROR_COLOR_PREFIX}API Error 403 (Forbidden): Permission denied or regional restriction. Message: {e.message}{COLOR_SUFFIX}")
+        case 429:
+            print(f" {ERROR_COLOR_PREFIX}API Error 429 (Rate Limit): You are making too many requests or out of credits. Message: {e.message}{COLOR_SUFFIX}")
+        case 500 | 503:
+            print(f" {ERROR_COLOR_PREFIX}API Error {e.code} (Server Error): Google's servers are temporarily down. Message: {e.message}{COLOR_SUFFIX}")
+        case _:
+            print(f" {ERROR_COLOR_PREFIX}Unexpected Error {e.code}: {e.message}{COLOR_SUFFIX}")
+
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
+def show_http_error_message(e):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {ERROR_COLOR_PREFIX}Internet connection unstable, could not reach google. Try again later. Message: {e.message}{COLOR_SUFFIX}")
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
 def print_follow_up_request_input():
     # for the user to enter more information that the AI requested.
     # the format for this should
@@ -457,4 +492,5 @@ def print_follow_up_request_input():
 def print_final_output():
     # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
     pass
+
 

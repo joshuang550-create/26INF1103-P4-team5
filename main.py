@@ -42,11 +42,26 @@ def main_menu(user_profile):
                 return # go back to login page
 
         elif chosen_option == 3: # Check Food
+
+
+
+
+            # put into a loop, maybe as its own function here in main.py
+
+
             food_to_check = io_manager.ask_for_check_food_item_name()
             prompt_string = ai_manager_jeff.generate_first_prompt(user_profile)
             response = ai_manager_jeff.send_prompt_to_ai(prompt_string)
-            ai_manager_jeff.validate_ai_response(response)
+            validation_result = ai_manager_jeff.validate_ai_response(response)
 
+            if validation_result != "No Errors":
+                response = ai_manager_jeff.send_prompt_to_ai(validation_result) # this should work cause send_prompt_to_ai should auto append the history, which would include the original response with these errors.
+                validation_result = ai_manager_jeff.validate_ai_response(response)
+
+            if validation_result != "No Errors":
+                # io_manager print some error message saying that something went wrong with the ai's response. Please try again later.
+                continue # back to main menu
+            
             if response == "Request for more info.":
                 more_info_input = io_manager.ask_for_more_information() # is a dict
                 more_info_prompt_string = ai_manager_jeff.generate_more_info_prompt(more_info_input) # more_info_input is a python dict {"How much alchohol do you drink a month?":"about 10 cans of beer a month.", "Do u run alot?":"no"}
@@ -62,6 +77,23 @@ def main_menu(user_profile):
             io_manager.print_final_output(response)
 
             continue # back to main menu for now. will call io_manager.show_final_output() later.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         elif chosen_option == 4: # Log Out
             break # goes back to login page

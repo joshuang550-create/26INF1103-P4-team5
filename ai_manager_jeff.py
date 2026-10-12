@@ -10,6 +10,7 @@ from google.genai import errors
 import httpx
 
 import data_manager
+import io_manager
 
 AI_MODEL = "gemini-3.5-flash-lite"
 SCHEMA = {
@@ -131,9 +132,8 @@ def generate_more_info_prompt(more_info_input):
     )
 
 
-
-
-
+def append_openfoodfacts_to_prompt():
+    pass
 
 
 def send_prompt_to_ai(user_profile, prompt_string): # also has error handling.
@@ -152,26 +152,14 @@ def send_prompt_to_ai(user_profile, prompt_string): # also has error handling.
         response = chat.send_message(prompt_string)
 
     except (httpx.ConnectError, httpx.TimeoutException) as e:
-        pass  # call io_manager.print_api_error_message(e)   maybe print that internet connection unstable, could not reach google, try again later. or smth.
+        io_manager.show_http_error_message(e)
 
     except errors.APIError as e:
-        if e.code == 400:
-            print(f"API Error 400 (Bad Request): Check your model name '{AI_MODEL}' or empty prompt string. Message: {e.message}") # see how to handle this, not user fault.
+        if e.code in [401, 403, 429, 500, 503]:
+            return io_manager.show_api_error_message(e)
         
-        elif e.code == 401:
-            print(f"API Error 401 (Unauthorized): Check if your API Key is valid and exported correctly. Message: {e.message}") # call io_manager.print_api_error_message(e)
-        
-        elif e.code == 403:
-            print(f"API Error 403 (Forbidden): Permission denied or regional restriction. Message: {e.message}") # call io_manager.print_api_error_message(e)
-        
-        elif e.code == 429:
-            print(f"API Error 429 (Rate Limit): You are making too many requests or out of credits. Message: {e.message}") # call io_manager.print_api_error_message(e)
-        
-        elif e.code in [500, 503]:
-            print(f"API Error {e.code} (Server Error): Google's servers are temporarily down. Message: {e.message}") # call io_manager.print_api_error_message(e)
-
     except Exception as e:
-        pass  # call io_manager.print_api_error_message(e)       say unexpected error?
+        return io_manager.show_api_error_message(e)
 
     history[user_profile.get("username", "")] = user_history
     data_manager.save_chats(history)
