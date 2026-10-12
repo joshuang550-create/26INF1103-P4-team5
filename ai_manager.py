@@ -36,50 +36,6 @@ def choose_username(profiles):
 
 
 
-TEST_FOODS = [ #hard-coded test foods to link with opoenfoodfacts_prompt.py
-    {
-        "food_name": "Nutella",
-        "barcode": "3017624010701",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Coca-Cola Original",
-        "barcode": "5449000000996",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Philadelphia Original",
-        "barcode": "7622300441937",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Heinz Beanz in Tomato Sauce",
-        "barcode": "5000157024671",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Lotus Biscoff",
-        "barcode": "5410126716016",
-        "ingredients": [],
-   },
-    {
-        "food_name": "Ritter Sport Marzipan Chocolate",
-        "barcode": "4000417025005",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Nasi Lemak",
-        "barcode": "0000000000000",
-        "ingredients": [],
-    },
-    {
-        "food_name": "Hokkien Mee",
-        "barcode": "0000000000000",
-        "ingredients": [],
-    }
-]
-
-
 # ---------- Storage: {username: [{"role", "text", "time"}, ...]} ----------
 
 def load_chats():
