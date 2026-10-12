@@ -1,5 +1,9 @@
 """The domain brain acting on the AI's output.
 """
+import json
+import re
+from pathlib import Path
+
 
 # ===============================================================
 # RESPONSE ACTION CONSTANTS
@@ -7,13 +11,25 @@
 RESPONSE_ACCEPT = "accept"
 RESPONSE_REPROMPT = "reprompt"
 RESPONSE_FALLBACK = "fallback"
+RESPONSE_AVOID = "avoid"
 
-
+ALLERGENS_FILE = Path(__file__).parent / "allergens.json"
 
 # ===============================================================
 # MOCK DATA - matches ai_manager sample output as of latest update
 # PARTNER_DEPENDENT: remove MOCK_* once real pipeline wiring exists
 # ===============================================================
+
+MOCK_AI_RESPONSE_ALLERGEN = {
+    "status": "complete",
+    "potential_concern": True,
+    "confidence_score": 85,
+    "reason": (
+        "According to OpenFoodFacts, these prawn crackers contain "
+        "crustaceans and are high in sodium"
+    ),
+    "information_needed": [],
+}
 
 MOCK_AI_RESPONSE = {
     "status": "complete",
@@ -156,19 +172,72 @@ def generate_generic_response(user_profile: dict = None) -> dict:
         "resolution strategy"
     )
 
+def load_allergens(path=ALLERGENS_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["allergen_synonyms"]
+
+def detect_allergens(text, allergen_synonyms=None):
+    """Return {category: [matched word]} for every allergen word detected"""
+    if allergen_synonyms is None:
+        allergen_synonyms = load_allergens()
+
+    found = {}
+    for category, words in allergen_synonyms.items():
+        for word in words:
+            if re.search(rf"\b{re.escape(word)}s?\b", text, re.IGNORECASE):
+                found.setdefault(category, []).append(word)
+    return found
+
+def build_allergen_warning(found):
+    parts = []
+    for category, words in found.items():
+        group = category.split("_")[0].title()
+        if group not in parts:
+            parts.append(group)
+        for word in words:
+            parts.append(word.title())
+    return (
+        f"  Allergens Found: {', '.join(parts)}\n"
+        f"  Warning        : Avoid this food, allergen detected"
+    )
+        
+    
+
 # ===================================================
 # TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
 # ===================================================
 
 if __name__ == "__main__":
+    print("=" * 50)
+    print("TEST 1: Normal Food (Heinz Beanz)")
+    print("=" * 50)
     confidence_result = calculate_response_confidence()
-    print("Confidence Result:", confidence_result)
-
     action = evaluate_response_confidence(confidence_result, attempt_number=1)
-    print("Next Action:", action)
+    print(f"    Confidence score : {confidence_result['overall_score']} / 10")
+    print(f"    Potential concern: {confidence_result['potential_concern']}")
+    print(f"    Action           : {action.upper()}")
 
-    risk = calculate_risk_score()
-    print("Risk Score:", risk)
+    '''Mock Response Allergen Detection'''
+    print("=" * 50)
+    print("TEST 2: Allergen Food (Prawn Crackers)")
+    print("=" * 50)
+    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
+    if found:
+        print(build_allergen_warning(found))
+    else:
+        print("No Allergens detected")
+
+    '''Risk Score skipped temporarily, to test allergen detection'''
+    print()
+    print("=" * 50)
+    print("TEST 1: (Heinz Beanz)")
+    print("=" * 50)
+    try:
+        risk = calculate_risk_score()
+        print("Risk Score:", risk)
+    except NotImplementedError as e:
+        print("Risk score skipped:", e)
+
 
     if action == RESPONSE_FALLBACK:
         prompt = generate_generic_response_prompt()

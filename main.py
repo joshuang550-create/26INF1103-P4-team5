@@ -3,6 +3,7 @@
 
 import io_manager
 import data_manager
+import ai_manager
 
 
 def login_menu():
@@ -12,12 +13,14 @@ def login_menu():
         if chosen_option == 1: # Login
             user_profile = data_manager.login_user_profile_from_database(*io_manager.get_login_credentials())
             if user_profile is None:
+                io_manager.show_failed_login_message()
                 continue # login failed. go to back to login page
             main_menu(user_profile) # login successful. move on to main menu page
 
         elif chosen_option == 2: # New Profile
             user_profile = io_manager.get_new_profile_info()
             data_manager.save_user_profile_to_database(user_profile)
+            io_manager.show_successful_profile_creation_message()
             main_menu(user_profile) # profile creation successful. move on to main menu page
 
         elif chosen_option == 3: # Close App
@@ -38,7 +41,9 @@ def main_menu(user_profile):
                 return # go back to login page
 
         elif chosen_option == 3: # Check Food
-            pass
+            food_to_check = io_manager.ask_for_check_food_item_name()
+            # ai_manager.prompt_ai(user_profile, food_to_check)  # rough idea.
+            continue # back to main menu for now. will call io_manager.show_final_output() later.
 
         elif chosen_option == 4: # Log Out
             break # goes back to login page
@@ -73,8 +78,14 @@ def edit_profile_menu(user_profile):
             return False # go back to main menu
 
         elif chosen_option == 8: # Delete Profile
-            data_manager.delete_user_profile_from_database(user_profile, io_manager.get_delete_user_profile_confirmation())
-            return True # go to login page
+            chosen_option = io_manager.get_delete_user_profile_confirmation()
+
+            if chosen_option in ["y", "yes"]:
+                data_manager.delete_user_profile_from_database(user_profile)
+                io_manager.show_successful_profile_deletion_message()
+                return True # delete profile, go to login page
+            
+            continue # don't delete, go back to edit profile menu
 
 
 def main():    

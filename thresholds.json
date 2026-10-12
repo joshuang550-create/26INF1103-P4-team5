@@ -20,9 +20,5 @@
             "high": 0.5,
             "relevant_conditions": ["cardiovascular condition"]
         }
-    },
-    "allergen_synonyms": {
-        "shellfish_crustacean": ["shrimp", "crab", "prawn", "lobster"],
-        "shellfish_mollusk": ["clam", "mussel", "oyster", "scallop"]
     }
 }
