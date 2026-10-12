@@ -72,7 +72,7 @@ def build_system_instruction(profile):
         "User profile:\n"
         f"- Age: {profile['age']}\n"
         f"- Gender: {profile['gender']}\n"
-        f"- Ethnicity: {profile['race']}\n"
+        f"- Ethnicity: {profile['ethnicity']}\n"
         f"- Country: {profile['country']}\n"
         f"- Height: {profile['height']} cm\n"
         f"- Weight: {profile['weight']} kg\n"
@@ -125,22 +125,32 @@ def count_foods(history):
 
 
 def new_chat(client, all_chats, profile):
-    history = all_chats[profile["username"]]
+    history = all_chats[profile["username"]] # just to get the chat history of this guy. all_chats is all histories
     chat = resume_chat(client, profile, history)
+    # TEST_FOODS = {
+    # banana:https://world.openfoodfacts.org/api/v0/product/3017620422003.json,
+    # chocolate:https://world.openfoodfacts.org/api/v0/product/3017620422003}
 
-    food = TEST_FOODS[count_foods(history) % len(TEST_FOODS)]
+
+    # food = TEST_FOODS[count_foods(history) % len(TEST_FOODS)]
+    
+    # food = {
+    #     "food_name": "Coca-Cola Original",
+    #     "barcode": "5449000000996",
+    #     "ingredients": []
+    #}
+
     print(f"\nChecking: {food['food_name']}")
 
     result = assess_food(chat, history, food)
 
     if result is None:
         print("No valid response.")
-    else:
-        if result["status"] == "needs_follow_up":
-            print("Assessment incomplete - more information is needed.")
+    elif result["status"] == "needs_follow_up":
+        print("Assessment incomplete - more information is needed.")
 
-        # Display the full JSON, including the confidence score.
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+    # Display the full JSON, including the confidence score.
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
     save_chats(all_chats)
 

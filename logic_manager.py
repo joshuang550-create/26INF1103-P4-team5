@@ -30,3 +30,9 @@ def generate_generic_response():
     # use a database to find the best foods to eat based on medical conditions. Ranked database. Issue is conflictions, what if best for this is bad for that and you have both this and that?
     pass
 
+
+
+
+
+
+# add openfoodfacts result into logic_manager. This result is appended to the prompt sent to gemini

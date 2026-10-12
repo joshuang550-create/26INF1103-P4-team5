@@ -11,7 +11,7 @@ COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
 APP_COLOR_PREFIX = "\033[92m"
 COUNTRIES_CSV = "./countries.csv"
-RACES_CSV = "./races.csv"
+ETHNICITIES_CSV = "./ethnicities.csv"
 
 
 def clear_terminal():
@@ -150,13 +150,13 @@ def ask_for_valid_weight(standalone=False):
             print(f" {ERROR_COLOR_PREFIX}Please enter a valid number for weight.{COLOR_SUFFIX}")
             
 
-def ask_for_valid_race():
-    """Loops until a valid race found in RACES_CSV is provided."""
+def ask_for_valid_ethnicity():
+    """Loops until a valid ethnicity found in RACES_CSV is provided."""
     while True:
-        race_input = input(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} ").strip()
-        if data_manager.search_csv_for_string(race_input, RACES_CSV):
-            return race_input
-        print(f" {ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
+        ethnicity_input = input(f" {APP_COLOR_PREFIX}Ethnicity:{COLOR_SUFFIX} ").strip()
+        if data_manager.search_csv_for_string(ethnicity_input, RACES_CSV):
+            return ethnicity_input
+        print(f" {ERROR_COLOR_PREFIX}{ethnicity_input} is not a valid ethnicity.{COLOR_SUFFIX}")
     
 
 def ask_for_valid_country(standalone=False):
@@ -324,7 +324,7 @@ def get_new_profile_info():
 
     gender_input = ask_for_valid_gender()
     age_input = ask_for_valid_age()
-    race_input = ask_for_valid_race()
+    ethnicity_input = ask_for_valid_ethnicity()
     country_input = ask_for_valid_country()
     height_input = ask_for_valid_height()
     weight_input = ask_for_valid_weight()
@@ -336,7 +336,7 @@ def get_new_profile_info():
         "password_hash": hashed_password_input,
         "gender": gender_input,
         "age": age_input,
-        "race": race_input,
+        "ethnicity": ethnicity_input,
         "country": country_input,
         "height": height_input,
         "weight": weight_input,
@@ -377,7 +377,7 @@ def show_user_profile(user_profile):
     print(f" {APP_COLOR_PREFIX}Username:{COLOR_SUFFIX} {user_profile.get("username", "")}")
     print(f" {APP_COLOR_PREFIX}Gender:{COLOR_SUFFIX} {user_profile.get("gender", "")}")
     print(f" {APP_COLOR_PREFIX}Age:{COLOR_SUFFIX} {user_profile.get("age", "")}")
-    print(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} {user_profile.get("race", "")}")
+    print(f" {APP_COLOR_PREFIX}Ethnicity:{COLOR_SUFFIX} {user_profile.get("ethnicity", "")}")
     print(f" {APP_COLOR_PREFIX}Country of Residence:{COLOR_SUFFIX} {user_profile.get("country", "")}")
     print(f" {APP_COLOR_PREFIX}Height:{COLOR_SUFFIX} {user_profile.get("height", "")}cm")
     print(f" {APP_COLOR_PREFIX}Weight:{COLOR_SUFFIX} {user_profile.get("weight", "")}kg\n")

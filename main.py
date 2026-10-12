@@ -3,7 +3,8 @@
 
 import io_manager
 import data_manager
-import ai_manager
+import ai_manager_jeff
+import logic_manager
 
 
 def login_menu():
@@ -42,7 +43,24 @@ def main_menu(user_profile):
 
         elif chosen_option == 3: # Check Food
             food_to_check = io_manager.ask_for_check_food_item_name()
-            # ai_manager.prompt_ai(user_profile, food_to_check)  # rough idea.
+            prompt_string = ai_manager_jeff.generate_first_prompt(user_profile)
+            response = ai_manager_jeff.send_prompt_to_ai(prompt_string)
+            ai_manager_jeff.validate_ai_response(response)
+
+            if response == "Request for more info.":
+                more_info_input = io_manager.ask_for_more_information() # is a dict
+                more_info_prompt_string = ai_manager_jeff.generate_more_info_prompt(more_info_input) # more_info_input is a python dict {"How much alchohol do you drink a month?":"about 10 cans of beer a month.", "Do u run alot?":"no"}
+                response = ai_manager_jeff.send_prompt_to_ai(more_info_prompt_string)
+
+            confidence_score = logic_manager.calculate_response_confidence(ai_response)
+            # LOGIC MANAGER FROM HERE ONWARDS...
+            generic_prompt_string = logic_manager.generate_generic_response_prompt() # "i am a 20 year olf singaporean chinese. i have diabetes, high blood pressure. what foods do i eat?"
+
+
+            response = ai_manager_jeff.send_prompt_to_ai(generic_prompt_string) # you should eat banana given your high blood pressure. ...
+
+            io_manager.print_final_output(response)
+
             continue # back to main menu for now. will call io_manager.show_final_output() later.
 
         elif chosen_option == 4: # Log Out
