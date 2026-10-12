@@ -4,7 +4,6 @@
 import io_manager
 import data_manager
 import ai_manager_jeff
-import logic_manager
 
 
 def login_menu():
@@ -42,56 +41,19 @@ def main_menu(user_profile):
                 return # go back to login page
 
         elif chosen_option == 3: # Check Food
+            check_food_process(user_profile)
 
 
-
-
-            # put into a loop, maybe as its own function here in main.py
-
-
-            food_to_check = io_manager.ask_for_check_food_item_name()
-            prompt_string = ai_manager_jeff.generate_first_prompt(user_profile)
-            response = ai_manager_jeff.send_prompt_to_ai(prompt_string)
-            validation_result = ai_manager_jeff.validate_ai_response(response)
-
-            if validation_result != "No Errors":
-                response = ai_manager_jeff.send_prompt_to_ai(validation_result) # this should work cause send_prompt_to_ai should auto append the history, which would include the original response with these errors.
-                validation_result = ai_manager_jeff.validate_ai_response(response)
-
-            if validation_result != "No Errors":
-                # io_manager print some error message saying that something went wrong with the ai's response. Please try again later.
-                continue # back to main menu
-            
-            if response == "Request for more info.":
-                more_info_input = io_manager.ask_for_more_information() # is a dict
-                more_info_prompt_string = ai_manager_jeff.generate_more_info_prompt(more_info_input) # more_info_input is a python dict {"How much alchohol do you drink a month?":"about 10 cans of beer a month.", "Do u run alot?":"no"}
-                response = ai_manager_jeff.send_prompt_to_ai(more_info_prompt_string)
-
-            confidence_score = logic_manager.calculate_response_confidence(ai_response)
             # LOGIC MANAGER FROM HERE ONWARDS...
-            generic_prompt_string = logic_manager.generate_generic_response_prompt() # "i am a 20 year olf singaporean chinese. i have diabetes, high blood pressure. what foods do i eat?"
 
+            # confidence_score = logic_manager.calculate_response_confidence(ai_response)
 
-            response = ai_manager_jeff.send_prompt_to_ai(generic_prompt_string) # you should eat banana given your high blood pressure. ...
+            # generic_prompt_string = logic_manager.generate_generic_response_prompt()           # "i am a 20 year olf singaporean chinese. i have diabetes, high blood pressure. what foods do i eat?"
+            # response = ai_manager_jeff.send_prompt_to_ai(generic_prompt_string)                # you should eat banana given your high blood pressure. ...
 
-            io_manager.print_final_output(response)
+            # io_manager.show_final_output(response)
 
-            continue # back to main menu for now. will call io_manager.show_final_output() later.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            continue                                                                             # back to main menu for now. will call io_manager.show_final_output() later.
 
 
 
@@ -136,6 +98,32 @@ def edit_profile_menu(user_profile):
                 return True # delete profile, go to login page
             
             continue # don't delete, go back to edit profile menu
+
+
+def check_food_process(user_profile):
+    food_to_check = io_manager.ask_for_check_food_item_name() # user will input a food name
+    prompt_string = ai_manager_jeff.generate_first_prompt(user_profile, food_to_check) # returns a full llm prompt as a string
+
+    retry = 2
+    while retry > 0:
+        response = ai_manager_jeff.send_prompt_to_ai(prompt_string) # returns the GenerateContentResponse's text attribute
+        validation_result = ai_manager_jeff.validate_ai_response(response) # checks if the response has valid structure, content etc.
+
+        if validation_result != "No Errors": # invalid response
+            prompt_string = validation_result
+            retry -= 1
+
+        elif response["status"] == "needs_follow_up":
+            more_info_input = io_manager.ask_for_ai_follow_up_input(response)
+            more_info_prompt_string = ai_manager_jeff.generate_more_info_prompt(more_info_input) # more_info_input is a python dict {"How much alchohol do you drink a month?":"about 10 cans of beer a month.", "Do u run alot?":"no"}
+            prompt_string = more_info_prompt_string
+            continue # prompt again using more info prompt string. send_prompt_to_ai() will automatically append the chat history so original prompt and response will be included.
+
+        else:
+            return response #successfully obtained json response from ai
+
+        io_manager.show_generic_error_message()
+        return # unsuccessful
 
 
 def main():    

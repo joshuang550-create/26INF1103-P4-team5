@@ -154,7 +154,7 @@ def ask_for_valid_ethnicity():
     """Loops until a valid ethnicity found in RACES_CSV is provided."""
     while True:
         ethnicity_input = input(f" {APP_COLOR_PREFIX}Ethnicity:{COLOR_SUFFIX} ").strip()
-        if data_manager.search_csv_for_string(ethnicity_input, RACES_CSV):
+        if data_manager.search_csv_for_string(ethnicity_input, ETHNICITIES_CSV):
             return ethnicity_input
         print(f" {ERROR_COLOR_PREFIX}{ethnicity_input} is not a valid ethnicity.{COLOR_SUFFIX}")
     
@@ -453,7 +453,7 @@ def show_api_error_message(e):
     show_app_banner()
 
     print("\n═══════════════════════════════════════════════════")
-    print(" Error.")
+    print(" API Error.")
     print("═══════════════════════════════════════════════════\n")
 
     match e:
@@ -476,20 +476,40 @@ def show_http_error_message(e):
     show_app_banner()
 
     print("\n═══════════════════════════════════════════════════")
-    print(" Error.")
+    print(" Internet Connection Error.")
     print("═══════════════════════════════════════════════════\n")
 
     print(f" {ERROR_COLOR_PREFIX}Internet connection unstable, could not reach google. Try again later. Message: {e.message}{COLOR_SUFFIX}")
     input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
 
 
-def print_follow_up_request_input():
-    # for the user to enter more information that the AI requested.
-    # the format for this should
-    pass
+def show_generic_error_message():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {ERROR_COLOR_PREFIX}Something went wrong, please try again later.{COLOR_SUFFIX}")
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
 
 
-def print_final_output():
+def ask_for_ai_follow_up_input(response): # NEED TO CHECK WHAT RESPONSE LOOKS LIKE. NOT EVERY THING IN RESPONSE WILL BE A QUESTION I ASSUME
+    for question in response:
+        while True:
+            answer = input(f" {APP_COLOR_PREFIX}{question}\n >>> {COLOR_SUFFIX}").strip()
+
+            if len(answer) > 0:
+                response[question] = answer
+                break
+            else:
+                print("Input cannot be empty. Please try to respond naturally.")
+
+    return response
+
+
+def show_final_output():
     # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
     pass
 
