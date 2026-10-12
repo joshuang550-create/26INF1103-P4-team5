@@ -135,7 +135,7 @@ def save_user_profile_to_database(user_profile):
         json.dump(user_profiles, file, indent=4)
 
 
-def delete_user_profile_from_database(user_profile, confirm):
+def delete_user_profile_from_database(user_profile):
     """Deletes a user profile dictionary from the JSON file.
 
     This function reads existing profiles from the JSON database, deletes 
