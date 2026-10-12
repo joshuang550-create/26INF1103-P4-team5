@@ -189,38 +189,55 @@ def detect_allergens(text, allergen_synonyms=None):
     return found
 
 def build_allergen_warning(found):
-    parts = [
-        f"{category.replace('_', ' ')} ({', '.join(words)})"
-        for category, words in found.items()
-    ]
-    return "Avoid this food, allergen detected: " + "; ".join(parts) + "."
+    parts = []
+    for category, words in found.items():
+        group = category.split("_")[0].title()
+        if group not in parts:
+            parts.append(group)
+        for word in words:
+            parts.append(word.title())
+    return (
+        f"  Allergens Found: {', '.join(parts)}\n"
+        f"  Warning        : Avoid this food, allergen detected"
+    )
+        
+    
 
 # ===================================================
 # TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
 # ===================================================
 
 if __name__ == "__main__":
+    print("=" * 50)
+    print("TEST 1: Normal Food (Heinz Beanz)")
+    print("=" * 50)
     confidence_result = calculate_response_confidence()
-    print("Confidence Result:", confidence_result)
-
     action = evaluate_response_confidence(confidence_result, attempt_number=1)
-    print("Next Action:", action)
+    print(f"    Confidence score : {confidence_result['overall_score']} / 10")
+    print(f"    Potential concern: {confidence_result['potential_concern']}")
+    print(f"    Action           : {action.upper()}")
 
+    '''Mock Response Allergen Detection'''
+    print("=" * 50)
+    print("TEST 2: Allergen Food (Prawn Crackers)")
+    print("=" * 50)
+    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
+    if found:
+        print(build_allergen_warning(found))
+    else:
+        print("No Allergens detected")
+
+    '''Risk Score skipped temporarily, to test allergen detection'''
+    print()
+    print("=" * 50)
+    print("TEST 1: (Heinz Beanz)")
+    print("=" * 50)
     try:
         risk = calculate_risk_score()
         print("Risk Score:", risk)
     except NotImplementedError as e:
         print("Risk score skipped:", e)
 
-    '''Allergen Mock Detection'''
-    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
-    print("Found:", found)
-    if found:
-        print(build_allergen_warning(found))
-
-    allergen_confidence = calculate_response_confidence(MOCK_AI_RESPONSE_ALLERGEN)
-    print("Confidence:", allergen_confidence)
-    print("Action:", evaluate_response_confidence(allergen_confidence, attempt_number=1))
 
     if action == RESPONSE_FALLBACK:
         prompt = generate_generic_response_prompt()
