@@ -1,13 +1,22 @@
 """System memory across runs.
 """
 
+import os
 import csv
 import hashlib
 import json
 import pathlib
 
-USER_PROFILES = "./user_profiles.json"
+from cryptography.fernet import Fernet
 
+USER_PROFILES = "./user_profiles.json"
+CHAT_HISTORY = "./chats.json"
+
+SECRET_KEY = "./secret.key"
+ENCRYPTED_API_KEY = "./encrypted_api_key.bin"
+
+
+# io_manager
 
 def get_all_user_profiles():
     """Load data from user_profiles JSON file and return it as a dictionary.
@@ -161,3 +170,31 @@ def remove_profile_medical_condition(user_profile, medical_conditions_to_remove_
         for i, mc in enumerate(user_profile["medical_conditions"])
         if i not in medical_conditions_to_remove_input
     ]
+
+
+# ai_manager
+
+def load_chat_history():
+    if not os.path.exists(CHAT_HISTORY):
+        return {}
+    with open(CHAT_HISTORY, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_chats(history):
+    with open(CHAT_HISTORY, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2)
+
+
+def get_ai_api_key():
+
+    secret_key = os.getenv("FERNET_SECRET_KEY")
+
+    with open(ENCRYPTED_API_KEY, "rb") as f:
+        encrypted_key = f.read()
+
+    return Fernet(secret_key).decrypt(encrypted_key).decode()
+
+    # docker run -e FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx" smartbite
+    # $env:FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx"; python main.py
+

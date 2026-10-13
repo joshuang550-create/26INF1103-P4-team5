@@ -11,7 +11,7 @@ COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
 APP_COLOR_PREFIX = "\033[92m"
 COUNTRIES_CSV = "./countries.csv"
-RACES_CSV = "./races.csv"
+ETHNICITIES_CSV = "./ethnicities.csv"
 
 
 def clear_terminal():
@@ -150,13 +150,13 @@ def ask_for_valid_weight(standalone=False):
             print(f" {ERROR_COLOR_PREFIX}Please enter a valid number for weight.{COLOR_SUFFIX}")
             
 
-def ask_for_valid_race():
-    """Loops until a valid race found in RACES_CSV is provided."""
+def ask_for_valid_ethnicity():
+    """Loops until a valid ethnicity found in RACES_CSV is provided."""
     while True:
-        race_input = input(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} ").strip()
-        if data_manager.search_csv_for_string(race_input, RACES_CSV):
-            return race_input
-        print(f" {ERROR_COLOR_PREFIX}{race_input} is not a valid race.{COLOR_SUFFIX}")
+        ethnicity_input = input(f" {APP_COLOR_PREFIX}Ethnicity:{COLOR_SUFFIX} ").strip()
+        if data_manager.search_csv_for_string(ethnicity_input, ETHNICITIES_CSV):
+            return ethnicity_input
+        print(f" {ERROR_COLOR_PREFIX}{ethnicity_input} is not a valid ethnicity.{COLOR_SUFFIX}")
     
 
 def ask_for_valid_country(standalone=False):
@@ -324,7 +324,7 @@ def get_new_profile_info():
 
     gender_input = ask_for_valid_gender()
     age_input = ask_for_valid_age()
-    race_input = ask_for_valid_race()
+    ethnicity_input = ask_for_valid_ethnicity()
     country_input = ask_for_valid_country()
     height_input = ask_for_valid_height()
     weight_input = ask_for_valid_weight()
@@ -336,7 +336,7 @@ def get_new_profile_info():
         "password_hash": hashed_password_input,
         "gender": gender_input,
         "age": age_input,
-        "race": race_input,
+        "ethnicity": ethnicity_input,
         "country": country_input,
         "height": height_input,
         "weight": weight_input,
@@ -377,7 +377,7 @@ def show_user_profile(user_profile):
     print(f" {APP_COLOR_PREFIX}Username:{COLOR_SUFFIX} {user_profile.get("username", "")}")
     print(f" {APP_COLOR_PREFIX}Gender:{COLOR_SUFFIX} {user_profile.get("gender", "")}")
     print(f" {APP_COLOR_PREFIX}Age:{COLOR_SUFFIX} {user_profile.get("age", "")}")
-    print(f" {APP_COLOR_PREFIX}Race:{COLOR_SUFFIX} {user_profile.get("race", "")}")
+    print(f" {APP_COLOR_PREFIX}Ethnicity:{COLOR_SUFFIX} {user_profile.get("ethnicity", "")}")
     print(f" {APP_COLOR_PREFIX}Country of Residence:{COLOR_SUFFIX} {user_profile.get("country", "")}")
     print(f" {APP_COLOR_PREFIX}Height:{COLOR_SUFFIX} {user_profile.get("height", "")}cm")
     print(f" {APP_COLOR_PREFIX}Weight:{COLOR_SUFFIX} {user_profile.get("weight", "")}kg\n")
@@ -443,18 +443,91 @@ def ask_for_check_food_item_name():
         food_item_name_input = input(f" {APP_COLOR_PREFIX}Food Item:{COLOR_SUFFIX} ").strip()
 
         if len(food_item_name_input) > 1: # proof of concept. In a real scenario, this would check against a database of food items
-            return food_item_name_input
+            break
         
         print(f" {ERROR_COLOR_PREFIX}Please try to enter a recognised name for the food item.{COLOR_SUFFIX}")   
 
+    while True:
+        food_item_barcode_input = input(f" {APP_COLOR_PREFIX}Barcode (Optional):{COLOR_SUFFIX} ").strip()
 
-def print_follow_up_request_input():
-    # for the user to enter more information that the AI requested.
-    # the format for this should
-    pass
+        if len(food_item_barcode_input) in [0, 12, 13]: # standard barcode length for food items. For real application, scan the barcode with camera.
+            return food_item_name_input, food_item_barcode_input
+        
+        print(f" {ERROR_COLOR_PREFIX}Please enter a valid barcode number for a food item or leave it blank.{COLOR_SUFFIX}") 
 
 
-def print_final_output():
+def show_api_error_message(e):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" API Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    match e:
+        case 401:
+            print(f" {ERROR_COLOR_PREFIX}API Error 401 (Unauthorized): Check if your API Key is valid and exported correctly. Message: {e.message}{COLOR_SUFFIX}")
+        case 403:
+            print(f" {ERROR_COLOR_PREFIX}API Error 403 (Forbidden): Permission denied or regional restriction. Message: {e.message}{COLOR_SUFFIX}")
+        case 429:
+            print(f" {ERROR_COLOR_PREFIX}API Error 429 (Rate Limit): You are making too many requests or out of credits. Message: {e.message}{COLOR_SUFFIX}")
+        case 500 | 503:
+            print(f" {ERROR_COLOR_PREFIX}API Error {e.code} (Server Error): Google's servers are temporarily down. Message: {e.message}{COLOR_SUFFIX}")
+        case _:
+            print(f" {ERROR_COLOR_PREFIX}Unexpected Error {e.code}: {e.message}{COLOR_SUFFIX}")
+
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
+def show_http_error_message(e):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Internet Connection Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {ERROR_COLOR_PREFIX}Internet connection unstable, could not reach google. Try again later. Message: {e.message}{COLOR_SUFFIX}")
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
+def show_generic_error_message():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Error.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f" {ERROR_COLOR_PREFIX}Something went wrong, please try again later.{COLOR_SUFFIX}")
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
+
+
+def ask_for_ai_follow_up_input(response):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Some additional information is needed.")
+    print("═══════════════════════════════════════════════════")
+
+    questions = response["information_needed"]
+
+    for question in questions:
+        while True:
+            answer = input(f"\n {APP_COLOR_PREFIX}{question}\n >>> {COLOR_SUFFIX}").strip()
+
+            if len(answer) > 0:
+                questions[question] = answer
+                break
+            else:
+                print(f" {ERROR_COLOR_PREFIX}Input cannot be empty. Please try to respond naturally.{COLOR_SUFFIX}")
+
+    return questions
+
+
+def show_final_output():
     # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
     pass
+
 
