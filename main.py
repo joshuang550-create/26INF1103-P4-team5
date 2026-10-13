@@ -1,10 +1,10 @@
 """Main entry point for the application.
 """
 
-import io_manager
-import data_manager
-import ai_manager
-import logic_manager
+import managers.io_manager as io_manager
+import managers.data_manager as data_manager
+import managers.ai_manager as ai_manager
+import managers.logic_manager as logic_manager
 
 
 def login_menu():
@@ -45,7 +45,6 @@ def main_menu(user_profile):
             ai_response = check_food_process(user_profile)
 
             if not ai_response:
-                io_manager.show_generic_error_message() # ai_response is empty, no response.
                 continue # back to main menu
 
             logic_response = logic_manager.process_ai_response(ai_response, user_profile)
@@ -105,6 +104,7 @@ def check_food_process(user_profile):
 
     retry = 2
     while retry > 0:
+        io_manager.show_waiting_screen()
         response = ai_manager.send_prompt_to_ai(user_profile, prompt_string) # returns the GenerateContentResponse's text attribute
 
         if not response: # send_prompt_to_ai failed.
@@ -126,7 +126,7 @@ def check_food_process(user_profile):
         else:
             return response #successfully obtained json response from ai
 
-    return # unsuccessful, go back to main menu
+    return io_manager.show_generic_error_message() # exceeded number of retries allowed, go back to main menu
 
 
 def main():    

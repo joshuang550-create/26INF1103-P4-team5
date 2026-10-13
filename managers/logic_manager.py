@@ -1,11 +1,9 @@
 """The domain brain acting on the AI's output.
 """
 
-import json
 import re
-from pathlib import Path
 
-import data_manager
+import managers.data_manager as data_manager
 
 # ===============================================================
 # RESPONSE ACTION CONSTANTS

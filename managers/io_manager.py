@@ -1,12 +1,14 @@
 """The boundary between the user and the application.
 """
 
+import os
 import sys
+import pathlib
 import textwrap
 
 import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
 
-import data_manager
+import managers.data_manager as data_manager
 
 COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
@@ -15,8 +17,10 @@ WARN_COLOR_PREFIX = "\033[93m"
 
 VERDICT_COLOR_MAP = {"ok": APP_COLOR_PREFIX, "avoid": ERROR_COLOR_PREFIX}
 
-COUNTRIES_CSV = "./countries.csv"
-ETHNICITIES_CSV = "./ethnicities.csv"
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+COUNTRIES_CSV = os.getenv("COUNTRIES", str(BASE_DIR / "lookup" / "./countries.csv")) 
+ETHNICITIES_CSV = os.getenv("ETHNICITIES", str(BASE_DIR / "lookup" / "./ethnicities.csv"))
 
 
 def clear_terminal():
@@ -529,6 +533,17 @@ def ask_for_ai_follow_up_input(response):
                 print(f" {ERROR_COLOR_PREFIX}Input cannot be empty. Please try to respond naturally.{COLOR_SUFFIX}")
 
     return questions
+
+
+def show_waiting_screen():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" This may take a while.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f"           {APP_COLOR_PREFIX}Processing, please wait... {COLOR_SUFFIX}\n")
 
 
 def show_final_output(logic_response):

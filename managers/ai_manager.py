@@ -9,8 +9,8 @@ from google.genai import errors, types
 import httpx
 import openfoodfacts
 
-import data_manager
-import io_manager
+import managers.data_manager as data_manager
+import managers.io_manager as io_manager
 
 AI_MODEL = "gemini-3.5-flash-lite"
 SCHEMA = {
@@ -69,8 +69,8 @@ information in information_needed; the user will reply with a JSON object where
 each key is one of your requests, filled in. Otherwise set status to 'complete' and
 leave information_needed empty. Always fill in the nutrition estimates
 (sodium in mg, sugar in g, saturated fat in g, trans fat in g). Fill in the 'nutrition' 
-object for one typical serving: sodium in mg, sugar in g, saturated fat in g and trans 
-fat in g. If the data has no ingredient list or nutritioal values, estimate from the 
+object for a 100g serving: sodium in mg, sugar in g, saturated fat in g and trans 
+fat in g. If the data has no ingredient list or nutritional values, estimate from the 
 typical recipe and preparation of this food. A value of 0 means the food truly contains 
 none. Never use 0 as a placeholder for unknown; give your best estimate and lower the 
 confidence_score instead.
@@ -342,6 +342,3 @@ def send_prompt_to_ai(user_profile, prompt_string):
     data_manager.save_chats(history)
 
     return json.loads(response.text) # ideally to return as str for validate_ai_response() to work. final datatype of response should be dict using json.loads(response.text).   -  Edited for logic_manager to work
-
-
-
