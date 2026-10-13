@@ -2,6 +2,7 @@
 """
 
 import sys
+import textwrap
 
 import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
 
@@ -10,6 +11,10 @@ import data_manager
 COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
 APP_COLOR_PREFIX = "\033[92m"
+WARN_COLOR_PREFIX = "\033[93m"
+
+VERDICT_COLOR_MAP = {"ok": APP_COLOR_PREFIX, "avoid": ERROR_COLOR_PREFIX}
+
 COUNTRIES_CSV = "./countries.csv"
 ETHNICITIES_CSV = "./ethnicities.csv"
 
@@ -527,10 +532,18 @@ def ask_for_ai_follow_up_input(response):
 
 
 def show_final_output(logic_response):
-    print(f"\n\n============================This is the start of show_final_output()============================\n\n")
-    
-    print(logic_response)
 
-    print(f"\n\n=============================This is the end of show_final_output()=============================\n\n")
+    wrapped_message = "\n".join(textwrap.fill(message, width=50) if message else "" for message in logic_response["message"].splitlines())
 
+    clear_terminal()
+    show_app_banner()
 
+    print("\n═══════════════════════════════════════════════════")
+    print(" Here is the final verdict.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f"Verdict: {VERDICT_COLOR_MAP.get(logic_response['verdict'].lower(), WARN_COLOR_PREFIX)}{logic_response["verdict"]}{COLOR_SUFFIX}")
+
+    print(wrapped_message)
+
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")

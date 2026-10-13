@@ -20,53 +20,6 @@ VERDICT_AVOID = "AVOID"
 VERDICT_CAUTION = "CAUTION"
 VERDICT_OK = "OK"
 
-# ===============================================================
-# MOCK DATA - matches ai_manager sample output as of latest update
-# PARTNER_DEPENDENT: remove MOCK_* once real pipeline wiring exists
-# ===============================================================
-
-MOCK_AI_RESPONSE_ALLERGEN = {
-    "status": "complete",
-    "potential_concern": True,
-    "confidence_score": 85,
-    "nutrition":{ # example one serving
-        "sodium_mg": 520,
-        "sugar_g": 0.5,
-        "saturated_fat_g": 3.4,
-        "trans_fat_g": 0.0,
-    },
-    "reason": (
-        "According to OpenFoodFacts, these prawn crackers contain "
-        "crustaceans and are high in sodium"
-    ),
-    "information_needed": {}, # a dict now: {question : ""}. Empty when complete
-}
-
-MOCK_AI_RESPONSE = {
-    "status": "complete",
-    "potential_concern": True,
-    "confidence_score": 90,
-    "nutrition":{ # example one serving
-            "sodium_mg": 480,
-            "sugar_g": 0.5,
-            "saturated_fat_g": 3.4,
-            "trans_fat_g": 0.0,
-    },
-    "reason": (
-        "According to Open Food Facts, Heinz Beanz in Tomato Sauce contains "
-        "added sugar and salt, and is classifed as an ultra-processed food. "
-    ),
-    "information_needed":{} 
-}
-
-MOCK_USER_PROFILE = { # same kets as profiles in json
-    "age": 45,
-    "gender": "female",
-    "ethnicity": "chinese",
-    "country": "Singapore",
-    "medical_conditions": ["diabetes", "high blood pressure"],
-}
-
 MAX_REPROMPT_ATTEMPTS = 1
 
 # ===============================================================
@@ -94,7 +47,7 @@ def calculate_response_confidence(ai_response: dict) -> dict:
 # ===============================================================
 
 def evaluate_response_confidence(
-        confidence_result: dict, # this is returned from calculate_response_confidence()
+        confidence_result: dict,
         attempt_number: int,
         min_accpetable_score: float = 5.0,
 ) -> str:
@@ -123,8 +76,8 @@ def evaluate_response_confidence(
 # ===============================================================
 
 def load_thresholds(path=THRESHOLDS_FILE):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)["nutrients"]
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)["nutrients"]
 
 def user_has_condition(user_conditions: list, keywords: list) -> bool:
     """True if any keyword appears inside any of the user's conditions.
@@ -181,8 +134,6 @@ def determine_verdict(flags, allergens_found, potential_concern):
 
 # ===============================================================
 # GENERIC FALLBACK RESPONSE
-# NOTE: CONCEPTUALLY belongs in ai_manager (build promts / fetch
-# content rather than deciding) idk if we should move it or keep it here
 # ===============================================================
 
 def generate_generic_response_prompt(user_profile: dict) -> str:
@@ -205,7 +156,6 @@ def generate_generic_response_prompt(user_profile: dict) -> str:
         f"I am a {age}-year-old {ethnicity} {gender} from {country} with the following medical conditions: {conditions}. "
         f"What are the best foods I should eat given my medical conditions?"
     )
-
 
 def load_allergens(path=ALLERGENS_FILE):
     with open(path, "r", encoding="utf-8") as f:
@@ -236,6 +186,46 @@ def build_allergen_warning(found):
         f"  Warning        : Avoid this food, allergen detected"
     )
 
+NUTRIENT_LABELS = {
+    "sodium_mg": ("Sodium", "mg"),
+    "sugar_g": ("Sugar", "g"),
+    "saturated_fat_g": ("Saturated fat", "g"),
+    "trans_fat_g": ("Trans fat", "g"),
+}
+
+
+def format_result_for_user(result: dict) -> str:
+    action = result["action"]
+
+    if action == RESPONSE_REPROMPT:
+        return ""  # nothing to show yet, main.py asks the AI again
+
+    if action == RESPONSE_FALLBACK:
+        return "We are unable to confidently determine whether this food suits you."
+
+    lines = [] # [f"Verdict: {result['verdict'].upper()}"]  removed to manually add in io_manager with color.
+
+    if result["allergen_warning"]:
+        lines += ["", result["allergen_warning"]]
+
+    lines += ["", result["reason"].strip()]
+
+    nutrition = result["nutrition"]
+    if nutrition:
+        lines += ["", "Nutrition (per typical serving):"]
+        for key, (label, unit) in NUTRIENT_LABELS.items():
+            if key in nutrition:
+                lines.append(f"  {label}: {nutrition[key]} {unit}")
+
+    if result["nutrition_flags"]:
+        lines += ["", "Watch out for your conditions:"]
+        for flag in result["nutrition_flags"]:
+            label, unit = NUTRIENT_LABELS.get(flag["nutrient"], (flag["nutrient"], ""))
+            lines.append(f"  - {label} is {flag['level'].upper()} ({flag['value']} {unit})")
+
+    return "\n".join(lines)
+
+
 # ===================================================
 # MAIN ENTRY POINT - the one function main.py needs to call
 # ===================================================
@@ -264,6 +254,7 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
         nutrition_flags  nutrients over a threshold that matter for this user
         allergen_warning text to show, or None
         fallback_prompt  text to send to the AI when action is "fallback"
+        message          ready-to-print text for the user (empty for "reprompt")
     """
     confidence_result = calculate_response_confidence(ai_response)
  
@@ -294,9 +285,9 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
  
     fallback_prompt = None
     if action == RESPONSE_FALLBACK:
-        fallback_prompt = generate_generic_response_prompt(user_profile) # if result["fallback_prompt"] is None: continue with show final output. else: send_prompt_to_ai(result["fallback_prompt"])
+        fallback_prompt = generate_generic_response_prompt(user_profile)
  
-    return {
+    result = {
         "action": action,
         "verdict": verdict,
         "confidence_score": confidence_result["overall_score"],
@@ -307,69 +298,5 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
         "allergen_warning": build_allergen_warning(allergens_found) if allergens_found else None,
         "fallback_prompt": fallback_prompt,
     }
-
-
-# ===================================================
-# TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
-# ===================================================
-
-if __name__ == "__main__":
-    print("=" * 50)
-    print("TEST 1: Normal Food (Heinz Beanz)")
-    print("=" * 50)
-    confidence_result = calculate_response_confidence(MOCK_AI_RESPONSE)
-    action = evaluate_response_confidence(confidence_result, attempt_number=1)
-    print(f"    Confidence score : {confidence_result['overall_score']} / 10")
-    print(f"    Potential concern: {confidence_result['potential_concern']}")
-    print(f"    Action           : {action.upper()}")
- 
-    '''No AI response at all (None)'''
-    print("=" * 50)
-    print("TEST: No AI response (None)")
-    print("=" * 50)
-    none_result = calculate_response_confidence(None)
-    for attempt in (1, 2):
-        none_action = evaluate_response_confidence(none_result, attempt_number=attempt)
-        print(f"    Attempt {attempt} -> {none_action.upper()}")
- 
-    '''Mock Response Allergen Detection'''
-    print("=" * 50)
-    print("TEST 2: Allergen Food (Prawn Crackers)")
-    print("=" * 50)
-    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
-    if found:
-        print(build_allergen_warning(found))
-    else:
-        print("No Allergens detected")
- 
-    '''Nutrition check: the AI's numbers vs thresholds.json'''
-    print()
-    print("=" * 50)
-    print("TEST: Nutrition check (Heinz Beanz)")
-    print("=" * 50)
-    for label, conditions in [
-        ("diabetes + high blood pressure", ["diabetes", "high blood pressure"]),
-        ("no conditions", []),
-    ]:
-        flags = check_nutrition(MOCK_AI_RESPONSE["nutrition"], conditions)
-        verdict = determine_verdict(flags, {}, MOCK_AI_RESPONSE["potential_concern"])
-        print(f"    User: {label}")
-        print(f"      Flags  : {flags}")
-        print(f"      Verdict: {verdict}")
- 
-    '''End to end: AI dict in -> display dict out'''
-    low_confidence = {**MOCK_AI_RESPONSE, "confidence_score": 30}
-    scenarios = [
-        ("Normal food, user has diabetes + high blood pressure", MOCK_AI_RESPONSE, 1),
-        ("Allergen food (prawn crackers)", MOCK_AI_RESPONSE_ALLERGEN, 1),
-        ("Low confidence, first try", low_confidence, 1),
-        ("Low confidence, second try", low_confidence, 2),
-        ("AI failed (None), second try", None, 2),
-    ]
-    for title, response, attempt in scenarios:
-        print()
-        print("=" * 50)
-        print("END TO END:", title)
-        print("=" * 50)
-        output = process_ai_response(response, MOCK_USER_PROFILE, attempt)
-        print(json.dumps(output, indent=2, ensure_ascii=False))
+    result["message"] = format_result_for_user(result)  # ready-to-print text
+    return result
