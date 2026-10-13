@@ -59,11 +59,12 @@ MOCK_AI_RESPONSE = {
     "information_needed":{} 
 }
 
-MOCK_USER_PROFILE = {
+MOCK_USER_PROFILE = { # same kets as profiles in json
     "age": 45,
     "gender": "female",
+    "ethnicity": "chinese",
     "country": "Singapore",
-    "conditions": ["diabetes", "hypertension"],
+    "conditions": ["diabetes", "high blood pressure"],
 }
 
 MAX_REPROMPT_ATTEMPTS = 1
@@ -72,11 +73,12 @@ MAX_REPROMPT_ATTEMPTS = 1
 # CONFIDENCE SCORING
 # ===============================================================
 
-def calculate_response_confidence(ai_response: dict = None) -> dict:
+def calculate_response_confidence(ai_response: dict) -> dict:
     # Take AI' single confidence score (0-100) and rescale it t0 0.0-10.0 scale
     # Also surface the AI's own "potential_concern" flag
+    # If AI response is missing (None), we have no answer, score 0 and potential concern is none
     if ai_response is None:
-        ai_response = MOCK_AI_RESPONSE # PARTNER-DEPENDENT: remove once wired to real data
+        return {"overall_score": 0.0, "potential_concern": None}
 
     confidence_score_raw = ai_response.get("confidence_score", 0)
     overall_score = round(confidence_score_raw/ 10, 1)
