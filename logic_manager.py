@@ -139,12 +139,11 @@ def user_has_condition(user_conditions: list, keywords: list) -> bool:
     return False
 
 def check_nutrition(nutrition: dict, user_conditions: list, thresholds: dict = None) -> list:
-   """Compare the AI's nurtition numbers with thresholds.json.
+    """Compare the AI's nurtition numbers with thresholds.json.
    
    Only nutrients that matter for the user's conditions are checked.
    Return list of flags
    Empty list means nothing crossed thresholds
-   
    """
     if thresholds is None:
         thresholds = load_thresholds()
@@ -248,45 +247,81 @@ def build_allergen_warning(found):
         f"  Allergens Found: {', '.join(parts)}\n"
         f"  Warning        : Avoid this food, allergen detected"
     )
-        
+
+# ===================================================
+# MAIN ENTRY POINT - the one function main.py needs to call
+# ===================================================
+
+def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: int = 1) -> dict:
+    """INPUT : ai_response  - the dict ai_manager produced, e.g.
+                              {"status": "complete", "potential_concern": True,
+                               "confidence_score": 90, "nutrition": {...},
+                               "reason": "...", "information_needed": {}}
+                              (None is accepted too: it means the AI failed)
+               user_profile - the logged-in user's profile dict
+               attempt_number - 1 on the first try, 2 after a reprompt
+ 
+    OUTPUT: one dict, ready for io_manager to show the user:
+        action           "accept" | "avoid" | "reprompt" | "fallback"
+                         accept   -> show the assessment as normal
+                         avoid    -> an allergen was found, show the warning
+                         reprompt -> AI was not confident, ask it once more
+                         fallback -> still not confident, send fallback_prompt
+                                     to the AI and show that answer instead
+        verdict          "Avoid" | "Caution" | "OK" (None if we could not judge)
+        confidence_score 0.0 - 10.0
+        potential_concern  the AI's own flag (None if the AI failed)
+        reason           the AI's explanation, passed straight through
+        nutrition        the AI's numbers (empty if none)
+        nutrition_flags  nutrients over a threshold that matter for this user
+        allergen_warning text to show, or None
+        fallback_prompt  text to send to the AI when action is "fallback"
+    """
+    confidence_result = calculate_response_confidence(ai_response)
+ 
+    reason = ""
+    nutrition = {}
+    if ai_response is not None:
+        reason = ai_response.get("reason", "")
+        nutrition = ai_response.get("nutrition", {})
+ 
+    # 1. Allergens first: a match always wins, even if the AI was unsure.
+    allergens_found = detect_allergens(reason) if reason else {}
+ 
+    if allergens_found:
+        action = RESPONSE_AVOID
+    else:
+        # 2. Otherwise, is the AI confident enough?
+        action = evaluate_response_confidence(confidence_result, attempt_number)
+ 
+    # 3. Only judge the food when we trust the answer (accept) or must warn (avoid)
+    flags = []
+    verdict = None
+    if action in (RESPONSE_ACCEPT, RESPONSE_AVOID):
+        conditions = user_profile.get("medical_conditions", [])
+        flags = check_nutrition(nutrition, conditions)
+        verdict = determine_verdict(
+            flags, allergens_found, confidence_result["potential_concern"]
+        )
+ 
+    fallback_prompt = None
+    if action == RESPONSE_FALLBACK:
+        fallback_prompt = generate_generic_response_prompt(user_profile)
+ 
+    return {
+        "action": action,
+        "verdict": verdict,
+        "confidence_score": confidence_result["overall_score"],
+        "potential_concern": confidence_result["potential_concern"],
+        "reason": reason,
+        "nutrition": nutrition,
+        "nutrition_flags": flags,
+        "allergen_warning": build_allergen_warning(allergens_found) if allergens_found else None,
+        "fallback_prompt": fallback_prompt,
+    }
     
 
 # ===================================================
 # TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
 # ===================================================
 
-if __name__ == "__main__":
-    print("=" * 50)
-    print("TEST 1: Normal Food (Heinz Beanz)")
-    print("=" * 50)
-    confidence_result = calculate_response_confidence()
-    action = evaluate_response_confidence(confidence_result, attempt_number=1)
-    print(f"    Confidence score : {confidence_result['overall_score']} / 10")
-    print(f"    Potential concern: {confidence_result['potential_concern']}")
-    print(f"    Action           : {action.upper()}")
-
-    '''Mock Response Allergen Detection'''
-    print("=" * 50)
-    print("TEST 2: Allergen Food (Prawn Crackers)")
-    print("=" * 50)
-    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
-    if found:
-        print(build_allergen_warning(found))
-    else:
-        print("No Allergens detected")
-
-    '''Risk Score skipped temporarily, to test allergen detection'''
-    print()
-    print("=" * 50)
-    print("TEST 1: (Heinz Beanz)")
-    print("=" * 50)
-    try:
-        risk = calculate_risk_score()
-        print("Risk Score:", risk)
-    except NotImplementedError as e:
-        print("Risk score skipped:", e)
-
-
-    if action == RESPONSE_FALLBACK:
-        prompt = generate_generic_response_prompt()
-        print("Generic fallback prompt:", prompt)
