@@ -316,6 +316,7 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
         nutrition_flags  nutrients over a threshold that matter for this user
         allergen_warning text to show, or None
         fallback_prompt  text to send to the AI when action is "fallback"
+        message          ready-to-print text for the user (empty for "reprompt")
     """
     confidence_result = calculate_response_confidence(ai_response)
  
@@ -348,7 +349,7 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
     if action == RESPONSE_FALLBACK:
         fallback_prompt = generate_generic_response_prompt(user_profile)
  
-    return {
+    result = {
         "action": action,
         "verdict": verdict,
         "confidence_score": confidence_result["overall_score"],
@@ -359,6 +360,8 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
         "allergen_warning": build_allergen_warning(allergens_found) if allergens_found else None,
         "fallback_prompt": fallback_prompt,
     }
+    result["message"] = format_result_for_user(result)  # ready-to-print text
+    return result
     
 
 # ===================================================
@@ -424,4 +427,5 @@ if __name__ == "__main__":
         print("END TO END:", title)
         print("=" * 50)
         output = process_ai_response(response, MOCK_USER_PROFILE, attempt)
-        print(json.dumps(output, indent=2, ensure_ascii=False))
+        print(f"[action = {output['action']}]")
+        print(output["message"])
