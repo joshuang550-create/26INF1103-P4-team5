@@ -1,0 +1,6 @@
+{
+    "allergen_synonyms": {
+        "shellfish_crustacean": ["shrimp", "crab", "prawn", "lobster"],
+        "shellfish_mollusk": ["clam", "mussel", "oyster", "scallop"]
+    }
+}
