@@ -94,7 +94,7 @@ def calculate_response_confidence(ai_response: dict) -> dict:
 # ===============================================================
 
 def evaluate_response_confidence(
-        confidence_result: dict,
+        confidence_result: dict, # this is returned from calculate_response_confidence()
         attempt_number: int,
         min_accpetable_score: float = 5.0,
 ) -> str:
@@ -123,8 +123,8 @@ def evaluate_response_confidence(
 # ===============================================================
 
 def load_thresholds(path=THRESHOLDS_FILE):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)["nutrients"]
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["nutrients"]
 
 def user_has_condition(user_conditions: list, keywords: list) -> bool:
     """True if any keyword appears inside any of the user's conditions.
@@ -205,19 +205,7 @@ def generate_generic_response_prompt(user_profile: dict) -> str:
         f"I am a {age}-year-old {ethnicity} {gender} from {country} with the following medical conditions: {conditions}. "
         f"What are the best foods I should eat given my medical conditions?"
     )
-    
 
-def generate_generic_response(user_profile: dict | None = None) -> dict:
-    """
-    Use a ranked database to find the best foods to eat based on medical
-    conditions. NOT IMPLEMENTED - requires a food/conditions database that 
-    doesn't exist yet (idk whr it exists), and agreed conflict-resolution strategy
-    """
-    raise NotImplementedError(
-        "generate_generic_response() requires a ranked food/conditions database "
-        "database that has not built yet, and a decided conflict -"
-        "resolution strategy"
-    )
 
 def load_allergens(path=ALLERGENS_FILE):
     with open(path, "r", encoding="utf-8") as f:
@@ -306,7 +294,7 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
  
     fallback_prompt = None
     if action == RESPONSE_FALLBACK:
-        fallback_prompt = generate_generic_response_prompt(user_profile)
+        fallback_prompt = generate_generic_response_prompt(user_profile) # if result["fallback_prompt"] is None: continue with show final output. else: send_prompt_to_ai(result["fallback_prompt"])
  
     return {
         "action": action,
@@ -319,7 +307,7 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
         "allergen_warning": build_allergen_warning(allergens_found) if allergens_found else None,
         "fallback_prompt": fallback_prompt,
     }
-    
+
 
 # ===================================================
 # TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES

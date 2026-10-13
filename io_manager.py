@@ -526,8 +526,11 @@ def ask_for_ai_follow_up_input(response):
     return questions
 
 
-def show_final_output():
-    # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
-    pass
+def show_final_output(logic_response):
+    print(f"\n\n============================This is the start of show_final_output()============================\n\n")
+    
+    print(logic_response)
+
+    print(f"\n\n=============================This is the end of show_final_output()=============================\n\n")
 
 
