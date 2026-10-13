@@ -64,7 +64,7 @@ MOCK_USER_PROFILE = { # same kets as profiles in json
     "gender": "female",
     "ethnicity": "chinese",
     "country": "Singapore",
-    "conditions": ["diabetes", "high blood pressure"],
+    "medical_conditions": ["diabetes", "high blood pressure"],
 }
 
 MAX_REPROMPT_ATTEMPTS = 1
@@ -122,36 +122,62 @@ def evaluate_response_confidence(
 # RISK SCORING
 # ===============================================================
 
-def calculate_risk_score(food_item: dict = None, user_conditions: list = None) -> float:
-    """ 
-    PARTNER-DEPENDENT/ BLOCKED: the real ai_manager sample does not include
-    any nutrional data (n sugar/sodium fields) This function cannot run
-    correctly until WE confirm where nutrition numbers come from -
-    e.g. a separate food/nutrition database lookup, or an added field in
-    the AI response. Raising explicitly instead of faking a number, since a
-    wrong risk score in a health context is worse than no risk score.
-    """
+def load_thresholds(path=THRESHOLDS_FILE):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)["nutrients"]
 
-    raise NotImplementedError(
-        "calculate_risk_score() is blocked: no nutrional data present in "
-        "the real ai_manager response sample. Confrim data source with team"
-    )
-
-def get_condition_risk(food_item: dict, condition: str) -> int:
+def user_has_condition(user_conditions: list, keywords: list) -> bool:
+    """True if any keyword appears inside any of the user's conditions.
+    Users type conditions freely (io_manager stores e.g. "high blood pressure"),
+    so we match keywords inside the test : "blood pressure" is in
+    "high blood pressure"
     """
-    RETURN RISK CONTRIBUTIION (0-10) FOR A SINGLE CONDITION AGAINST FOOD
-    
-    CHANGE ACCORDINGLY, WAIT FOR AI
-    THROWAWAY PLACEHOLDER SO calculate_risk_score() CAN BE TESTED
-    """
-    nutritional_info = food_item.get("nutrional_info", {})
+    for condition in user_conditions:
+        for keyword in keywords:
+            if keyword.lower() in condition.lower():
+                return True
+    return False
 
-    if condition == "diabetes":
-        return min(10, int(nutritional_info.get("sugar_g", 0)))  # Example: sugar content contributes to risk
-    if condition == "hypertension":
-        return min(10, int(nutritional_info.get("sodium_mg", 0) / 100))  # Example: sodium content contributes to risk
-    
-    return 0 # unknown condition - no risk data available
+def check_nutrition(nutrition: dict, user_conditions: list, thresholds: dict = None) -> list:
+   """Compare the AI's nurtition numbers with thresholds.json.
+   
+   Only nutrients that matter for the user's conditions are checked.
+   Return list of flags
+   Empty list means nothing crossed thresholds
+   
+   """
+    if thresholds is None:
+        thresholds = load_thresholds()
+ 
+    flags = []
+    for nutrient, limits in thresholds.items():
+        if not user_has_condition(user_conditions, limits["relevant_conditions"]):
+            continue  # this nutrient does not matter for this user
+ 
+        value = nutrition.get(nutrient)
+        if value is None:
+            continue
+ 
+        if value > limits["high"]:
+            level = "high"
+        elif value >= limits["moderate"]:
+            level = "moderate"
+        else:
+            continue  # under the limit, nothing to flag
+ 
+        flags.append({"nutrient": nutrient, "value": value, "level": level})
+    return flags
+
+def determine_verdict(flags, allergens_found, potential_concern):
+    if allergens_found:
+        return VERDICT_AVOID
+
+    levels = [flag["level"] for flag in flags]
+    if "high" in levels:
+        return VERDICT_AVOID
+    if "moderate" in levels or potential_concern:
+        return VERDICT_CAUTION
+    return VERDICT_OK
 
 
 # ===============================================================
