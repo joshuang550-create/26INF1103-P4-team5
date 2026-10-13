@@ -29,22 +29,34 @@ MOCK_AI_RESPONSE_ALLERGEN = {
     "status": "complete",
     "potential_concern": True,
     "confidence_score": 85,
+    "nutrition":{ # example one serving
+        "sodium_mg": 520,
+        "sugar_g": 0.5,
+        "saturated_fat_g": 3.4,
+        "trans_fat_g": 0.0,
+    },
     "reason": (
         "According to OpenFoodFacts, these prawn crackers contain "
         "crustaceans and are high in sodium"
     ),
-    "information_needed": [],
+    "information_needed": {}, # a dict now: {question : ""}. Empty when complete
 }
 
 MOCK_AI_RESPONSE = {
     "status": "complete",
     "potential_concern": True,
     "confidence_score": 90,
+    "nutrition":{ # example one serving
+            "sodium_mg": 480,
+            "sugar_g": 0.5,
+            "saturated_fat_g": 3.4,
+            "trans_fat_g": 0.0,
+    },
     "reason": (
         "According to Open Food Facts, Heinz Beanz in Tomato Sauce contains "
         "added sugar and salt, and is classifed as an ultra-processed food. "
     ),
-    "information_needed":[] 
+    "information_needed":{} 
 }
 
 MOCK_USER_PROFILE = {
