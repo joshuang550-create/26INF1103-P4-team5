@@ -12,6 +12,9 @@ from cryptography.fernet import Fernet
 USER_PROFILES = "./user_profiles.json"
 CHAT_HISTORY = "./chats.json"
 
+ALLERGENS_FILE = "./allergens.json"
+THRESHOLDS_FILE = "./thresholds.json"
+
 SECRET_KEY = "./secret.key"
 ENCRYPTED_API_KEY = "./encrypted_api_key.bin"
 
@@ -198,3 +201,14 @@ def get_ai_api_key():
     # docker run -e FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx" smartbite
     # $env:FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx"; python main.py
 
+
+# logic_manager
+
+def load_thresholds(path=THRESHOLDS_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["nutrients"]
+
+
+def load_allergens(path=ALLERGENS_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["allergen_synonyms"]

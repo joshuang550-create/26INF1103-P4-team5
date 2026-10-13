@@ -5,6 +5,8 @@ import json
 import re
 from pathlib import Path
 
+import data_manager
+
 # ===============================================================
 # RESPONSE ACTION CONSTANTS
 # ===============================================================
@@ -12,9 +14,6 @@ RESPONSE_ACCEPT = "accept"
 RESPONSE_REPROMPT = "reprompt"
 RESPONSE_FALLBACK = "fallback"
 RESPONSE_AVOID = "avoid"
-
-ALLERGENS_FILE = Path(__file__).parent / "allergens.json"
-THRESHOLDS_FILE = Path(__file__).parent / "thresholds.json"
 
 VERDICT_AVOID = "AVOID"
 VERDICT_CAUTION = "CAUTION"
@@ -75,10 +74,6 @@ def evaluate_response_confidence(
 # RISK SCORING
 # ===============================================================
 
-def load_thresholds(path=THRESHOLDS_FILE):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)["nutrients"]
-
 def user_has_condition(user_conditions: list, keywords: list) -> bool:
     """True if any keyword appears inside any of the user's conditions.
     Users type conditions freely (io_manager stores e.g. "high blood pressure"),
@@ -99,7 +94,7 @@ def check_nutrition(nutrition: dict, user_conditions: list, thresholds: dict | N
    Empty list means nothing crossed thresholds
    """
     if thresholds is None:
-        thresholds = load_thresholds()
+        thresholds = data_manager.load_thresholds()
  
     flags = []
     for nutrient, limits in thresholds.items():
@@ -157,14 +152,10 @@ def generate_generic_response_prompt(user_profile: dict) -> str:
         f"What are the best foods I should eat given my medical conditions?"
     )
 
-def load_allergens(path=ALLERGENS_FILE):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)["allergen_synonyms"]
-
 def detect_allergens(text, allergen_synonyms=None):
     """Return {category: [matched word]} for every allergen word detected"""
     if allergen_synonyms is None:
-        allergen_synonyms = load_allergens()
+        allergen_synonyms = data_manager.load_allergens()
 
     found = {}
     for category, words in allergen_synonyms.items():
