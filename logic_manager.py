@@ -16,6 +16,10 @@ RESPONSE_AVOID = "avoid"
 ALLERGENS_FILE = Path(__file__).parent / "allergens.json"
 THRESHOLDS_FILE = Path(__file__).parent / "thresholds.json"
 
+VERDICT_AVOID = "AVOID"
+VERDICT_CAUTION = "CAUTION"
+VERDICT_OK = "OK"
+
 # ===============================================================
 # MOCK DATA - matches ai_manager sample output as of latest update
 # PARTNER_DEPENDENT: remove MOCK_* once real pipeline wiring exists
