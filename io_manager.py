@@ -503,18 +503,27 @@ def show_generic_error_message():
     input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
 
 
-def ask_for_ai_follow_up_input(response): # NEED TO CHECK WHAT RESPONSE LOOKS LIKE. NOT EVERY THING IN RESPONSE WILL BE A QUESTION I ASSUME
-    for question in response:
+def ask_for_ai_follow_up_input(response):
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Some additional information is needed.")
+    print("═══════════════════════════════════════════════════")
+
+    questions = response["information_needed"]
+
+    for question in questions:
         while True:
-            answer = input(f" {APP_COLOR_PREFIX}{question}\n >>> {COLOR_SUFFIX}").strip()
+            answer = input(f"\n {APP_COLOR_PREFIX}{question}\n >>> {COLOR_SUFFIX}").strip()
 
             if len(answer) > 0:
-                response[question] = answer
+                questions[question] = answer
                 break
             else:
-                print("Input cannot be empty. Please try to respond naturally.")
+                print(f" {ERROR_COLOR_PREFIX}Input cannot be empty. Please try to respond naturally.{COLOR_SUFFIX}")
 
-    return response
+    return questions
 
 
 def show_final_output():
