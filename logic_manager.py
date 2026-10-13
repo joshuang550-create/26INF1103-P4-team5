@@ -1,9 +1,9 @@
 """The domain brain acting on the AI's output.
 """
+
 import json
 import re
 from pathlib import Path
-
 
 # ===============================================================
 # RESPONSE ACTION CONSTANTS
@@ -138,7 +138,7 @@ def user_has_condition(user_conditions: list, keywords: list) -> bool:
                 return True
     return False
 
-def check_nutrition(nutrition: dict, user_conditions: list, thresholds: dict = None) -> list:
+def check_nutrition(nutrition: dict, user_conditions: list, thresholds: dict | None = None) -> list:
     """Compare the AI's nurtition numbers with thresholds.json.
    
    Only nutrients that matter for the user's conditions are checked.
@@ -207,7 +207,7 @@ def generate_generic_response_prompt(user_profile: dict) -> str:
     )
     
 
-def generate_generic_response(user_profile: dict = None) -> dict:
+def generate_generic_response(user_profile: dict | None = None) -> dict:
     """
     Use a ranked database to find the best foods to eat based on medical
     conditions. NOT IMPLEMENTED - requires a food/conditions database that 
@@ -325,3 +325,63 @@ def process_ai_response(ai_response: dict, user_profile: dict, attempt_number: i
 # TEMPORARY MOCK FUNCTIONS FOR TESTING PURPOSES
 # ===================================================
 
+if __name__ == "__main__":
+    print("=" * 50)
+    print("TEST 1: Normal Food (Heinz Beanz)")
+    print("=" * 50)
+    confidence_result = calculate_response_confidence(MOCK_AI_RESPONSE)
+    action = evaluate_response_confidence(confidence_result, attempt_number=1)
+    print(f"    Confidence score : {confidence_result['overall_score']} / 10")
+    print(f"    Potential concern: {confidence_result['potential_concern']}")
+    print(f"    Action           : {action.upper()}")
+ 
+    '''No AI response at all (None)'''
+    print("=" * 50)
+    print("TEST: No AI response (None)")
+    print("=" * 50)
+    none_result = calculate_response_confidence(None)
+    for attempt in (1, 2):
+        none_action = evaluate_response_confidence(none_result, attempt_number=attempt)
+        print(f"    Attempt {attempt} -> {none_action.upper()}")
+ 
+    '''Mock Response Allergen Detection'''
+    print("=" * 50)
+    print("TEST 2: Allergen Food (Prawn Crackers)")
+    print("=" * 50)
+    found = detect_allergens(MOCK_AI_RESPONSE_ALLERGEN["reason"])
+    if found:
+        print(build_allergen_warning(found))
+    else:
+        print("No Allergens detected")
+ 
+    '''Nutrition check: the AI's numbers vs thresholds.json'''
+    print()
+    print("=" * 50)
+    print("TEST: Nutrition check (Heinz Beanz)")
+    print("=" * 50)
+    for label, conditions in [
+        ("diabetes + high blood pressure", ["diabetes", "high blood pressure"]),
+        ("no conditions", []),
+    ]:
+        flags = check_nutrition(MOCK_AI_RESPONSE["nutrition"], conditions)
+        verdict = determine_verdict(flags, {}, MOCK_AI_RESPONSE["potential_concern"])
+        print(f"    User: {label}")
+        print(f"      Flags  : {flags}")
+        print(f"      Verdict: {verdict}")
+ 
+    '''End to end: AI dict in -> display dict out'''
+    low_confidence = {**MOCK_AI_RESPONSE, "confidence_score": 30}
+    scenarios = [
+        ("Normal food, user has diabetes + high blood pressure", MOCK_AI_RESPONSE, 1),
+        ("Allergen food (prawn crackers)", MOCK_AI_RESPONSE_ALLERGEN, 1),
+        ("Low confidence, first try", low_confidence, 1),
+        ("Low confidence, second try", low_confidence, 2),
+        ("AI failed (None), second try", None, 2),
+    ]
+    for title, response, attempt in scenarios:
+        print()
+        print("=" * 50)
+        print("END TO END:", title)
+        print("=" * 50)
+        output = process_ai_response(response, MOCK_USER_PROFILE, attempt)
+        print(json.dumps(output, indent=2, ensure_ascii=False))
