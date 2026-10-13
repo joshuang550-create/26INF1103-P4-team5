@@ -186,21 +186,24 @@ def determine_verdict(flags, allergens_found, potential_concern):
 # content rather than deciding) idk if we should move it or keep it here
 # ===============================================================
 
-def generate_generic_response_prompt(user_profile: dict = None) -> str:
+def generate_generic_response_prompt(user_profile: dict) -> str:
     """should the response confidence be poor even after reprompt, build a
     prompt that ignores the original request food item and ask for food
     recos based on user profile and conditions
     """
-    if user_profile is None:
-        user_profile = MOCK_USER_PROFILE # PARTNER-DEPENDENT: remove once wired to real data
-
     age = user_profile.get("age")
     gender = user_profile.get("gender")
+    ethnicity = user_profile.get("ethnicity")
     country = user_profile.get("country")
-    conditions = ", ".join(user_profile.get("conditions", []))
+
+    if "medical_conditions" not in user_profile:
+        conditions = "not provided (unknown, NOT confirmed as none)"
+    else:
+        conditions = ", ".join(user_profile["medical_conditions"]) or "none reported"
+
 
     return (
-        f"I am a {age}-year-old {gender} from {country} with the following medical conditions: {conditions}. "
+        f"I am a {age}-year-old {ethnicity} {gender} from {country} with the following medical conditions: {conditions}. "
         f"What are the best foods I should eat given my medical conditions?"
     )
     
