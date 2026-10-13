@@ -14,6 +14,7 @@ RESPONSE_FALLBACK = "fallback"
 RESPONSE_AVOID = "avoid"
 
 ALLERGENS_FILE = Path(__file__).parent / "allergens.json"
+THRESHOLDS_FILE = Path(__file__).parent / "thresholds.json"
 
 # ===============================================================
 # MOCK DATA - matches ai_manager sample output as of latest update
