@@ -248,6 +248,46 @@ def build_allergen_warning(found):
         f"  Warning        : Avoid this food, allergen detected"
     )
 
+NUTRIENT_LABELS = {
+    "sodium_mg": ("Sodium", "mg"),
+    "sugar_g": ("Sugar", "g"),
+    "saturated_fat_g": ("Saturated fat", "g"),
+    "trans_fat_g": ("Trans fat", "g"),
+}
+
+
+def format_result_for_user(result: dict) -> str:
+    action = result["action"]
+
+    if action == RESPONSE_REPROMPT:
+        return ""  # nothing to show yet, main.py asks the AI again
+
+    if action == RESPONSE_FALLBACK:
+        return "We are unable to confidently determine whether this food suits you."
+
+    lines = [f"VERDICT: {result['verdict'].upper()}"]
+
+    if result["allergen_warning"]:
+        lines += ["", result["allergen_warning"]]
+
+    lines += ["", "Why:", result["reason"].strip()]
+
+    nutrition = result["nutrition"]
+    if nutrition:
+        lines += ["", "Nutrition (per typical serving):"]
+        for key, (label, unit) in NUTRIENT_LABELS.items():
+            if key in nutrition:
+                lines.append(f"  {label}: {nutrition[key]} {unit}")
+
+    if result["nutrition_flags"]:
+        lines += ["", "Watch out for your conditions:"]
+        for flag in result["nutrition_flags"]:
+            label, unit = NUTRIENT_LABELS.get(flag["nutrient"], (flag["nutrient"], ""))
+            lines.append(f"  - {label} is {flag['level'].upper()} ({flag['value']} {unit})")
+
+    return "\n".join(lines)
+
+
 # ===================================================
 # MAIN ENTRY POINT - the one function main.py needs to call
 # ===================================================
