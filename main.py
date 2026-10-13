@@ -1,9 +1,10 @@
 """Main entry point for the application.
 """
 
-import io_manager
-import data_manager
-import ai_manager
+import managers.io_manager as io_manager
+import managers.data_manager as data_manager
+import managers.ai_manager as ai_manager
+import managers.logic_manager as logic_manager
 
 
 def login_menu():
@@ -42,24 +43,17 @@ def main_menu(user_profile):
 
         elif chosen_option == 3: # Check Food
             ai_response = check_food_process(user_profile)
-            print(ai_response) # DELETE LATER. just to see
 
+            if not ai_response:
+                continue # back to main menu
 
-            # LOGIC MANAGER FROM HERE ONWARDS...
+            logic_response = logic_manager.process_ai_response(ai_response, user_profile)
 
-            # if not ai_response:
-            #     break # ai did not return a good response. go back to main menu.
+            if logic_response.get("fallback_prompt"):
+                logic_response = ai_manager.send_prompt_to_ai(user_profile, logic_response.get("fallback_prompt")) # returns a dict of food name and detail pairs.
 
-            # confidence_score = logic_manager.calculate_response_confidence(ai_response)
-
-            # generic_prompt_string = logic_manager.generate_generic_response_prompt()           # "i am a 20 year olf singaporean chinese. i have diabetes, high blood pressure. what foods do i eat?"
-            # response = ai_manager_jeff.send_prompt_to_ai(generic_prompt_string)                # you should eat banana given your high blood pressure. ...
-
-            # io_manager.show_final_output(response)
-
-            continue                                                                             # back to main menu for now. will call io_manager.show_final_output() later.
-
-
+            io_manager.show_final_output(logic_response)
+            continue # back to main menu
 
         elif chosen_option == 4: # Log Out
             break # goes back to login page
@@ -110,6 +104,7 @@ def check_food_process(user_profile):
 
     retry = 2
     while retry > 0:
+        io_manager.show_waiting_screen()
         response = ai_manager.send_prompt_to_ai(user_profile, prompt_string) # returns the GenerateContentResponse's text attribute
 
         if not response: # send_prompt_to_ai failed.
@@ -131,8 +126,7 @@ def check_food_process(user_profile):
         else:
             return response #successfully obtained json response from ai
 
-    io_manager.show_generic_error_message()
-    return # unsuccessful
+    return io_manager.show_generic_error_message() # exceeded number of retries allowed, go back to main menu
 
 
 def main():    

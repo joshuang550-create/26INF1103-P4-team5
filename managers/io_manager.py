@@ -1,17 +1,26 @@
 """The boundary between the user and the application.
 """
 
+import os
 import sys
+import pathlib
+import textwrap
 
 import getpass # for python 3.14, if docker 3.14 slim is too unstable, may need to change getpass to smth else.
 
-import data_manager
+import managers.data_manager as data_manager
 
 COLOR_SUFFIX = "\033[0m"
 ERROR_COLOR_PREFIX = "\033[91m"
 APP_COLOR_PREFIX = "\033[92m"
-COUNTRIES_CSV = "./countries.csv"
-ETHNICITIES_CSV = "./ethnicities.csv"
+WARN_COLOR_PREFIX = "\033[93m"
+
+VERDICT_COLOR_MAP = {"ok": APP_COLOR_PREFIX, "avoid": ERROR_COLOR_PREFIX}
+
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+COUNTRIES_CSV = os.getenv("COUNTRIES", str(BASE_DIR / "lookup" / "./countries.csv")) 
+ETHNICITIES_CSV = os.getenv("ETHNICITIES", str(BASE_DIR / "lookup" / "./ethnicities.csv"))
 
 
 def clear_terminal():
@@ -526,8 +535,30 @@ def ask_for_ai_follow_up_input(response):
     return questions
 
 
-def show_final_output():
-    # more to this. Just a temporary placeholder to note that there will be functions to print out the final output response for the user to see after all the ai and logic managers do their processing.
-    pass
+def show_waiting_screen():
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" This may take a while.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f"           {APP_COLOR_PREFIX}Processing, please wait... {COLOR_SUFFIX}\n")
 
 
+def show_final_output(logic_response):
+
+    wrapped_message = "\n".join(textwrap.fill(message, width=50) if message else "" for message in logic_response["message"].splitlines())
+
+    clear_terminal()
+    show_app_banner()
+
+    print("\n═══════════════════════════════════════════════════")
+    print(" Here is the final verdict.")
+    print("═══════════════════════════════════════════════════\n")
+
+    print(f"Verdict: {VERDICT_COLOR_MAP.get(logic_response['verdict'].lower(), WARN_COLOR_PREFIX)}{logic_response["verdict"]}{COLOR_SUFFIX}")
+
+    print(wrapped_message)
+
+    input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")

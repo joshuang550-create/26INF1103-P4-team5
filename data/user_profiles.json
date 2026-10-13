@@ -58,5 +58,20 @@
             "high blood pressure",
             "tmj"
         ]
+    },
+    "wig": {
+        "username": "wig",
+        "password_hash": "2249476332138d1ed3ea3dc61ccc61e6a1640872b423b0f708f919433b988aba",
+        "gender": "male",
+        "age": 66,
+        "ethnicity": "indian",
+        "country": "India",
+        "height": 167.0,
+        "weight": 59.0,
+        "medical_conditions": [
+            "high blood pressure",
+            "high cholesterol",
+            "sduhjfohng"
+        ]
     }
 }

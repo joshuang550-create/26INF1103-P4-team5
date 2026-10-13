@@ -9,8 +9,8 @@ from google.genai import errors, types
 import httpx
 import openfoodfacts
 
-import data_manager
-import io_manager
+import managers.data_manager as data_manager
+import managers.io_manager as io_manager
 
 AI_MODEL = "gemini-3.5-flash-lite"
 SCHEMA = {
@@ -69,8 +69,8 @@ information in information_needed; the user will reply with a JSON object where
 each key is one of your requests, filled in. Otherwise set status to 'complete' and
 leave information_needed empty. Always fill in the nutrition estimates
 (sodium in mg, sugar in g, saturated fat in g, trans fat in g). Fill in the 'nutrition' 
-object for one typical serving: sodium in mg, sugar in g, saturated fat in g and trans 
-fat in g. If the data has no ingredient list or nutritioal values, estimate from the 
+object for a 100g serving: sodium in mg, sugar in g, saturated fat in g and trans 
+fat in g. If the data has no ingredient list or nutritional values, estimate from the 
 typical recipe and preparation of this food. A value of 0 means the food truly contains 
 none. Never use 0 as a placeholder for unknown; give your best estimate and lower the 
 confidence_score instead.
@@ -134,6 +134,14 @@ Return exactly the current JSON schema fields: status, potential_concern,
 confidence_score, reason, information_needed. Apply this format to every new
 response, including follow-up answers and repairs, even if earlier messages
 used a format without a confidence score. Do not add any other keys.
+
+If you receive a prompt in this format:
+"I am a [age]-year-old [ethnicity] [gender] from [country] with the following 
+medical conditions: [list of conditions]. What are the best foods I should 
+eat given my medical conditions?"
+Return the response to this request as a single json of key value pairs where 
+each key is the food name, and the value is any information or details you 
+want to provide. This can be servinge size, recommended variation, brand etc.
 """.strip()
 
 
@@ -151,14 +159,17 @@ def validate_ai_response(text):
     """
     errors = []
 
-    # 1. Must be valid JSON (and a JSON object)
-    try:
-        data = json.loads(text)
-    except (json.JSONDecodeError, TypeError) as e:
-        return None, (
-            f"Your output is not valid JSON. Parsing error: {e}. "
-            f"Please output a valid JSON object strictly matching the required schema."
-        )
+    # 1. Must be valid JSON (and a JSON object)   -   Edited to accept if text had already been run through json.loads() before this. To accomodate logic_manager's generic prompt response.
+    if isinstance(text, (dict)):
+        data = text
+    else:
+        try:
+            data = json.loads(text)
+        except (json.JSONDecodeError, TypeError) as e:
+            return None, (
+                f"Your output is not valid JSON. Parsing error: {e}. "
+                f"Please output a valid JSON object strictly matching the required schema."
+            )
 
     if not isinstance(data, dict):
         return None, (
@@ -330,7 +341,4 @@ def send_prompt_to_ai(user_profile, prompt_string):
     history[user_profile.get("username", "")] = [{"role": item.role, "text": "".join(part.text or "" for part in (item.parts or []) if part.text is not None)} for item in updated_history]
     data_manager.save_chats(history)
 
-    return response.text # needs to return as str so validate_ai_response() works. final datatype of response should be dict using json.loads(response.text)
-
-
-
+    return json.loads(response.text) # ideally to return as str for validate_ai_response() to work. final datatype of response should be dict using json.loads(response.text).   -  Edited for logic_manager to work

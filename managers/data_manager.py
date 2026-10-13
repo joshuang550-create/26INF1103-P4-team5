@@ -9,11 +9,14 @@ import pathlib
 
 from cryptography.fernet import Fernet
 
-USER_PROFILES = "./user_profiles.json"
-CHAT_HISTORY = "./chats.json"
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "./secret.key"
-ENCRYPTED_API_KEY = "./encrypted_api_key.bin"
+USER_PROFILES = os.getenv("USER_PROFILES", str(BASE_DIR / "data" / "user_profiles.json"))
+CHAT_HISTORY = os.getenv("CHATS", str(BASE_DIR / "data" / "./chats.json"))
+ALLERGENS_FILE = os.getenv("ALLERGENS", str(BASE_DIR / "lookup" / "./allergens.json")) 
+THRESHOLDS_FILE = os.getenv("THRESHOLDS", str(BASE_DIR / "lookup" / "./thresholds.json"))
+
+ENCRYPTED_API_KEY = os.getenv("ENCRYPTED_API_KEY", str(BASE_DIR / "./encrypted_api_key.bin"))
 
 
 # io_manager
@@ -187,7 +190,6 @@ def save_chats(history):
 
 
 def get_ai_api_key():
-
     secret_key = os.getenv("FERNET_SECRET_KEY")
 
     with open(ENCRYPTED_API_KEY, "rb") as f:
@@ -198,3 +200,14 @@ def get_ai_api_key():
     # docker run -e FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx" smartbite
     # $env:FERNET_SECRET_KEY="xxxxxxxxxxxxxxxxx"; python main.py
 
+
+# logic_manager
+
+def load_thresholds(path=THRESHOLDS_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["nutrients"]
+
+
+def load_allergens(path=ALLERGENS_FILE):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)["allergen_synonyms"]
