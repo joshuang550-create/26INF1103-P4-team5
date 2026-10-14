@@ -473,7 +473,7 @@ def show_api_error_message(e):
     print(" API Error.")
     print("═══════════════════════════════════════════════════\n")
 
-    match e:
+    match e.code:
         case 401:
             print(f" {ERROR_COLOR_PREFIX}API Error 401 (Unauthorized): Check if your API Key is valid and exported correctly. Message: {e.message}{COLOR_SUFFIX}")
         case 403:
@@ -483,7 +483,7 @@ def show_api_error_message(e):
         case 500 | 503:
             print(f" {ERROR_COLOR_PREFIX}API Error {e.code} (Server Error): Google's servers are temporarily down. Message: {e.message}{COLOR_SUFFIX}")
         case _:
-            print(f" {ERROR_COLOR_PREFIX}Unexpected Error {e.code}: {e.message}{COLOR_SUFFIX}")
+            print(f" {ERROR_COLOR_PREFIX}Unexpected Error: {e}{COLOR_SUFFIX}")
 
     input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
 
@@ -496,7 +496,7 @@ def show_http_error_message(e):
     print(" Internet Connection Error.")
     print("═══════════════════════════════════════════════════\n")
 
-    print(f" {ERROR_COLOR_PREFIX}Internet connection unstable, could not reach google. Try again later. Message: {e.message}{COLOR_SUFFIX}")
+    print(f" {ERROR_COLOR_PREFIX}Internet connection unstable, could not reach google. Try again later. Message: {e}{COLOR_SUFFIX}")
     input(f"\n       {APP_COLOR_PREFIX}<Press enter to return to main menu>{COLOR_SUFFIX} ")
 
 

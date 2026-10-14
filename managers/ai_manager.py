@@ -328,6 +328,11 @@ def send_prompt_to_ai(user_profile, prompt_string):
         response = chat.send_message(prompt_string)
         updated_history = chat.get_history()
 
+        history[user_profile.get("username", "")] = [{"role": item.role, "text": "".join(part.text or "" for part in (item.parts or []) if part.text is not None)} for item in updated_history]
+        data_manager.save_chats(history)
+
+        return json.loads(response.text) # ideally to return as str for validate_ai_response() to work. final datatype of response should be dict using json.loads(response.text).   -  Edited for logic_manager to work
+
     except (httpx.ConnectError, httpx.TimeoutException) as e:
         return io_manager.show_http_error_message(e)
 
@@ -335,10 +340,5 @@ def send_prompt_to_ai(user_profile, prompt_string):
         if e.code in [401, 403, 429, 500, 503]:
             return io_manager.show_api_error_message(e)
         
-    except Exception as e:
+    except Exception:
         return io_manager.show_generic_error_message()
-
-    history[user_profile.get("username", "")] = [{"role": item.role, "text": "".join(part.text or "" for part in (item.parts or []) if part.text is not None)} for item in updated_history]
-    data_manager.save_chats(history)
-
-    return json.loads(response.text) # ideally to return as str for validate_ai_response() to work. final datatype of response should be dict using json.loads(response.text).   -  Edited for logic_manager to work

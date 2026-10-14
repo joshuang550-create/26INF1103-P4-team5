@@ -39,6 +39,14 @@
     {
       "role": "model",
       "text": "{\"status\": \"complete\", \"potential_concern\": true, \"confidence_score\": 75, \"nutrition\": {\"sodium_mg\": 800, \"sugar_g\": 0.5, \"saturated_fat_g\": 3.0, \"trans_fat_g\": 0.0}, \"reason\": \"You clarified that 'icam billiss' is actually 'ikan bilis' (dried anchovies). Plain dried anchovies are generally very low in carbohydrates and sugar, which is manageable for diabetes, but they are typically extremely high in sodium due to the curing and drying process, which is a major concern for high blood pressure. Additionally, depending on how they are prepared (such as commercially pre-packaged crispy ikan bilis fried with peanuts or processed in facilities handling peanuts), there is a significant cross-contamination or direct allergen risk for your severe peanut allergy.\", \"information_needed\": {}}"
+    },
+    {
+      "role": "user",
+      "text": "Give a risk assessment for this food: mcdonalds big mac meal with coke and sweet and sour sauce\n\nUser profile:\n- Age: 22\n- Gender: male\n- Ethnicity: caucasian\n- Country: Singapore\n- Height: 190.0 cm\n- Weight: 80.0 kg\n- BMI: 22.2\n- Medical conditions: diabetes, high blood pressure, peanut allergy\n\nNo openfoodfacts data provided for cross reference."
+    },
+    {
+      "role": "model",
+      "text": "{\"status\": \"complete\", \"potential_concern\": true, \"confidence_score\": 85, \"nutrition\": {\"sodium_mg\": 550, \"sugar_g\": 10.0, \"saturated_fat_g\": 3.5, \"trans_fat_g\": 0.2}, \"reason\": \"This assessment is for a McDonald's Big Mac meal including a Big Mac, fries, a regular Coca-Cola, and sweet and sour sauce (nutrition values estimated per 100g of the combined meal based on standard McDonald's nutritional data). This meal presents significant concerns given your medical profile: the regular Coca-Cola and sweet and sour sauce contain very high amounts of simple sugars which can severely spike blood glucose levels (critical for diabetes); the Big Mac and fries are exceptionally high in sodium, posing a risk for high blood pressure; and while McDonald's items generally avoid peanuts, cross-contamination risks or specific regional condiment formulations must always be verified due to your peanut allergy.\", \"information_needed\": {}}"
     }
   ],
   "wig": [
