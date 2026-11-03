@@ -7,7 +7,7 @@ class MedicalConditions:
 
     # =========== Attribute Validation ===========
     @staticmethod
-    def validate_condition(value):
+    def validate_condition(value): # currently only checks length of name, in real application would cross check with database of all medical condition names.
         if len(value.strip().lower()) <= 1:
             raise ValueError("Please try to enter a recognised name for your medical condition.")
         return value.strip().lower()
@@ -33,7 +33,7 @@ class MedicalConditions:
 
 
 class UserProfile:
-    def __init__(self, username, password_hash, age, height, weight, country, ethnicity, gender, medical_conditions):
+    def __init__(self, username, password_hash, age, height, weight, country, ethnicity, gender, medical_conditions=[]):
         self._username = self.validate_username(username)
         self.__password_hash = str(password_hash) # validation not neccessary
         self._age = self.validate_age(age)
@@ -112,6 +112,16 @@ class UserProfile:
             "medical_conditions": self.__medical_conditions.to_list()
         }
 
+    # =========== Behaviours ===========
+    def add_medical_conditions(self, conditions):
+        self.__medical_conditions.add_conditions(conditions)
+
+    def remove_medical_conditions(self, indices):
+        self.__medical_conditions.remove_conditions(indices)
+
+    def has_condition_matching(self, keywords):
+        return self.__medical_conditions.matches_any(keywords)
+
     # =========== Read-Only Properties ===========
     @property
     def username(self):
@@ -169,7 +179,12 @@ class UserProfile:
 
 
 
+# Testing
+jeff = UserProfile.create(username="jeff", password="Jeff", age=23, height=169.95, weight=74.55, country="Singapore", ethnicity="Chinese", gender="Male", medical_conditions=["high cholesterol", "high blood pressure"])
 
+try:
+    jeff.add_medical_conditions(["test", "1", "test2"])
+except Exception as e:
+    print(e)
 
-
-
+print(jeff.medical_conditions)
