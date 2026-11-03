@@ -82,8 +82,8 @@ class UserProfile:
 
     # =========== Profile Create Methods ===========
     @classmethod
-    def create(cls, username, password, age, height, weight, country, ethnicity, gender, medical_conditions=[]): # hashes the plain_password and calls the constructor as password is stored as hash, not plain
-        return cls(username, cls.hash_password(password), age, height, weight, country, ethnicity, gender, medical_conditions)
+    def create(cls, username, plain_password, age, height, weight, country, ethnicity, gender, medical_conditions=[]): # hashes the plain_password and calls the constructor as password is stored as hash, not plain
+        return cls(username, cls.hash_password(plain_password), age, height, weight, country, ethnicity, gender, medical_conditions)
 
     @classmethod
     def from_dict(cls, data): # creates a UserProfile instance from a dictionary, when existing user logs in for example
@@ -113,6 +113,9 @@ class UserProfile:
         }
 
     # =========== Behaviours ===========
+    def verify_password(self, plain_password):
+        return self.__password_hash == self.hash_password(plain_password)
+    
     def add_medical_conditions(self, conditions):
         self.__medical_conditions.add_conditions(conditions)
 
@@ -175,16 +178,3 @@ class UserProfile:
     @country.setter
     def country(self, value):
         self._country = str(value) # validation during user input
-
-
-
-
-# Testing
-jeff = UserProfile.create(username="jeff", password="Jeff", age=23, height=169.95, weight=74.55, country="Singapore", ethnicity="Chinese", gender="Male", medical_conditions=["high cholesterol", "high blood pressure"])
-
-try:
-    jeff.add_medical_conditions(["test", "1", "test2"])
-except Exception as e:
-    print(e)
-
-print(jeff.medical_conditions)

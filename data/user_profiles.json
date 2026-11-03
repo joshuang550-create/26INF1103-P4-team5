@@ -32,12 +32,12 @@
     "ride": {
         "username": "ride",
         "password_hash": "e049bd056f936d1b39b704abcf824eaef39bd8877fcbb82b2a213ceec82bdf26",
-        "gender": "male",
         "age": 22,
-        "ethnicity": "caucasian",
-        "country": "Singapore",
         "height": 190.0,
         "weight": 80.0,
+        "country": "Singapore",
+        "ethnicity": "caucasian",
+        "gender": "male",
         "medical_conditions": [
             "diabetes",
             "high blood pressure",
