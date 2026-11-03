@@ -2,8 +2,8 @@ import hashlib
 
 
 class MedicalConditions:
-    def __init__(self, conditions=[]):
-        self._conditions = conditions
+    def __init__(self, conditions=None):
+        self._conditions = list(conditions or []) # fresh copy everytime
 
     # =========== Attribute Validation ===========
     @staticmethod
@@ -26,14 +26,14 @@ class MedicalConditions:
         return any(keyword.lower() in condition.lower() for condition in self._conditions for keyword in keywords)
 
     def to_list(self):
-        return list(self._conditions)
+        return list(self._conditions) # "read-only" since it is a copy, will not affect original
 
     def __len__(self):
         return len(self._conditions)
 
 
 class UserProfile:
-    def __init__(self, username, password_hash, age, height, weight, country, ethnicity, gender, medical_conditions=[]):
+    def __init__(self, username, password_hash, age, height, weight, country, ethnicity, gender, medical_conditions=None):
         self._username = self.validate_username(username)
         self.__password_hash = str(password_hash) # validation not neccessary
         self._age = self.validate_age(age)
@@ -53,25 +53,25 @@ class UserProfile:
 
     @staticmethod
     def validate_age(value):
-        if not isinstance(value, int) or 120 < value < 0:
+        if not isinstance(value, int) or not 0 < value <= 120:
             raise ValueError("Age must be an integer between 0 and 120.")
         return value
 
     @staticmethod
     def validate_height(value):
-        if not isinstance(value, (int, float)) or 260 < value < 0:
+        if not isinstance(value, (int, float)) or not 0 < value <= 260:
             raise ValueError("Height must be between 0 and 260 cm.")
         return value
 
     @staticmethod
     def validate_weight(value):
-        if not isinstance(value, (int, float)) or 500 < value < 0:
+        if not isinstance(value, (int, float)) or not 0 < value <= 500:
             raise ValueError("Weight must be between 0 and 500 kg.")
         return value
 
     @staticmethod
     def validate_gender(value):
-        if value.strip().lower() not in ["male", "female"]:
+        if not isinstance(value, str) or value.strip().lower() not in ["male", "female"]:
             raise ValueError("Gender must be 'male' or 'female'")
         return value.strip().lower()
 
@@ -82,7 +82,7 @@ class UserProfile:
 
     # =========== Profile Create Methods ===========
     @classmethod
-    def create(cls, username, plain_password, age, height, weight, country, ethnicity, gender, medical_conditions=[]): # hashes the plain_password and calls the constructor as password is stored as hash, not plain
+    def create(cls, username, plain_password, age, height, weight, country, ethnicity, gender, medical_conditions=None): # hashes the plain_password and calls the constructor as password is stored as hash, not plain
         return cls(username, cls.hash_password(plain_password), age, height, weight, country, ethnicity, gender, medical_conditions)
 
     @classmethod
@@ -160,7 +160,7 @@ class UserProfile:
 
     @property
     def bmi(self):
-        return round(self._weight / (self._height ** 2), 2)
+        return round(self._weight / ((self._height / 100) ** 2), 2)
 
     # =========== Profile Edit Setters ===========
     @age.setter
