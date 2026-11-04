@@ -1,5 +1,6 @@
 import json
 
+
 # =========== AI Response JSON Format ===========
 RESPONSE_SCHEMA = {
     "type": "object",
@@ -54,7 +55,7 @@ EXPECTED_KEYS = set(RESPONSE_SCHEMA["properties"])
 NUTRIENT_KEYS = {"sodium_mg", "sugar_g", "saturated_fat_g", "trans_fat_g"}
 
 
-# =========== Prompt Builder Parts ===========
+# =========== System Instruction Parts ===========
 YOUR_PURPOSE = ""
 
 ADHERE_TO_THESE_RULES = ""
@@ -76,4 +77,7 @@ DO_NOT_MAKE_ASSUMPTIONS = ""
 HOW_TO_DEAL_WITH_CHAT_HISTORY = ""
 
 HOW_TO_DEAL_WITH_FALLBACK_PROMPT = ""
+
+
+# =========== Prompt Builder ===========
 

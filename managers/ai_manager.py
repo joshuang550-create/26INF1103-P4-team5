@@ -1,5 +1,84 @@
-""" Handles Prompts, API Calls, API Responses.
-"""
+
+
+
+class PromptBuilder:
+    def check_food_prompt(self):
+        pass # returns a string to be sent to an AI model
+
+    def check_food_follow_up_prompt(self):
+        pass # returns a string to be sent to an AI model
+
+    def low_confidence_reprompt(self):
+        pass # returns a string to be sent to an AI model
+
+    def fallback_prompt(self):
+        pass # returns a string to be sent to an AI model
+
+    # =========== Property ===========
+    @property
+    def system_instruction(self):
+        return self.system_instruction
+
+
+class AIManager:
+    def __init__(self, data_manager, model):
+        self._data = data_manager
+        self._model = model
+
+    def ask_ai(self, profile, prompt, system_instruction):
+        history = self._data.get_chat_history(profile.username)
+        response_text, new_history = self._model.send(prompt, history, system_instruction)
+        self._data.save_chat_history(profile.username, new_history)
+        return response_text
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import json
 import math
