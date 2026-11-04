@@ -1,7 +1,88 @@
-"""The domain brain acting on the AI's output.
-"""
+from abc import ABC, abstractmethod
+from enum import IntEnum
+from dataclasses import dataclass
 
-import re
+
+# =========== Helper Types ===========
+class Verdict(IntEnum):
+    OK = 0
+    CAUTION = 1
+    AVOID = 2
+
+
+@dataclass(frozen=True)
+class RuleResult:
+    severity: Verdict = Verdict.OK
+    flags: tuple = () # ("sodium_mg", 650, "high")
+
+
+# =========== Interface ===========
+class RiskRule(ABC):
+    @abstractmethod
+    def evaluate(self, profile, assessment, allergens_found):
+        pass # returns RuleResult(). If rule doesnt apply, returns deafault (OK, no flags)
+
+
+# =========== Rules ===========
+class AllergenRule(RiskRule):
+    pass
+
+
+class NutrientThresholdRule(RiskRule):
+    pass
+
+
+class AIConcernRule(RiskRule):
+    pass
+
+
+# =========== Manager ===========
+class LogicManager:
+    def __init__(self, rules):
+        self._rules = list(rules)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import managers.data_manager as data_manager
 

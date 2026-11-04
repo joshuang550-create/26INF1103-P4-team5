@@ -62,7 +62,7 @@ class DataManager:
 
     def delete_profile(self, profile):
         record = profile.to_dict()
-        profiles = self._read_json(self.__profiles_path)
+        profiles = self._read_json(self.__profiles_path, {})
         profiles.pop(record["username"], None) # deletes the key value pair by the key, key is username
         self._write_json(self.__profiles_path, profiles, indent=4)
 
