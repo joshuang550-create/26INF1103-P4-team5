@@ -79,5 +79,16 @@ HOW_TO_DEAL_WITH_CHAT_HISTORY = ""
 HOW_TO_DEAL_WITH_FALLBACK_PROMPT = ""
 
 
+# =========== System Instruction ===========
+SYSTEM_INSTRUCTION = ""
+
+
 # =========== Prompt Builder ===========
+CHECK_FOOD_TEMPLATE = "Give a risk assessment for this food: {food_name}\n\nUser Profile:\n Age: {age}\n Medical Conditions: {medical_conditions}"
+
+CHECK_FOOD_FOLLOW_UP_TEMPLATE = ""
+
+LOW_CONFIDENCE_REPROMPT = ""
+
+FALLBACK_PROMPT = ""
 
