@@ -23,7 +23,7 @@ class MedicalConditions:
 
     # =========== Utility ===========
     def matches_any(self, keywords): # returns True if any keywords are found in list of medical conditions
-        return any(keyword.lower() in condition.lower() for condition in self._conditions for keyword in keywords)
+        return any(keyword.lower() in condition.lower() for condition in self._conditions for keyword in keywords) # no need for regex since rapidfuzz will ensure only valid medical conditions are in the list
 
     def to_list(self):
         return list(self._conditions) # "read-only" since it is a copy, will not affect original
