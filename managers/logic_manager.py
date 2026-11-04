@@ -67,7 +67,7 @@ class NutrientThresholdRule(RiskRule):
             if not context.profile.has_condition_matching(limits["relevant_conditions"]): # if the words in relevant_conditions matches any words in MedicalCondition's _conditions
                 continue
 
-            value = context.assessment.nutrition.get(nutrient) # try to get the value of the nutrient in assessment, if that nutrient is not in assessment, None, else get the value (in mg/g)
+            value = context.assessment.nutrient.get(nutrient) # try to get the value of the nutrient in assessment, if that nutrient is not in assessment, None, else get the value (in mg/g)
             if value is None:
                 continue
             if value > limits["high"]:

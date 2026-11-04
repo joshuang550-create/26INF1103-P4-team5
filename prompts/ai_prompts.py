@@ -23,7 +23,7 @@ RESPONSE_SCHEMA = {
                 "Not a calibrated probability of correctness or food safety."
             ),
         },
-        "nutrition": {
+        "nutrients": {
             "type": "object",
             "properties": {
                 "sodium_mg": {"type": "number"},
@@ -92,3 +92,25 @@ LOW_CONFIDENCE_REPROMPT = ""
 
 FALLBACK_PROMPT = ""
 
+
+# =========== Invalid Response Reprompt ===========
+INVALID_REASON = ""
+
+INVALID_POTENTIAL_CONCERN =  ""
+
+INVALID_CONFIDENCE_SCORE =  ""
+
+INVALID_NUTRIENT =  ""
+
+INVALID_STATUS =  ""
+
+INVALID_INFORMATION_NEEDED =  ""
+
+INVALID_PROMPTS = {
+    "invalid_reason": INVALID_REASON,
+    "invalid_potential_concern": INVALID_POTENTIAL_CONCERN,
+    "invalid_confidence_score": INVALID_CONFIDENCE_SCORE,
+    "invalid_nutrient": INVALID_NUTRIENT,
+    "invalid_status": INVALID_STATUS,
+    "invalid_information_needed": INVALID_INFORMATION_NEEDED,
+}
