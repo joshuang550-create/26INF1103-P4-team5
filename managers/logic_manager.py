@@ -105,8 +105,9 @@ class AllergenDetector:
 
 
 class ConfidencePolicy:
-    min_score = 5.0
-    max_reprompts = 1
+    def __init__(self, min_score=5.0, max_reprompts=1):
+        self._min_score = min_score
+        self._max_reprompts = max_reprompts
 
     def decide(self, score, attempt_number):
         if score >= self.min_score:
@@ -122,7 +123,7 @@ class ConfidencePolicy:
 class LogicManager:
     def __init__(self, rules, allergen_detector):
         self._rules = list(rules)
-        self._detector = allergen_detector # aggregation for DataManager to pass the synonyms to AllergenDetector
+        self._detector = allergen_detector
         self._policy = ConfidencePolicy()
 
     def evaluate(self, assessment, profile, attempt_number=1):
@@ -141,36 +142,3 @@ class LogicManager:
             flags = tuple(flag for r in results for flag in r.flags) # (("sodium_mg", 650, "high"), (...), (...))
 
         return Evaluation(action, verdict, flags, allergens, assessment) # if action is reprompt or fallback, go to AI, else, send to GUI
-
-
-
-
-
-# assessment here is dict not object, replace above code assessment methods with dict key to test
-
-# from managers.data_manager import DataManager
-# from models.user_profile import UserProfile
- 
-# data = DataManager()
-
-# rules = [AllergenRule(), NutrientThresholdRule(data.get_thresholds()), AIConcernRule()]
-# allergen_detector = AllergenDetector(data.get_allergens())
-
-# reason = "The chocolate protein bar contains caffeine, which can potentially shrimp raise blood pressure, a concern given your medical history of high blood pressure. Additionally, maltitol is a sugar alcohol that can sometimes cause gastrointestinal distress, and the peanuts are a hard texture that might aggravate TMJ symptoms."
-# assessment = {"reason": reason, "potential_concern": True, "confidence_score": 8.84, "nutrition": {"sodium_mg": 650, "calcium_g": 10, "sugar_g": 10}, "status": "complete", "information_needed": None}
-# profile = UserProfile.create(username="Jeff", plain_password="jeff", age=23, height=169.95, weight=73.55, country="Singapore", ethnicity="Chinese", gender="Male", medical_conditions=["shrimp allergy", "Diabet", "High Cholesterol", "Hypertension"])
-
-# lm = LogicManager(rules, allergen_detector)
-# evaluation = lm.evaluate(assessment, profile, attempt_number=1)
-
-# print()
-# print(evaluation.action)
-# print()
-# print(evaluation.verdict)
-# print()
-# print(evaluation.flags)
-# print()
-# print(evaluation.allergens_found)
-# print()
-# print(evaluation.assessment)
-# print()
