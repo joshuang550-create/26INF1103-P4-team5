@@ -21,7 +21,7 @@ class AIModel(ABC):
 
 
 # =========== AI Models ===========
-class GeminiFlashLite(AIModel):
+class Gemini(AIModel):
     def __init__(self, api_key_supplier, model="gemini-3.5-flash-lite"):
         self._api_key_supplier = api_key_supplier # this will be provided during app build, api_key_supplier=data_manager_instance.get_api_key
         self._model = model
@@ -45,12 +45,12 @@ class GeminiFlashLite(AIModel):
 
         except (httpx.ConnectError, httpx.TimeoutException) as e:
             print(f"http connect error: \n\n{e}") # temp for now, will handle once error handler is complete
-            return #io_manager.show_http_error_message(e)
+            return
 
         except errors.APIError as e:
             print(f"api error: \n\n{e}") # temp for now, will handle once error handler is complete
-            return #io_manager.show_api_error_message(e)
+            return
             
         except Exception as e:
             print(f"exception: \n\n{e}") # temp for now, will handle once error handler is complete
-            return #io_manager.show_generic_error_message()
+            return
