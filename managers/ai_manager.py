@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 
 from prompts.ai_prompts import SYSTEM_INSTRUCTION, CHECK_FOOD_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS
@@ -14,26 +15,36 @@ class Assessment: # this is the final output of ai manager. returned by (AIRespo
     information_needed: dict
 
 
+@dataclass(frozen=True)
+class ValidationResult: # this is the final output of AIResponseValidator. Allows both assessment and issues to be returned as one rather than either or, leading to isinstance check in main
+    assessment: Assessment | None = None
+    issues: tuple = ()
+
+    @property
+    def ok(self):
+        return not self.issues
+
+
 # =========== Helper Classes ===========
 class PromptBuilder:
     @staticmethod
-    def check_food_prompt(self, profile, food_name):
+    def check_food_prompt(profile, food_name):
         return CHECK_FOOD_TEMPLATE.format(food_name=food_name, age=profile.age, medical_conditions=", ".join(profile.medical_conditions) or "none reported")
 
     @staticmethod
-    def check_food_follow_up_prompt(self, answers):
+    def check_food_follow_up_prompt(answers):
         pass # returns a string to be sent to an AI model
 
     @staticmethod
-    def low_confidence_reprompt(self):
+    def low_confidence_reprompt():
         pass # returns a string to be sent to an AI model
 
     @staticmethod
-    def fallback_prompt(self, profile):
+    def fallback_prompt(profile):
         pass # returns a string to be sent to an AI model
 
     @staticmethod
-    def invalid_response_prompt(self, issues): # issues is a list ["invalid_reason", "invalid_potential_concern"] from AIResponseValidator
+    def invalid_response_prompt(issues): # issues is a list ["invalid_reason", "invalid_potential_concern"] from AIResponseValidator
         return "".join(INVALID_PROMPTS[issue] for issue in issues if issue in INVALID_PROMPTS)
 
     # =========== Read-Only Property ===========
@@ -43,7 +54,73 @@ class PromptBuilder:
 
 
 class AIResponseValidator:
-    pass
+    def __init__(self):
+        self.checks = [ # if new checks are needed, just create the private staticmethod and add it here
+            self._check_keys,
+            self._check_nutrient,
+            self._check_status,
+            self._check_potential_concern,
+            self._check_confidence_score,
+            self._check_reason,
+            self._check_information_needed
+        ]
+
+    # =========== Helper Method ===========
+    @staticmethod
+    def _parse(response_text):
+        try:
+            data = json.loads(response_text) if isinstance(response_text, str) else response_text # if string, json.loads to a dict, else keep it as is
+        except json.JSONDecodeError:
+            return None, "invalid_json"
+
+        if not isinstance(data, dict):
+            return None, "invalid_structure" # if not a dict
+
+        return data, None # valid data
+
+
+    # =========== Public Method ===========
+    def validate(self, response_text):
+        data, issue = self._parse(response_text)
+
+        if issue:
+            return ValidationResult(issues=(issue,)) # if response_text cannot be parsed properly, not a dict
+        
+        issues = [i for check in self._checks for i in check(data)] # response_text is a dict, then run every check in self.checks 
+
+        if issues:
+            return ValidationResult(issues=tuple(issues)) # if there is even 1 issue, return issues without assessment
+
+        return ValidationResult(assessment=Assessment(**data)) # if there is no issues at all, return assessment without issues
+
+    # =========== Private Methods ===========
+    @staticmethod
+    def _check_keys(data):
+        pass
+
+    @staticmethod
+    def _check_nutrient(data):
+        pass
+
+    @staticmethod
+    def _check_status(data):
+        pass
+
+    @staticmethod
+    def _check_potential_concern(data):
+        pass
+
+    @staticmethod
+    def _check_confidence_score(data):
+        pass
+
+    @staticmethod
+    def _check_reason(data):
+        pass
+
+    @staticmethod
+    def _check_information_needed(data):
+        pass
 
     # takes in response_text from AIManager's _ask()
 
