@@ -2,7 +2,7 @@ import json
 import math
 from dataclasses import dataclass
 
-from prompts.ai_prompts import CHECK_FOOD_TEMPLATE, INVALID_PROMPTS, INVALID_UNKNOWN, INVALID_RESPONSE_TEMPLATE, SYSTEM_INSTRUCTION, EXPECTED_KEYS, NUTRIENT_KEYS
+from prompts.ai_prompts import CHECK_FOOD_TEMPLATE, OPENFOODFACTS_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS, INVALID_UNKNOWN, INVALID_RESPONSE_TEMPLATE, SYSTEM_INSTRUCTION, EXPECTED_KEYS, NUTRIENT_KEYS
 
 
 # =========== Helper Types ===========
@@ -37,20 +37,23 @@ class ValidationResult: # this is the final output of AIResponseValidator. Allow
 # =========== Helper Classes ===========
 class PromptBuilder:
     @staticmethod
-    def check_food_prompt(profile, food_name):
-        return CHECK_FOOD_TEMPLATE.format(food_name=food_name, age=profile.age, medical_conditions=", ".join(profile.medical_conditions) or "none reported")
+    def check_food_prompt(profile, food_name, openfoodfact=None): # change 'openfoodfact' to whatever the actual OpenFoodFacts class returns after a check
+        check_food = CHECK_FOOD_TEMPLATE.format(food_name=food_name, age=profile.age, gender=profile.gender, height=profile.height, weight=profile.weight, bmi=profile.bmi, country=profile.country, ethnicity=profile.ethnicity, medical_conditions=", ".join(profile.medical_conditions) or "none reported")
+        if openfoodfact:
+            return check_food + "\n\n" + OPENFOODFACTS_TEMPLATE.format(barcode=openfoodfact.barcode, brand=openfoodfact.brand, quantity=openfoodfact.quantity, ingredients=openfoodfact.ingredients, allergens=openfoodfact.allergens, nutrients=openfoodfact.nutrients)
+        return check_food
 
     @staticmethod
     def check_food_follow_up_prompt(answers):
-        pass # returns a string to be sent to an AI model
+        return CHECK_FOOD_FOLLOW_UP_TEMPLATE.format(answers=answers)
 
     @staticmethod
     def low_confidence_reprompt():
-        pass # returns a string to be sent to an AI model
+        return LOW_CONFIDENCE_REPROMPT
 
     @staticmethod
     def fallback_prompt(profile):
-        pass # returns a string to be sent to an AI model
+        return FALLBACK_PROMPT.format(age=profile.age, gender=profile.gender, country=profile.country, ethnicity=profile.ethnicity, medical_conditions=", ".join(profile.medical_conditions) or "none reported")
 
     @staticmethod
     def invalid_response_prompt(issues): # issues is a list ["invalid_reason", "invalid_potential_concern"] from AIResponseValidator
@@ -163,6 +166,7 @@ class AIResponseValidator:
             return []
         return ["invalid_confidence_score"]
 
+
 # =========== Manager ===========
 class AIManager:
     def __init__(self, data_manager, model):
@@ -199,3 +203,42 @@ class AIManager:
 
             prompt = self._prompts.invalid_response_prompt(result.issues) # if validator still returns issues, reprompt the ai with the new issues, up to retry_limit times
         raise ValueError("The AI did not return a valid response.") # failed to get valid response from ai after even after reprompting
+
+
+
+
+# from models.user_profile import UserProfile
+# from managers.data_manager import DataManager
+# from models.ai_models import GeminiFlashLite
+
+# profile = UserProfile.create(username="Jeff", plain_password="jeff", age=23, height=169.95, weight=73.55, country="Singapore", ethnicity="Chinese", gender="Male", medical_conditions=["shrimp allergy", "Diabet", "High Cholesterol", "Hypertension"])
+# data = DataManager()
+# model = GeminiFlashLite(data.get_api_key)
+# ai = AIManager(data, model)
+
+# # assessment = ai.check_food(profile, "egg")
+# assessment = ai.follow_up(profile, "scrambled. two eggs.")
+
+# print(assessment)
+
+# this is returned by ai.check_food(profile, "egg")
+# Assessment(
+#     information_needed=['How is the egg prepared? (e.g. boiled, fried, scrambled, poached)', 'How many eggs will you eat? (e.g. one egg, two eggs)'], 
+#     portion_g=0, 
+#     nutrients={'sodium_mg': 0, 'sugar_g': 0, 'saturated_fat_g': 0, 'trans_fat_g': 0}, 
+#     reason='I need to know how the egg is prepared and how many you will eat before I can assess it for you.', 
+#     potential_concern=False, 
+#     confidence_score=0
+#     )
+
+# this is returned by ai.follow_up(profile, "scrambled. two eggs.")
+# Assessment(
+#     information_needed=[], 
+#     portion_g=100, 
+#     nutrients={'sodium_mg': 250, 'sugar_g': 1.2, 'saturated_fat_g': 3.5, 'trans_fat_g': 0.1}, 
+#     reason='You are planning to eat two scrambled eggs, assumed to be prepared with a little oil or butter. Eggs are generally a good source of protein, but your high cholesterol means keeping an eye on overall fat intake is wise. I assumed standard preparation methods for the scrambling.', 
+#     potential_concern=True, 
+#     confidence_score=85
+#     )
+
+# To Complete: GeminiFlashLite error handling, PromptBuilder check food method after openfoodfacts searcher class is created 

@@ -44,10 +44,13 @@ class GeminiFlashLite(AIModel):
             return ModelResponse(response.text, new_history)
 
         except (httpx.ConnectError, httpx.TimeoutException) as e:
+            print(f"http connect error: \n\n{e}") # temp for now, will handle once error handler is complete
             return #io_manager.show_http_error_message(e)
 
         except errors.APIError as e:
+            print(f"api error: \n\n{e}") # temp for now, will handle once error handler is complete
             return #io_manager.show_api_error_message(e)
             
         except Exception as e:
+            print(f"exception: \n\n{e}") # temp for now, will handle once error handler is complete
             return #io_manager.show_generic_error_message()
