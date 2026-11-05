@@ -11,13 +11,13 @@ class Assessment: # this is the final output of ai manager. returned by (AIRespo
     reason: str
     potential_concern: bool
     confidence_score: int
-    nutrition: dict
+    nutrient: dict
     status: str
     information_needed: dict
 
     @property
     def needs_follow_up(self):
-        return self.status
+        self.status == "needs_follow_up"
 
 
 @dataclass(frozen=True)
@@ -60,7 +60,7 @@ class PromptBuilder:
 
 class AIResponseValidator:
     def __init__(self):
-        self.checks = [ # if new checks are needed, just create the private staticmethod and add it here
+        self._checks = [ # if new checks are needed, just create the private staticmethod and add it here
             self._check_keys,
             self._check_nutrient,
             self._check_status,
@@ -100,7 +100,7 @@ class AIResponseValidator:
     # =========== Private Methods ===========
     @staticmethod
     def _check_keys(data):
-        extra, missing = set(data) - EXPECTED_KEYS, NUTRIENT_KEYS - set(data)
+        extra, missing = set(data) - EXPECTED_KEYS, EXPECTED_KEYS - set(data)
         if extra or missing:
             return ["invalid_keys"]
         return []
@@ -189,9 +189,9 @@ class AIManager:
     # =========== Private Method ===========
     def _ask(self, profile, prompt):
         history = self._data.get_chat_history(profile.username) or [] # get_chat_history returns None if user has no history, so empty list instead
-        response_text, new_history = self._model.send(prompt, history, self._prompts.system_instruction)
-        self._data.save_chat_history(profile.username, new_history)
-        return response_text
+        response = self._model.send(prompt, history, self._prompts.system_instruction)
+        self._data.save_chat_history(profile.username, response.history)
+        return response.text
 
     def _get_valid_assessment(self, profile, prompt, retry_limit=2):
         for _ in range(retry_limit):

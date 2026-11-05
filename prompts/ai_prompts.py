@@ -23,7 +23,7 @@ RESPONSE_SCHEMA = {
                 "Not a calibrated probability of correctness or food safety."
             ),
         },
-        "nutrients": {
+        "nutrient": {
             "type": "object",
             "properties": {
                 "sodium_mg": {"type": "number"},

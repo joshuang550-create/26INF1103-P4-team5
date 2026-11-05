@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from google import genai
 from google.genai import errors, types
@@ -6,15 +7,16 @@ import httpx
 
 
 # =========== Helper Type ===========
+@dataclass(frozen=True)
 class ModelResponse:
     text: str # the most recent response from the AI
-    history: tuple # chat history of the user [{}, {}, {}]
+    history: list # chat history of the user [{}, {}, {}]
 
 
 # =========== Interface ===========
 class AIModel(ABC):
     @abstractmethod
-    def send(self, prompt, system_instruction): # system_instruction is a string that gets sent automatically to the ai with the prompt, basically rules for the ai to follow
+    def send(self, prompt, history, system_instruction): # system_instruction is a string that gets sent automatically to the ai with the prompt, basically rules for the ai to follow
         pass
 
 
@@ -28,7 +30,7 @@ class GeminiFlashLite(AIModel):
         try:
             api_key = self._api_key_supplier()
 
-            history_content = [types.Content(role=item.role, parts=[types.Part.from_text(text=item.text)]) for item in history] # convert history to content
+            history_content = [types.Content(role=item["role"], parts=[types.Part.from_text(text=item["text"])]) for item in history] # convert history to content
             retry_config = types.HttpRetryOptions(attempts=2, initial_delay=2.0, max_delay=32.0, http_status_codes=[408, 500, 502, 503, 504]) # will auto try to prompt again 2 times if these status codes are returned
             
             client = genai.Client(api_key=api_key, http_options=types.HttpOptions(retry_options=retry_config))
