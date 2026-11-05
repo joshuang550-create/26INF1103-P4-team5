@@ -131,7 +131,7 @@ class LogicManager:
         if allergens:
             action = ResponseAction.AVOID
         else: # empty allergens dict means no allergens matched
-            action = self._policy.decide(assessment.confidence_score, attempt_number)
+            action = self._policy.decide(assessment.confidence, attempt_number)
 
         verdict, flags = None, () # if reprompt or fallback, set as nothing
 

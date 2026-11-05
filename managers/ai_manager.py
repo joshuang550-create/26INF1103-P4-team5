@@ -2,22 +2,26 @@ import json
 import math
 from dataclasses import dataclass
 
-from prompts.ai_prompts import EXPECTED_KEYS, NUTRIENT_KEYS, SYSTEM_INSTRUCTION, CHECK_FOOD_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS
+from prompts.ai_prompts import CHECK_FOOD_TEMPLATE, INVALID_PROMPTS, INVALID_UNKNOWN, INVALID_RESPONSE_TEMPLATE, SYSTEM_INSTRUCTION, EXPECTED_KEYS, NUTRIENT_KEYS
 
 
 # =========== Helper Types ===========
 @dataclass(frozen=True)
 class Assessment: # this is the final output of ai manager. returned by (AIResponseValidator's validate method)? maybe, maybe not
+    information_needed: list
+    portion_g: float
+    nutrients: dict
     reason: str
     potential_concern: bool
     confidence_score: int
-    nutrient: dict
-    status: str
-    information_needed: dict
 
     @property
     def needs_follow_up(self):
-        self.status == "needs_follow_up"
+        return bool(self.information_needed)
+
+    @property
+    def confidence(self):
+        return round(self.confidence_score / 10, 1)
 
 
 @dataclass(frozen=True)
@@ -50,7 +54,8 @@ class PromptBuilder:
 
     @staticmethod
     def invalid_response_prompt(issues): # issues is a list ["invalid_reason", "invalid_potential_concern"] from AIResponseValidator
-        return "".join(INVALID_PROMPTS[issue] for issue in issues if issue in INVALID_PROMPTS)
+        problems = [INVALID_PROMPTS.get(issue, INVALID_UNKNOWN) for issue in dict.fromkeys(issues)]
+        return INVALID_RESPONSE_TEMPLATE.format(problems="\n".join(f"- {p}" for p in problems))
 
     # =========== Read-Only Property ===========
     @property
@@ -61,13 +66,13 @@ class PromptBuilder:
 class AIResponseValidator:
     def __init__(self):
         self._checks = [ # if new checks are needed, just create the private staticmethod and add it here
-            self._check_keys,
-            self._check_nutrient,
-            self._check_status,
-            self._check_potential_concern,
-            self._check_confidence_score,
-            self._check_reason,
-            self._check_information_needed
+            self._check_keys, 
+            self._check_information_needed, 
+            self._check_portion, 
+            self._check_nutrient, 
+            self._check_reason, 
+            self._check_potential_concern, 
+            self._check_confidence_score
         ]
 
     # =========== Helper Methods ===========
@@ -100,31 +105,49 @@ class AIResponseValidator:
     # =========== Private Methods ===========
     @staticmethod
     def _check_keys(data):
-        extra, missing = set(data) - EXPECTED_KEYS, EXPECTED_KEYS - set(data)
-        if extra or missing:
+        if set(data) != EXPECTED_KEYS:
             return ["invalid_keys"]
         return []
 
     @staticmethod
-    def _check_nutrient(data):
-        nutrient = data.get("nutrient")
+    def _check_information_needed(data):
+        questions = data.get("information_needed")
 
-        if not isinstance(nutrient, dict) or set(nutrient) != set(NUTRIENT_KEYS):
-            return ["invalid_nutrient"]
+        if isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions):
+            return []
+        
+        return ["invalid_information_needed"]
 
-        for key in sorted(NUTRIENT_KEYS):
-            val = nutrient.get(key)
-            if not isinstance(val, (int, float)) or isinstance(val, bool) or not math.isfinite(val):
-                return ["invalid_nutrient"]
+    @staticmethod
+    def _check_portion(data):
+        portion, questions = data.get("portion_g"), data.get("information_needed")
 
+        if not (isinstance(portion, (int, float)) and not isinstance(portion, bool) and math.isfinite(portion)) or portion < 0: 
+            return ["invalid_portion"]
+        
+        if questions == [] and portion == 0: # assessed, but no portion given
+            return ["invalid_portion"]
+        
         return []
 
     @staticmethod
-    def _check_status(data):
-        status = data.get("status")
-        if isinstance(status, str) and status in ("complete", "needs_follow_up"):
+    def _check_nutrient(data):
+        nutrients = data.get("nutrients")
+
+        if not isinstance(nutrients, dict) or set(nutrients) != set(NUTRIENT_KEYS):
+            return ["invalid_nutrient"]
+        
+        if not all((isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)) and v >= 0 for v in nutrients.values()):
+            return ["invalid_nutrient"]
+        
+        return []
+
+    @staticmethod
+    def _check_reason(data):
+        reason = data.get("reason")
+        if isinstance(reason, str) and reason.strip():
             return []
-        return ["invalid_status"]
+        return ["invalid_reason"]
 
     @staticmethod
     def _check_potential_concern(data):
@@ -139,31 +162,6 @@ class AIResponseValidator:
         if type(score) is int and 0 <= score <= 100:
             return []
         return ["invalid_confidence_score"]
-
-    @staticmethod
-    def _check_reason(data):
-        reason = data.get("reason")
-        if isinstance(reason, str) and reason.strip():
-            return []
-        return ["invalid_reason"]
-
-    @staticmethod
-    def _check_information_needed(data):
-        information_needed = data.get("information_needed")
-        status = data.get("status")
-
-        if not isinstance(information_needed, dict):
-            return["invalid_information_needed"]
-
-        for question, answer in information_needed.items():
-            if not str(question).strip() or answer != "":
-                return["invalid_information_needed"]
-            
-        if (status == "complete" and information_needed) or (status == "needs_follow_up" and not information_needed):
-            return["invalid_information_needed"]
-
-        return []
-
 
 # =========== Manager ===========
 class AIManager:
