@@ -1,7 +1,8 @@
 import json
+import math
 from dataclasses import dataclass
 
-from prompts.ai_prompts import SYSTEM_INSTRUCTION, CHECK_FOOD_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS
+from prompts.ai_prompts import EXPECTED_KEYS, NUTRIENT_KEYS, SYSTEM_INSTRUCTION, CHECK_FOOD_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS
 
 
 # =========== Helper Types ===========
@@ -13,6 +14,10 @@ class Assessment: # this is the final output of ai manager. returned by (AIRespo
     nutrition: dict
     status: str
     information_needed: dict
+
+    @property
+    def needs_follow_up(self):
+        return self.status
 
 
 @dataclass(frozen=True)
@@ -65,7 +70,7 @@ class AIResponseValidator:
             self._check_information_needed
         ]
 
-    # =========== Helper Method ===========
+    # =========== Helper Methods ===========
     @staticmethod
     def _parse(response_text):
         try:
@@ -77,7 +82,6 @@ class AIResponseValidator:
             return None, "invalid_structure" # if not a dict
 
         return data, None # valid data
-
 
     # =========== Public Method ===========
     def validate(self, response_text):
@@ -96,55 +100,69 @@ class AIResponseValidator:
     # =========== Private Methods ===========
     @staticmethod
     def _check_keys(data):
-        pass
+        extra, missing = set(data) - EXPECTED_KEYS, NUTRIENT_KEYS - set(data)
+        if extra or missing:
+            return ["invalid_keys"]
+        return []
 
     @staticmethod
     def _check_nutrient(data):
-        pass
+        nutrient = data.get("nutrient")
+
+        if not isinstance(nutrient, dict) or set(nutrient) != set(NUTRIENT_KEYS):
+            return ["invalid_nutrient"]
+
+        for key in sorted(NUTRIENT_KEYS):
+            val = nutrient.get(key)
+            if not isinstance(val, (int, float)) or isinstance(val, bool) or not math.isfinite(val):
+                return ["invalid_nutrient"]
+
+        return []
 
     @staticmethod
     def _check_status(data):
-        pass
+        status = data.get("status")
+        if isinstance(status, str) and status in ("complete", "needs_follow_up"):
+            return []
+        return ["invalid_status"]
 
     @staticmethod
     def _check_potential_concern(data):
-        pass
+        potential_concern = data.get("potential_concern")
+        if isinstance(potential_concern, bool):
+            return []
+        return ["invalid_potential_concern"]
 
     @staticmethod
     def _check_confidence_score(data):
-        pass
+        score = data.get("confidence_score")
+        if type(score) is int and 0 <= score <= 100:
+            return []
+        return ["invalid_confidence_score"]
 
     @staticmethod
     def _check_reason(data):
-        pass
+        reason = data.get("reason")
+        if isinstance(reason, str) and reason.strip():
+            return []
+        return ["invalid_reason"]
 
     @staticmethod
     def _check_information_needed(data):
-        pass
+        information_needed = data.get("information_needed")
+        status = data.get("status")
 
-    # takes in response_text from AIManager's _ask()
+        if not isinstance(information_needed, dict):
+            return["invalid_information_needed"]
 
-    # returns assessment object for LogicManager
+        for question, answer in information_needed.items():
+            if not str(question).strip() or answer != "":
+                return["invalid_information_needed"]
+            
+        if (status == "complete" and information_needed) or (status == "needs_follow_up" and not information_needed):
+            return["invalid_information_needed"]
 
-    # 1. check isinstance json/dict (response_text might be string so need to convert to dict fist, check later)
-
-    # 2. check response_text against EXPECTED_KEYS   -   if missing or extra keys, append to issues list  -   run through all tests first and get all the errors
-
-    # 3. check response_text["nutrient"] against NUTRIENT_KEYS   -   if response_text's nutrients != NUTRIENT_KEYS or values are not positive int/float, append to issues list
-
-    # 4. check value of response_text["status"]   -   isinstance str and  in ("complete", "needs_follow_up")
-
-    # 5. check value of response_text["potential_concern"]   -   isinstance bool
-
-    # 6. check value of response_text["confidence_score"]   -   isinstance int and between 0 and 100 inclusive
-
-    # 7. check value of response_text["reason"]   -   isinstance str and not empty after strip()
-
-    # 8. check value of response_text["information_needed"]   -   isinstance dict, keys must not be empty, values must be empty, if status=="complete" {}, if status=="needs_follow_up" {"...":"", "...":""}
-
-    # 9. if there is even 1 issue, return issues   -   issues is a list ["invalid_nutrient", "invalid_reason"]
-
-    # 9. if not issues, then create and return assessment   -   assessment is an object instance of Assessment
+        return []
 
 
 # =========== Manager ===========
@@ -153,22 +171,20 @@ class AIManager:
         self._data = data_manager
         self._model = model
         self._prompts = PromptBuilder()
+        self._validator = AIResponseValidator()
 
     # =========== Public Methods ===========
     def check_food(self, profile, food_name):
-        return self._ask(profile, self._prompts.check_food_prompt(profile, food_name))
+        return self._get_valid_assessment(profile, self._prompts.check_food_prompt(profile, food_name))
 
     def follow_up(self, profile, answers):
-        return self._ask(profile, self._prompts.check_food_follow_up_prompt(answers))
+        return self._get_valid_assessment(profile, self._prompts.check_food_follow_up_prompt(answers))
 
     def reprompt(self, profile):
-        return self._ask(profile, self._prompts.low_confidence_reprompt())
+        return self._get_valid_assessment(profile, self._prompts.low_confidence_reprompt())
 
     def fallback(self, profile):
         return self._ask(profile, self._prompts.fallback_prompt(profile))
-
-    def invalid(self, profile, issues):
-        return self._ask(profile, self._prompts.invalid_response_prompt(issues))
 
     # =========== Private Method ===========
     def _ask(self, profile, prompt):
@@ -177,3 +193,11 @@ class AIManager:
         self._data.save_chat_history(profile.username, new_history)
         return response_text
 
+    def _get_valid_assessment(self, profile, prompt, retry_limit=2):
+        for _ in range(retry_limit):
+            result = self._validator.validate(self._ask(profile, prompt)) # sends a prompt telling the ai all the issues, gets the response and runs it through validator
+            if result.ok: # result.ok means issues list is empty
+                return result.assessment # if validator returns no issues, return the assessment only
+
+            prompt = self._prompts.invalid_response_prompt(result.issues) # if validator still returns issues, reprompt the ai with the new issues, up to retry_limit times
+        raise ValueError("The AI did not return a valid response.") # failed to get valid response from ai after even after reprompting

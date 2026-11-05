@@ -94,6 +94,8 @@ FALLBACK_PROMPT = ""
 
 
 # =========== Invalid Response Reprompt ===========
+INVALID_KEYS = ""
+
 INVALID_REASON = ""
 
 INVALID_POTENTIAL_CONCERN =  ""
@@ -107,6 +109,7 @@ INVALID_STATUS =  ""
 INVALID_INFORMATION_NEEDED =  ""
 
 INVALID_PROMPTS = {
+    "invalid_keys": INVALID_KEYS,
     "invalid_reason": INVALID_REASON,
     "invalid_potential_concern": INVALID_POTENTIAL_CONCERN,
     "invalid_confidence_score": INVALID_CONFIDENCE_SCORE,
