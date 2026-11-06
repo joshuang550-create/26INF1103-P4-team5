@@ -19,6 +19,7 @@ class DataManager:
         self.__profiles_path = pathlib.Path(os.getenv("USER_PROFILES", str(BASE_DIR / "data" / "user_profiles.json")))
         self.__countries_path = pathlib.Path(os.getenv("COUNTRIES", str(BASE_DIR / "lookup" / "./countries.csv")))
         self.__ethnicities_path = pathlib.Path(os.getenv("ETHNICITIES", str(BASE_DIR / "lookup" / "./ethnicities.csv")))
+        self.__conditions_path = pathlib.Path(os.getenv("CONDITIONS", str(BASE_DIR / "lookup" / "./conditions.csv")))
         self.__chats_path = pathlib.Path(os.getenv("CHATS", str(BASE_DIR / "data" / "./chats.json")))
         self.__thresholds_path = pathlib.Path(os.getenv("THRESHOLDS", str(BASE_DIR / "lookup" / "./thresholds.json")))
         self.__allergens_path = pathlib.Path(os.getenv("ALLERGENS", str(BASE_DIR / "lookup" / "./allergens.json")))
@@ -51,6 +52,23 @@ class DataManager:
             with suppress(OSError):
                 temp.unlink(missing_ok=True) # remove the half-written temp file
             raise DataError("Could not save data. Check that there is free space and permission to write.") from error
+
+    @staticmethod
+    def _read_csv(path):
+        try:
+            conditions_list = []
+            with path.open("r", newline='', encoding="utf-8") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row:
+                        conditions_list.append(row[0])
+                return conditions_list
+        except FileNotFoundError as error:
+            raise ConfigurationError(f"A required file is missing: {path.name}") from error
+        except (csv.Error, UnicodeDecodeError) as error: # as its own error so that returning {} would let the next save overwrite every stored profile
+            raise DataError(f"{path.name} could not be read. Nothing has been changed.") from error
+        except OSError as error:
+            raise DataError(f"{path.name} could not be read.") from error
 
     @staticmethod
     def _csv_contains(path, value):
@@ -105,11 +123,17 @@ class DataManager:
     def is_valid_ethnicity(self, ethnicity):
         return self._csv_contains(self.__ethnicities_path, ethnicity) # returns True / False
 
+    def is_valid_condition(self, condition):
+        return self._csv_contains(self.__conditions_path, condition) # returns True / False
+
     def get_thresholds(self):
         return self._read_lookup(self.__thresholds_path, "nutrients") # returns: {'sodium_mg': {'moderate': 300, 'high': 600, 'relevant_conditions': ['hypertension', 'blood pressure', 'kidney']}, 'sugar_g': {'moderate': 10, 'high': 22.5, 'relevant_conditions': ['diabet']}, 'saturated_fat_g': {'moderate': 1.5, 'high': 5, 'relevant_conditions': ['cardiovascular', 'heart', 'cholesterol']}, 'trans_fat_g': {'moderate': 0.1, 'high': 0.5, 'relevant_conditions': ['cardiovascular', 'heart', 'cholesterol']}}
 
     def get_allergens(self):
         return self._read_lookup(self.__allergens_path, "allergen_synonyms") # returns {'shellfish_crustacean': ['shrimp', 'crab', 'prawn', 'lobster'], 'shellfish_mollusk': ['clam', 'mussel', 'oyster', 'scallop']}
+
+    def get_conditions(self):
+        return self._read_csv(self.__conditions_path) # returns a list of all the medical conditions in conditions.csv ["High Blood Pressure", "High Cholesterol", ...]   For GUI to reference in rapidfuzz
 
     # =========== AI Support ===========
     def get_api_key(self):

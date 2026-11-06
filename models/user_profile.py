@@ -8,7 +8,7 @@ class MedicalConditions:
 
     # =========== Attribute Validation ===========
     @staticmethod
-    def validate_condition(value): # currently only checks length of name, in real application would cross check with database of all medical condition names.
+    def validate_condition(value): # format validator, datamanager has the csv check validator
         if len(value.strip().lower()) <= 1:
             raise InvalidInputError("Please try to enter a recognised name for your medical condition.")
         return value.strip().lower()
@@ -43,7 +43,7 @@ class UserProfile:
         self._country = str(country) # validation during user input
         self._ethnicity = str(ethnicity) # validation during user input
         self._gender = self.validate_gender(gender)
-        self.__medical_conditions = MedicalConditions(medical_conditions)
+        self.__medical_conditions = MedicalConditions(medical_conditions) # validation during user input
 
     # =========== Attribute Validation ===========
     @staticmethod
