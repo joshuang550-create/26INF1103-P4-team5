@@ -9,6 +9,7 @@ from managers.data_manager import DataManager
 from managers.ai_manager import AIManager
 from managers.logic_manager import LogicManager, AllergenRule, NutrientThresholdRule, AIConcernRule, AllergenDetector, ResponseAction
 
+
 # =========== Helper Type ===========
 @dataclass(frozen=True)
 class FoodCheckStep: # what the GUI gets back after running check_food and answer_questions

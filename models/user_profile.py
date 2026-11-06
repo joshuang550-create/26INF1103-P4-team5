@@ -2,6 +2,7 @@ import hashlib
 
 from models.errors import InvalidInputError
 
+
 class MedicalConditions:
     def __init__(self, conditions=None):
         self._conditions = list(conditions or []) # fresh copy everytime
