@@ -59,39 +59,47 @@ class AppEngine:
 
 
     # =========== Profile Editing ===========
-    def update_age():
-        pass
+    def update_age(self, age):
+        return self._set_field("age", age)
 
-    def update_height():
-        pass
+    def update_height(self, height):
+        return self._set_field("height", height)
 
-    def update_weight():
-        pass
+    def update_weight(self, weight):
+        return self._set_field("weight", weight)
 
-    def update_country():
-        pass
+    def update_country(self, country):
+        return self._set_field("country", self._valid_country(country))
 
-    def add_medical_conditions():
-        pass
+    def add_medical_conditions(self, conditions): # list of conditions
+        updated = self._copy_of_profile()
+        updated.add_medical_conditions(conditions)
+        return self._save_updated(updated)
 
-    def remove_medical_conditions():
-        pass
+    def remove_medical_conditions(self, indices): # list of positions in profile.medical_conditions starting at 0 (GUI checkbox as input)
+        updated = self._copy_of_profile()
+        total = len(updated.medical_conditions)
+        if not all(isinstance(i, int) and 0 <= i < total for i in indices):
+            raise InvalidInputError("Please select one of the listed medical conditions.")
+        updated.remove_medical_conditions(indices)
+        return self._save_updated(updated)
     
     # =========== Live GUI Input Validation ===========
-    def is_username_taken():
-        pass
+    def is_username_taken(self, username):
+        return self._data.is_username_taken(username.strip())
 
-    def is_valid_country():
-        pass
+    def is_valid_country(self, country):
+        return self._data.is_valid_country(country.strip())
 
-    def is_valid_ethnicity():
-        pass
+    def is_valid_ethnicity(self, ethnicity):
+        return self._data.is_valid_ethnicity(ethnicity.strip())
 
-    def is_valid_condition():
-        pass
+    def is_valid_condition(self, condition):
+        return self._data.is_valid_condition(condition.strip()) # use to check if it is in the csv, if it is not, run rapidfuzz
 
-    def is_valid_barcode():
-        pass
+    @staticmethod
+    def is_valid_barcode(barcode):
+        return OpenFoodFactsSearcher.is_valid_barcode(barcode)
 
     # =========== Food Check ===========
     def check_food():
@@ -121,7 +129,7 @@ class AppEngine:
         self._rounds = 1 # rounds of questions the AI has asked (follow up)
         self._questions = ()
 
-    # =========== Private Session / Profile Helpers ===========
+    # =========== Private Session Helpers ===========
     def _start_session(self, profile):
         self._user = profile
         self._reset_check()
@@ -135,5 +143,18 @@ class AppEngine:
             raise InvalidActionError("Please log in first.")
         return self._user
 
+    # =========== Private Profile Helpers ===========
+    def _copy_of_profile(self):
+        return UserProfile.from_dict(self._require_login().to_dict())
+
+    def _save_updated(self, updated):
+        self._data.save_profile(updated) # may raise DataError
+        self._user = updated # only replaced after saving worked
+        return self.profile
+
+    def _set_field(self, field, value): # works on a copy the real profile is untouched
+        updated = self._copy_of_profile()
+        setattr(updated, field, value)
+        return self._save_updated(updated)
 
 
