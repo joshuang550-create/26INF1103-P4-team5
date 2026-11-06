@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from prompts.ai_prompts import CHECK_FOOD_TEMPLATE, OPENFOODFACTS_TEMPLATE, CHECK_FOOD_FOLLOW_UP_TEMPLATE, LOW_CONFIDENCE_REPROMPT, FALLBACK_PROMPT, INVALID_PROMPTS, INVALID_UNKNOWN, INVALID_RESPONSE_TEMPLATE, SYSTEM_INSTRUCTION, EXPECTED_KEYS, NUTRIENT_KEYS
 
+from models.errors import AIResponseError
+
 
 # =========== Helper Types ===========
 @dataclass(frozen=True)
@@ -37,15 +39,16 @@ class ValidationResult: # this is the final output of AIResponseValidator. Allow
 # =========== Helper Classes ===========
 class PromptBuilder:
     @staticmethod
-    def check_food_prompt(profile, food_name, openfoodfact=None): # change 'openfoodfact' to whatever the actual OpenFoodFacts class returns after a check
+    def check_food_prompt(profile, food_name, product=None): # product from OpenFoodFactsSearcher, FoodProduct object
         check_food = CHECK_FOOD_TEMPLATE.format(food_name=food_name, age=profile.age, gender=profile.gender, height=profile.height, weight=profile.weight, bmi=profile.bmi, country=profile.country, ethnicity=profile.ethnicity, medical_conditions=", ".join(profile.medical_conditions) or "none reported")
-        if openfoodfact:
-            return check_food + "\n\n" + OPENFOODFACTS_TEMPLATE.format(barcode=openfoodfact.barcode, brand=openfoodfact.brand, quantity=openfoodfact.quantity, ingredients=openfoodfact.ingredients, allergens=openfoodfact.allergens, nutrients=openfoodfact.nutrients)
+        if product:
+            return check_food + "\n\n" + OPENFOODFACTS_TEMPLATE.format(barcode=product.barcode, name=product.name, brand=product.brand, quantity=product.quantity, ingredients=product.ingredients, allergens=", ".join(product.allergens) or "none listed", nutrients=json.dumps(product.nutrition_per_100g))
         return check_food
 
     @staticmethod
-    def check_food_follow_up_prompt(answers):
-        return CHECK_FOOD_FOLLOW_UP_TEMPLATE.format(answers=answers)
+    def check_food_follow_up_prompt(answers): # answers is {"question": "answer"}
+        lines = "\n".join(f"Q: {question}\nA: {answer}" for question, answer in answers.items()) # format it for the prompt
+        return CHECK_FOOD_FOLLOW_UP_TEMPLATE.format(answers=lines)
 
     @staticmethod
     def low_confidence_reprompt():
@@ -105,6 +108,24 @@ class AIResponseValidator:
 
         return ValidationResult(assessment=Assessment(**data)) # if there is no issues at all, return assessment without issues
 
+    def validate_recommendations(self, response_text): # the fallback reply should be a list of dicts {"recommendations": [{"food": "...", "reason": "..."}]}
+        data, issue = self._parse(response_text)
+        if issue or set(data) != {"recommendations"}:
+            return None
+
+        items = data["recommendations"]
+        if not isinstance(items, list) or not 1 <= len(items) <= 10:
+            return None
+
+        recommendations = []
+        for item in items:
+            if not isinstance(item, dict) or set(item) != {"food", "reason"}:
+                return None
+            if not all(isinstance(item[key], str) and item[key].strip() for key in ("food", "reason")):
+                return None
+            recommendations.append({"food": item["food"].strip(), "reason": item["reason"].strip()})
+        return recommendations
+    
     # =========== Private Methods ===========
     @staticmethod
     def _check_keys(data):
@@ -176,8 +197,8 @@ class AIManager:
         self._validator = AIResponseValidator()
 
     # =========== Public Methods ===========
-    def check_food(self, profile, food_name):
-        return self._get_valid_assessment(profile, self._prompts.check_food_prompt(profile, food_name))
+    def check_food(self, profile, food_name, product=None): # product is FoodProduct from OpenFoodFactsSearcher
+        return self._get_valid_assessment(profile, self._prompts.check_food_prompt(profile, food_name, product))
 
     def follow_up(self, profile, answers):
         return self._get_valid_assessment(profile, self._prompts.check_food_follow_up_prompt(answers))
@@ -185,8 +206,14 @@ class AIManager:
     def reprompt(self, profile):
         return self._get_valid_assessment(profile, self._prompts.low_confidence_reprompt())
 
-    def fallback(self, profile):
-        return self._ask(profile, self._prompts.fallback_prompt(profile))
+    def fallback(self, profile, retry_limit=2):
+        prompt = self._prompts.fallback_prompt(profile)
+        for _ in range(retry_limit):
+            recommendations = self._validator.validate_recommendations(self._ask(profile, prompt))
+            if recommendations is not None:
+                return recommendations
+            prompt = self._prompts.invalid_response_prompt(["invalid_recommendations"])
+        raise AIResponseError() # failed to get valid recommendations even after reprompting
 
     # =========== Private Method ===========
     def _ask(self, profile, prompt):
@@ -202,4 +229,4 @@ class AIManager:
                 return result.assessment # if validator returns no issues, return the assessment only
 
             prompt = self._prompts.invalid_response_prompt(result.issues) # if validator still returns issues, reprompt the ai with the new issues, up to retry_limit times
-        raise ValueError("The AI did not return a valid response.") # failed to get valid response from ai after even after reprompting
+        raise AIResponseError() # failed to get valid response from ai after even after reprompting

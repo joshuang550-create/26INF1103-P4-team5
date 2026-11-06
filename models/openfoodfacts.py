@@ -2,10 +2,7 @@ from dataclasses import dataclass, field
 
 import openfoodfacts
 
-
-# =========== Error ===========
-class FoodLookupError(Exception):
-    """Open Food Facts could not be reached or returned data we cannot read."""
+from models.errors import FoodLookupError
 
 
 # =========== Helper Type ===========
@@ -24,7 +21,7 @@ class FoodProduct:
 class OpenFoodFactsSearcher:
     VALID_LENGTHS = (8, 12, 13) # EAN-8, UPC-A, EAN-13
     FIELDS = ["code", "product_name", "brands", "quantity", "ingredients_text", "allergens_tags", "nutriments"]
-    NUTRIENTS = {
+    NUTRIENTS = { # convert units. eg. g to mg
         "sodium_mg": ("sodium_100g", 1000),
         "sugar_g": ("sugars_100g", 1),
         "saturated_fat_g": ("saturated-fat_100g", 1),

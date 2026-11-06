@@ -341,6 +341,8 @@ INVALID_POTENTIAL_CONCERN = "potential_concern must be true or false (a JSON boo
 
 INVALID_CONFIDENCE_SCORE = "confidence_score must be a whole number from 0 to 100 (no decimals, no text)."
 
+INVALID_RECOMMENDATIONS = 'Your reply must be one JSON object with exactly one key, "recommendations": a list of 3 to 5 objects, each with exactly the keys "food" and "reason", both non-empty strings.'
+
 INVALID_UNKNOWN = "Your reply did not match the required format."
 
 INVALID_PROMPTS = {
@@ -353,6 +355,7 @@ INVALID_PROMPTS = {
     "invalid_reason": INVALID_REASON,
     "invalid_potential_concern": INVALID_POTENTIAL_CONCERN,
     "invalid_confidence_score": INVALID_CONFIDENCE_SCORE,
+    "invalid_recommendations": INVALID_RECOMMENDATIONS
 }
 
 INVALID_RESPONSE_TEMPLATE = \
