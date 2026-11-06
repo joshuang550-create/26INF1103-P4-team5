@@ -5,6 +5,8 @@ from google import genai
 from google.genai import errors, types
 import httpx
 
+from models.errors import SmartBiteError, AIError, AIConnectionError, AIServiceError, AIResponseError
+
 
 # =========== Helper Type ===========
 @dataclass(frozen=True)
@@ -17,7 +19,7 @@ class ModelResponse:
 class AIModel(ABC):
     @abstractmethod
     def send(self, prompt, history, system_instruction): # system_instruction is a string that gets sent automatically to the ai with the prompt, basically rules for the ai to follow
-        pass
+        pass # returns ModelResponse object
 
 
 # =========== AI Models ===========
@@ -38,19 +40,22 @@ class Gemini(AIModel):
             
             response = chat.send_message(prompt) # send the prompt and get a response
 
+            if not response.text:
+                raise AIResponseError() # if response is empty
+
             updated_history = chat.get_history(curated=True) # returns the whole history of the user, including history_content
             new_history = [{"role": item.role, "text": "".join(part.text or "" for part in (item.parts or []) if part.text is not None)} for item in updated_history] # convert content objects to dicts
             
             return ModelResponse(response.text, new_history)
 
-        except (httpx.ConnectError, httpx.TimeoutException) as e:
-            print(f"http connect error: \n\n{e}") # temp for now, will handle once error handler is complete
-            return
+        except SmartBiteError:
+            raise # continues from an earlier raise like AIResponseError()
 
-        except errors.APIError as e:
-            print(f"api error: \n\n{e}") # temp for now, will handle once error handler is complete
-            return
+        except (httpx.ConnectError, httpx.TimeoutException) as error:
+            raise AIConnectionError() from error
+
+        except errors.APIError as error:
+            raise AIServiceError(error.code) from error
             
-        except Exception as e:
-            print(f"exception: \n\n{e}") # temp for now, will handle once error handler is complete
-            return
+        except Exception as error:
+            raise AIError() from error

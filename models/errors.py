@@ -7,6 +7,13 @@ class SmartBiteError(Exception):
         super().__init__(self.description)
 
 
+# =========== Input Errors ===========
+class InvalidInputError(SmartBiteError, ValueError): # also a ValueError so except ValueError will also work
+    title = "Invalid Input"
+    description = "Please check what you entered and try again."
+
+
+
 # =========== AI Errors ===========
 class AIError(SmartBiteError):
     title = "AI Error"
@@ -36,13 +43,19 @@ class AIServiceError(AIError):
 
 
 class AIResponseError(AIError):
-    title = "AI answer unusable"
+    title = "AI Answer Unusable"
     description = "The AI gave an answer the app could not use. Please try again."
+
+
+# =========== Data Errors ===========
+class DataError(SmartBiteError): # a data file is corrupted, or could not be read or saved
+    title = "Data Error"
+    description = "SmartBite could not read or save its data. Please try again."
 
 
 # =========== Setup Errors ===========
 class ConfigurationError(SmartBiteError):
-    title = "Setup problem"
+    title = "Setup Problem"
     description = "SmartBite is not set up correctly."
 
 

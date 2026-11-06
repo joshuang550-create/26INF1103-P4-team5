@@ -1,5 +1,6 @@
 import hashlib
 
+from models.errors import InvalidInputError
 
 class MedicalConditions:
     def __init__(self, conditions=None):
@@ -9,7 +10,7 @@ class MedicalConditions:
     @staticmethod
     def validate_condition(value): # currently only checks length of name, in real application would cross check with database of all medical condition names.
         if len(value.strip().lower()) <= 1:
-            raise ValueError("Please try to enter a recognised name for your medical condition.")
+            raise InvalidInputError("Please try to enter a recognised name for your medical condition.")
         return value.strip().lower()
 
     # =========== Edit ===========
