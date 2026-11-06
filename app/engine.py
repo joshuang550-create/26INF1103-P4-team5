@@ -1,13 +1,26 @@
+from dataclasses import dataclass
+
 from models.user_profile import UserProfile
 from models.ai_models import Gemini
 from models.openfoodfacts import OpenFoodFactsSearcher
-from models.errors import InvalidInputError, LoginFailedError, InvalidActionError
+from models.errors import InvalidInputError, LoginFailedError, InvalidActionError, AIResponseError
 
 from managers.data_manager import DataManager
 from managers.ai_manager import AIManager
-from managers.logic_manager import LogicManager, AllergenRule, NutrientThresholdRule, AIConcernRule, AllergenDetector
+from managers.logic_manager import LogicManager, AllergenRule, NutrientThresholdRule, AIConcernRule, AllergenDetector, ResponseAction
+
+# =========== Helper Type ===========
+@dataclass(frozen=True)
+class FoodCheckStep: # what the GUI gets back after running check_food and answer_questions
+    questions: tuple = () # questions the AI needs answered first. empty when the check is finished
+    outcome: object = None # an Outcome object when the check is finished, else None
+
+    @property
+    def needs_answers(self):
+        return bool(self.questions) # True or False that it needs answers
 
 
+# =========== App Engine ===========
 class AppEngine:
     def __init__(self, data_manager=None, ai_model=None, searcher=None): # optional argument for test suite
         self._data = data_manager or DataManager()
@@ -55,7 +68,7 @@ class AppEngine:
     def profile(self):
         if self._user is None:
             return None
-        return UserProfile.from_dict(self._user.to_dict()) # returns a copy, cant be edited
+        return UserProfile.from_dict(self._user.to_dict()) # returns a copy, cant be edited (still an object)
 
 
     # =========== Profile Editing ===========
@@ -95,21 +108,31 @@ class AppEngine:
         return self._data.is_valid_ethnicity(ethnicity.strip())
 
     def is_valid_condition(self, condition):
-        return self._data.is_valid_condition(condition.strip()) # use to check if it is in the csv, if it is not, run rapidfuzz
+        return self._data.is_valid_condition(condition.strip()) # returns True/False. use to check if it is in the csv, if it is not, run rapidfuzz
 
     @staticmethod
     def is_valid_barcode(barcode):
         return OpenFoodFactsSearcher.is_valid_barcode(barcode)
 
     # =========== Food Check ===========
-    def check_food():
-        pass
+    def check_food(self, food_name, barcode=""): # starts a new food check
+        profile = self._require_login()
+        food_name = self._valid_food_name(food_name)
+        product = self._find_product(barcode) # run before AI call so bad barcode doesnt matter
 
-    def answer_questions():
-        pass
+        self._reset_check()
+        return self._next_step(self._ai.check_food(profile, food_name, product))
 
-    def cancel_food_check(): # might not want to implement if adds too much complications to the rest of the code. Idea is to be able to abort
-        pass
+    def answer_questions(self, answers): # answers = {question: answer}, one for every question in the last step
+        profile = self._require_login()
+        if not self._check_in_progress:
+            raise InvalidActionError("There is no food check waiting for answers.")
+        answers = self._valid_answers(answers)
+
+        return self._next_step(self._ai.follow_up(profile, answers))
+
+    def cancel_food_check(self):
+        self._reset_check()
 
     # =========== Private Input Validation Helpers ===========
     def _valid_country(self, country):
@@ -122,12 +145,61 @@ class AppEngine:
             raise InvalidInputError(f"{ethnicity} is not a valid ethnicity.")
         return ethnicity.strip()
 
+    def _valid_food_name(self, food_name):
+        if not isinstance(food_name, str) or len(food_name.strip()) <= 1:
+            raise InvalidInputError("Please try to enter a recognised name for the food item.")
+        return food_name.strip()
+
+    def _find_product(self, barcode): # FoodProduct or None if no barcode was given or openfoodfacts doesnt know it
+        barcode = (barcode or "").strip()
+        if not barcode:
+            return None
+        if not self.is_valid_barcode(barcode):
+            raise InvalidInputError("A barcode must be 8, 12 or 13 digits, or left blank.")
+        return self._searcher.search(barcode) # raises FoodLookupError if openfoodfacts cannot be reached
+
+    def _valid_answers(self, answers):
+        if not isinstance(answers, dict):
+            raise InvalidInputError("Please answer every question.")
+        cleaned = {}
+        for question in self._questions:
+            answer = answers.get(question)
+            if not isinstance(answer, str) or not answer.strip():
+                raise InvalidInputError("Please answer every question.")
+            cleaned[question] = answer.strip()
+        return cleaned
+
     # =========== Private Food Check Helpers ===========
     def _reset_check(self):
         self._check_in_progress = False
         self._attempt = 1 # attempt number for getting an assessment from the AI (eg. low confidence)
         self._rounds = 1 # rounds of questions the AI has asked (follow up)
         self._questions = ()
+
+    def _next_step(self, assessment): # decides what the next step is after each AI response. followup, reprompt, fallback
+        while True:
+            if assessment.needs_follow_up:
+                self._rounds += 1
+                if self._rounds > self.MAX_QUESTION_ROUNDS:
+                    self._reset_check()
+                    raise AIResponseError("The AI asked too many follow-up questions. Please try again with more details about the food.")
+                self._check_in_progress = True
+                self._questions = tuple(assessment.information_needed)
+                return FoodCheckStep(questions=self._questions)
+
+            evaluation = self._logic.evaluate(assessment, self._user, self._attempt)
+
+            if evaluation.action in (ResponseAction.ACCEPT, ResponseAction.AVOID):
+                outcome = self._logic.build_outcome(evaluation)
+            elif evaluation.action is ResponseAction.REPROMPT: # not confident enough, ask the AI to look again
+                self._attempt += 1
+                assessment = self._ai.reprompt(self._user)
+                continue
+            else: # ResponseAction.FALLBACK: still not confident after the reprompt
+                outcome = self._logic.build_fallback_outcome(self._ai.fallback(self._user))
+
+            self._reset_check()
+            return FoodCheckStep(outcome=outcome)
 
     # =========== Private Session Helpers ===========
     def _start_session(self, profile):
@@ -156,5 +228,3 @@ class AppEngine:
         updated = self._copy_of_profile()
         setattr(updated, field, value)
         return self._save_updated(updated)
-
-

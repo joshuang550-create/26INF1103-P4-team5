@@ -1,2 +1,28 @@
 {
+    "mary": [
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"banana\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high cholesterol, diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 118,\n  \"nutrients\": {\n    \"sodium_mg\": 1.2,\n    \"sugar_g\": 14.4,\n    \"saturated_fat_g\": 0.1,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"You are considering a medium raw banana weighing about 118 grams. Since you have diabetes and type 1 diabetes, the natural sugars in this fruit will raise your blood sugar levels and should be accounted for in your meal planning. It is low in sodium and fat, fitting well with your high cholesterol and hypertension management.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"banana\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high cholesterol, diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 118,\n  \"nutrients\": {\n    \"sodium_mg\": 1.2,\n    \"sugar_g\": 14.4,\n    \"saturated_fat_g\": 0.1,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"You are considering a medium raw banana weighing about 118 grams. Since you have diabetes and type 1 diabetes, the natural sugars in this fruit will impact your blood sugar levels and require careful management. It is very low in sodium and fat, which aligns well with your high cholesterol and hypertension.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"banana\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high cholesterol, diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension, type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 118,\n  \"nutrients\": {\n    \"sodium_mg\": 1.2,\n    \"sugar_g\": 14.4,\n    \"saturated_fat_g\": 0.1,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"You are considering a medium raw banana weighing about 118 grams. Because you have diabetes and type 1 diabetes, the natural sugars in this fruit will raise your blood sugar and must be counted in your daily carbohydrate management. The fruit is very low in sodium and fat, which supports your high cholesterol and hypertension.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        }
+    ]
 }
