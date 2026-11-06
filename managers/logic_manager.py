@@ -119,6 +119,70 @@ class ConfidencePolicy:
         return ResponseAction.FALLBACK # not good enough even after reprompt, use fallback response
 
 
+# =========== Outcomes ===========
+class Outcome(ABC): # final output that the GUI can use
+    @property
+    @abstractmethod
+    def headline(self):
+        pass # OK, CAUTION, AVOID, UNDETERMINED
+
+    @property
+    @abstractmethod
+    def severity(self):
+        pass # Verdict
+
+    @abstractmethod
+    def details(self):
+        pass # dict of details/info to show the user
+
+    def to_dict(self):
+        return {"headline": self.headline, "severity": None if self.severity is None else self.severity.name, "details": self.details()}
+    
+
+class AssessmentOutcome(Outcome): # used when confidence score is good enough or allergen detected
+    def __init__(self, evaluation):
+        self._evaluation = evaluation
+
+    @property
+    def headline(self):
+        return self._evaluation.verdict.name
+
+    @property
+    def severity(self):
+        return self._evaluation.verdict
+
+    def details(self):
+        assessment = self._evaluation.assessment
+        return {
+            "reason": assessment.reason, # long text from the ai on why the verdict
+            "portion_g": assessment.portion_g, # the portion the nutrient amounts are based on
+            "nutrients": dict(assessment.nutrients), 
+            "flags": [{"nutrient": nutrient, "value": value, "level": level} for nutrient, value, level in self._evaluation.flags], 
+            "allergens_found": {category: list(words) for category, words in self._evaluation.allergens_found.items()}, 
+            "potential_concern": assessment.potential_concern, # true or false
+            "confidence": assessment.confidence, # float 0 to 10
+        }
+
+
+class RecommendationOutcome(Outcome):
+    def __init__(self, recommendations):
+        self._recommendations = [dict(item) for item in recommendations] # list of dicts [{"food": "Milk", "reason": "The calcium is good for your bones"}, {"": "", "": ""}]
+
+    @property
+    def headline(self):
+        return "UNDETERMINED"
+
+    @property
+    def severity(self):
+        return None
+
+    def details(self):
+        return {
+            "message": "We are unable to confidently determine whether this food suits you.",
+            "recommendations": self._recommendations
+        }
+
+
 # =========== Manager ===========
 class LogicManager:
     def __init__(self, rules, allergen_detector):
@@ -142,3 +206,10 @@ class LogicManager:
             flags = tuple(flag for r in results for flag in r.flags) # (("sodium_mg", 650, "high"), (...), (...))
 
         return Evaluation(action, verdict, flags, allergens, assessment) # if action is reprompt or fallback, go to AI, else, send to GUI
+
+    def build_outcome(self, evaluation):
+        return AssessmentOutcome(evaluation)
+
+    @staticmethod
+    def build_fallback_outcome(recommendations):
+        return RecommendationOutcome(recommendations)
