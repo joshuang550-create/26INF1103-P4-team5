@@ -67,7 +67,7 @@ class NutrientThresholdRule(RiskRule):
             if not context.profile.has_condition_matching(limits["relevant_conditions"]): # if the words in relevant_conditions matches any words in MedicalCondition's _conditions
                 continue
 
-            value = context.assessment.nutrient.get(nutrient) # try to get the value of the nutrient in assessment, if that nutrient is not in assessment, None, else get the value (in mg/g)
+            value = context.assessment.nutrients.get(nutrient) # try to get the value of the nutrient in assessment, if that nutrient is not in assessment, None, else get the value (in mg/g)
             if value is None:
                 continue
             if value > limits["high"]:
@@ -110,7 +110,7 @@ class ConfidencePolicy:
         self._max_reprompts = max_reprompts
 
     def decide(self, score, attempt_number):
-        if score >= self.min_score:
+        if score >= self._min_score:
             return ResponseAction.ACCEPT # good enough
 
         if attempt_number < self.max_reprompts + 1:
