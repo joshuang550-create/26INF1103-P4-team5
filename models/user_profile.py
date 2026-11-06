@@ -49,31 +49,31 @@ class UserProfile:
     @staticmethod
     def validate_username(value):
         if not isinstance(value, str) or not value.strip():
-            raise ValueError("Username must be a non-empty string.")
+            raise InvalidInputError("Username must be a non-empty string.")
         return value.strip()
 
     @staticmethod
     def validate_age(value):
         if not isinstance(value, int) or not 0 < value <= 120:
-            raise ValueError("Age must be an integer between 0 and 120.")
+            raise InvalidInputError("Age must be an integer between 0 and 120.")
         return value
 
     @staticmethod
     def validate_height(value):
         if not isinstance(value, (int, float)) or not 0 < value <= 260:
-            raise ValueError("Height must be between 0 and 260 cm.")
+            raise InvalidInputError("Height must be between 0 and 260 cm.")
         return value
 
     @staticmethod
     def validate_weight(value):
         if not isinstance(value, (int, float)) or not 0 < value <= 500:
-            raise ValueError("Weight must be between 0 and 500 kg.")
+            raise InvalidInputError("Weight must be between 0 and 500 kg.")
         return value
 
     @staticmethod
     def validate_gender(value):
         if not isinstance(value, str) or value.strip().lower() not in ["male", "female"]:
-            raise ValueError("Gender must be 'male' or 'female'")
+            raise InvalidInputError("Gender must be 'male' or 'female'")
         return value.strip().lower()
 
     # =========== Password Hashing ===========

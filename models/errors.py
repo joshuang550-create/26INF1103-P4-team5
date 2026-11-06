@@ -13,7 +13,6 @@ class InvalidInputError(SmartBiteError, ValueError): # also a ValueError so exce
     description = "Please check what you entered and try again."
 
 
-
 # =========== AI Errors ===========
 class AIError(SmartBiteError):
     title = "AI Error"
