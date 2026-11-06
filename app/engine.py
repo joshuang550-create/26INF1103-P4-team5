@@ -23,6 +23,8 @@ class FoodCheckStep: # what the GUI gets back after running check_food and answe
 
 # =========== App Engine ===========
 class AppEngine:
+    MAX_QUESTION_ROUNDS = 3 # incase the ai ignores the limit and keeps going, this will force break
+
     def __init__(self, data_manager=None, ai_model=None, searcher=None): # optional argument for test suite
         self._data = data_manager or DataManager()
         self._ai = AIManager(self._data, ai_model or Gemini(api_key_supplier=self._data.get_api_key))

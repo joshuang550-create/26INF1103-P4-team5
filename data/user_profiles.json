@@ -54,15 +54,8 @@
         "ethnicity": "chinese",
         "gender": "female",
         "medical_conditions": [
-            "high cholesterol",
-            "diabetes",
-            "hypertension",
-            "type 1 diabetes",
-            "hypertension",
-            "type 1 diabetes",
-            "hypertension",
-            "type 1 diabetes",
-            "hypertension"
+            "high blood pressure",
+            "prawn allergy"
         ]
     },
     "wig": {

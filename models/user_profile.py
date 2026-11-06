@@ -1,4 +1,5 @@
 import hashlib
+import re
 
 from models.errors import InvalidInputError
 
@@ -23,7 +24,7 @@ class MedicalConditions:
         to_remove = set(condition_indices)
         self._conditions = [c for i, c in enumerate(self._conditions) if i not in to_remove]
 
-    # =========== Utility ===========
+    # =========== Utility =========== 
     def matches_any(self, keywords): # returns True if any keywords are found in list of medical conditions
         return any(keyword.lower() in condition.lower() for condition in self._conditions for keyword in keywords) # no need for regex since rapidfuzz will ensure only valid medical conditions are in the list
 
@@ -163,6 +164,10 @@ class UserProfile:
     @property
     def bmi(self):
         return round(self._weight / ((self._height / 100) ** 2), 2)
+
+    @property
+    def allergies(self): # used by AllergenDetector
+        return [word for word in self.medical_conditions if re.search(r"allergy", word, re.IGNORECASE)] # works because all allergies in conditions.csv ends with the word "Allergy"
 
     # =========== Profile Edit Setters ===========
     @age.setter
