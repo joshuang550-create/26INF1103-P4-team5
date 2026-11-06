@@ -13,6 +13,16 @@ class InvalidInputError(SmartBiteError, ValueError): # also a ValueError so exce
     description = "Please check what you entered and try again."
 
 
+class LoginFailedError(SmartBiteError):
+    title = "Login Failed"
+    description = "Please enter a valid username and password."
+
+
+class InvalidActionError(SmartBiteError):
+    title = "Action Not Available"
+    description = "That action is not available right now."
+
+
 # =========== AI Errors ===========
 class AIError(SmartBiteError):
     title = "AI Error"
