@@ -56,12 +56,6 @@ class AIResponseError(AIError):
     description = "The AI gave an answer the app could not use. Please try again."
 
 
-# =========== OpenFoodFacts Error ===========
-class FoodLookupError(Exception):
-    title = "Barcode Lookup Failed"
-    description = "Could not look up that barcode right now. You can continue without barcode data, or try again."
-
-
 # =========== Data Errors ===========
 class DataError(SmartBiteError): # a data file is corrupted, or could not be read or saved
     title = "Data Error"

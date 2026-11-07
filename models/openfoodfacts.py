@@ -2,8 +2,6 @@ from dataclasses import dataclass, field
 
 import openfoodfacts
 
-from models.errors import FoodLookupError
-
 
 # =========== Helper Type ===========
 @dataclass(frozen=True)
@@ -15,6 +13,12 @@ class FoodProduct:
     ingredients: str
     allergens: tuple = () # ("shrimp", "peanut")
     nutrition_per_100g: dict = field(default_factory=dict)
+
+
+# =========== Helper Error ===========
+class FoodLookupError(Exception):
+    title = "Barcode Lookup Failed"
+    description = "Could not look up that barcode right now. You can continue without barcode data, or try again."
 
 
 # =========== Open Food Facts Searcher ===========
