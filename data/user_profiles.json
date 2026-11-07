@@ -32,12 +32,12 @@
     "ride": {
         "username": "ride",
         "password_hash": "e049bd056f936d1b39b704abcf824eaef39bd8877fcbb82b2a213ceec82bdf26",
-        "gender": "male",
         "age": 22,
-        "ethnicity": "caucasian",
-        "country": "Singapore",
         "height": 190.0,
         "weight": 80.0,
+        "country": "Singapore",
+        "ethnicity": "caucasian",
+        "gender": "male",
         "medical_conditions": [
             "diabetes",
             "high blood pressure",
@@ -47,16 +47,15 @@
     "mary": {
         "username": "mary",
         "password_hash": "6915771be1c5aa0c886870b6951b03d7eafc121fea0e80a5ea83beb7c449f4ec",
-        "gender": "female",
-        "age": 22,
-        "ethnicity": "chinese",
-        "country": "singapore",
+        "age": 50,
         "height": 160.0,
         "weight": 60.0,
+        "country": "singapore",
+        "ethnicity": "chinese",
+        "gender": "female",
         "medical_conditions": [
-            "high cholesterol",
             "high blood pressure",
-            "tmj"
+            "prawn allergy"
         ]
     },
     "wig": {
