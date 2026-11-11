@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -7,10 +8,13 @@ from matplotlib.figure import Figure
 
 from managers.logic_manager import Verdict
 from models.errors import DataError, InvalidActionError
+from progress.chart import Chart
 from progress.health_trend import HealthTrend
 from progress.tracking_engine import ProgressTrackingEngine
 from progress.trend_chart import TrendChart
 from progress.verdict_log import VerdictLog
+from progress.weekly_breakdown import WeeklyBreakdown
+from progress.weekly_chart import WeeklyChart
 
 
 def finished(verdict):
@@ -114,7 +118,7 @@ class TrendChartTests(unittest.TestCase):
     def test_render_returns_a_figure(self):
         figure = TrendChart(HealthTrend(["AVOID", "CAUTION", "OK", "OK"])).render()
         self.assertIsInstance(figure, Figure)
-        self.assertIn("improving", figure.axes[0].get_title(loc="right").lower)
+        self.assertIn("improving", figure.axes[0].get_title(loc="right").lower())
 
     def test_empty_history_shows_a_message(self):
         figure = TrendChart(HealthTrend([])).render()
@@ -182,6 +186,87 @@ class ProgressTrackingEngineTests(TempFolderTestCase):
         step = finished(Verdict.AVOID)
         self.assertIs(self.tracker(step).check_food("Prawns"), step)
 
+def at(month, day):
+    """Epoch seconds for noon on a day in 2026. Mondays: 2 Nov, 9 Nov."""
+    return datetime(2026, month, day, 12).timestamp()
+
+
+class VerdictLogEntriesTests(TempFolderTestCase):
+    def test_entries_give_timestamp_and_verdict_in_order(self):
+        log = VerdictLog(self.path)
+        log.add("jane", "Apple", "OK")
+        log.add("jane", "Prawns", "AVOID")
+        entries = log.entries("jane")
+        self.assertEqual([verdict for _time, verdict in entries], ["OK", "AVOID"])
+        self.assertLessEqual(entries[0][0], entries[1][0])
+
+    def test_entries_skip_records_without_a_valid_time(self):
+        self.path.parent.mkdir(parents=True)
+        self.path.write_text('{"jane": [{"verdict": "OK"}, {"time": 5, "verdict": "AVOID"}]}', encoding="utf-8")
+        self.assertEqual(VerdictLog(self.path).entries("jane"), [(5, "AVOID")])
+
+
+class WeeklyBreakdownTests(unittest.TestCase):
+    def test_checks_are_counted_per_week_starting_monday(self):
+        breakdown = WeeklyBreakdown([(at(11, 3), "OK"), (at(11, 8), "AVOID"), (at(11, 9), "OK")])  # Tue, Sun, next Mon
+        weeks = breakdown.weeks
+        self.assertEqual(len(weeks), 2)
+        self.assertEqual(weeks[0][0].isoformat(), "2026-11-02")
+        self.assertEqual(weeks[0][1], {"OK": 1, "CAUTION": 0, "AVOID": 1})
+        self.assertEqual(weeks[1][1], {"OK": 1, "CAUTION": 0, "AVOID": 0})
+
+    def test_quiet_weeks_in_between_are_included_as_empty(self):
+        weeks = WeeklyBreakdown([(at(10, 20), "OK"), (at(11, 10), "OK")]).weeks
+        self.assertEqual(len(weeks), 4)
+        self.assertEqual(weeks[1][1], {"OK": 0, "CAUTION": 0, "AVOID": 0})
+
+    def test_only_the_most_recent_weeks_are_kept(self):
+        entries = [(at(10, 5) + week * 7 * 86400, "OK") for week in range(12)]
+        self.assertEqual(len(WeeklyBreakdown(entries, max_weeks=8).weeks), 8)
+
+    def test_unknown_verdicts_are_ignored_and_empty_input_is_fine(self):
+        self.assertEqual(WeeklyBreakdown([(at(11, 3), "MAYBE")]).weeks, [])
+        self.assertEqual(WeeklyBreakdown([]).weeks, [])
+
+
+class WeeklyChartTests(unittest.TestCase):
+    def test_bar_heights_match_the_weekly_counts(self):
+        breakdown = WeeklyBreakdown([(at(11, 3), "OK"), (at(11, 4), "OK"), (at(11, 5), "AVOID"), (at(11, 10), "CAUTION")])
+        axes = WeeklyChart(breakdown).render().axes[0]
+        # bars are drawn OK, then CAUTION, then AVOID (2 weeks each)
+        self.assertEqual([bar.get_height() for bar in axes.patches], [1, 0, 0, 1, 1, 0])
+
+    def test_empty_history_shows_a_message(self):
+        axes = WeeklyChart(WeeklyBreakdown([])).render().axes[0]
+        self.assertEqual(axes.texts[0].get_text(), "No food checks yet")
+
+    def test_save_writes_a_png(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "weekly.png"
+            WeeklyChart(WeeklyBreakdown([(at(11, 3), "OK")])).save(path)
+            self.assertEqual(path.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+
+
+class ChartBaseTests(unittest.TestCase):
+    def test_the_base_class_cannot_be_used_directly(self):
+        with self.assertRaises(TypeError):
+            Chart()
+
+    def test_every_chart_can_be_used_through_the_same_interface(self):
+        charts = [TrendChart(HealthTrend(["OK", "AVOID"])), WeeklyChart(WeeklyBreakdown([(at(11, 3), "OK")]))]
+        for chart in charts:
+            with self.subTest(chart=type(chart).__name__):
+                self.assertIsInstance(chart, Chart)
+                self.assertIsInstance(chart.render(), Figure)
+
+
+class TrackerWeeklyTests(TempFolderTestCase):
+    def test_weekly_breakdown_uses_the_logged_in_users_checks(self):
+        log = VerdictLog(self.path)
+        tracker = ProgressTrackingEngine(FakeEngine([finished(Verdict.OK)]), log)
+        tracker.check_food("Apple")
+        weeks = tracker.weekly_breakdown().weeks
+        self.assertEqual(sum(weeks[0][1].values()), 1)
 
 if __name__ == "__main__":
     unittest.main()
