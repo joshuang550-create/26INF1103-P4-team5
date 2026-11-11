@@ -42,9 +42,8 @@ jobs:
       # Step 5: Run the Docker container.
       - name: Run Docker container
         run: |
-            run: docker run --rm smartbite python -m unittest discover -s tests -t . -v
-
-
+          docker run --rm smartbite:test python -m unittest discover -s tests -t . -v
+            
       # Step 6: Run the Python application.
       - name: Run Python application
         run: |
