@@ -24,12 +24,17 @@ class VerdictLog:
         log[username] = entries
         self._write(log)
 
-    def verdicts(self, username):
-        """ Verdict names for user, oldest first, e.g. ["OK", "AVOID", "CAUTION"] """
-        entries = self._read().get(username, [])
-        if not isinstance(entries, list):
+    def entries(self, username):
+        """ (timestamp, verdict) pair for user, oldest first """
+        raw = self._read().get(username, [])
+        if not isinstance(raw, list):
             return []
-        return [entry["verdict"] for entry in entries if isinstance(entry, dict) and "verdict" in entry]
+        return [(entry["time"], entry["verdict"]) for entry in raw
+                if isinstance(entry, dict) and isinstance(entry.get("time"), (int, float)) and "verdict" in entry]
+
+    def verdicts(self, username):
+        """ verdict names for user, oldest first - e.g. OK, AVOID, CAUTION """
+        return [verdict for _timestamp, verdict in self.entries(username)]
 
     def delete(self, username):
         log = self._read()
