@@ -1,5 +1,6 @@
 from models.errors import DataError, InvalidActionError
 from progress.health_trend import HealthTrend
+from progress.weekly_breakdown import WeeklyBreakdown
 
 
 class ProgressTrackingEngine:
@@ -34,6 +35,9 @@ class ProgressTrackingEngine:
     # ========== New ==========
     def progress_trend(self):
         return HealthTrend(self._log.verdicts(self._username()))
+
+    def weekly_breakdown(self):
+        return WeeklyBreakdown(self._log.entries(self._username()))
 
     # ========== Everyth else goes to real engine ==========
     def __getattr__(self, name):
