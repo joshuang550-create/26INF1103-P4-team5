@@ -8,8 +8,8 @@ from matplotlib.figure import Figure
 from managers.logic_manager import Verdict
 from models.errors import DataError, InvalidActionError
 from progress.health_trend import HealthTrend
-from progress.trend_chart import TrendChart
 from progress.tracking_engine import ProgressTrackingEngine
+from progress.trend_chart import TrendChart
 from progress.verdict_log import VerdictLog
 
 
