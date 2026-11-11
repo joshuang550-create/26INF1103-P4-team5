@@ -29,7 +29,7 @@ class Chart(ABC):
             axes.spines[side].set_color(GRID)
         axes.tick_params(colors=MUTED, length=0)
         axes.yaxis.grid(True, color=GRID)
-        axes.set_axiesbelow(True)
+        axes.set_axisbelow(True)
         axes.set_title(title, loc="left", fontsize=14, fontweight="bold", color=TEXT)
         return figure, axes
 
