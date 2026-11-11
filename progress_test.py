@@ -114,7 +114,7 @@ class TrendChartTests(unittest.TestCase):
     def test_render_returns_a_figure(self):
         figure = TrendChart(HealthTrend(["AVOID", "CAUTION", "OK", "OK"])).render()
         self.assertIsInstance(figure, Figure)
-        self.assertIn("improving", figure.axes[0].get_title())
+        self.assertIn("improving", figure.axes[0].get_title(loc="right").lower)
 
     def test_empty_history_shows_a_message(self):
         figure = TrendChart(HealthTrend([])).render()
