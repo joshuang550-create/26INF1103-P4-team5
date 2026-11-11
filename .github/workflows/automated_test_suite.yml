@@ -42,7 +42,8 @@ jobs:
       # Step 5: Run the Docker container.
       - name: Run Docker container
         run: |
-          docker run --rm -v smartbite_data_vol:/smartbite/data -e FERNET_SECRET_KEY="${{ secrets.FERNET_SECRET_KEY }}" smartbite:test
+            run: docker run --rm smartbite:test python -m unittest discover -s tests -t . -v
+
 
       # Step 6: Run the Python application.
       - name: Run Python application
