@@ -8,8 +8,8 @@ class HealthTrend:
     CHANGE_NEEDED = 10   # points of difference needed to call better or worse
 
     def __init__(self, verdicts, window=3):
-        self.scores = [VERDICT_SCORES[verdict] for verdict in verdicts if verdict in VERDICT_SCORES]
-        self.window = window
+        self._scores = [VERDICT_SCORES[verdict] for verdict in verdicts if verdict in VERDICT_SCORES]
+        self._window = window
 
     @property
     def scores(self):
@@ -33,8 +33,8 @@ class HealthTrend:
         recent = sum(self._scores[-half:]) / half
 
         if recent - earlier >= self.CHANGE_NEEDED:
-            return "improving!!"
+            return "improving"
         if earlier - recent >= self.CHANGE_NEEDED:
-            return "declining!!"
+            return "declining"
         return "steady"
         

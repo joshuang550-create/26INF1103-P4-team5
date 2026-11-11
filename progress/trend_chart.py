@@ -1,6 +1,6 @@
 from matplotlib.figure import Figure
 
-POINT_COLORS = {100: "#2e9e5b", 50: "#e0a526", 0: "#d64545"}
+POINT_COLORS = {100: "#2e9e5b", 50: "#e0a526", 0: "#d64545"} # OK, CAUTION, AVOID
 
 
 class TrendChart:
@@ -22,7 +22,7 @@ class TrendChart:
             checks = list(range(1, len(scores) + 1))
             axes.plot(checks, self._trend.rolling_average(), color="#3b6fb6", label="Trend (rolling average)")
             axes.scatter(checks, scores, c=[POINT_COLORS[score] for score in scores], zorder=3)
-            axes.set_yslim(-10, 110)
+            axes.set_ylim(-10, 110)
             axes.set_yticks([0, 50, 100])
             axes.set_yticklabels(["AVOID", "CAUTION", "OK"])
             axes.xaxis.get_major_locator().set_params(integer=True)

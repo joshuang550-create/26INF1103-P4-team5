@@ -3,7 +3,7 @@ import time
 from contextlib import suppress
 from pathlib import Path
 
-from models.error import DataError
+from models.errors import DataError
 
 Default_Path = Path(__file__).resolve().parent.parent / "data" / "verdict_log.json"
 
@@ -12,7 +12,7 @@ class VerdictLog:
     """ Rmbs verdict of every food checked per user in a json"""
 
     def __init__(self, path=Default_Path):
-        self.path = Path(path)
+        self._path = Path(path)
 
     # =========== Public Methods ===========
     def add(self, username, food_name, verdict):
@@ -26,13 +26,13 @@ class VerdictLog:
 
     def verdicts(self, username):
         """ Verdict names for user, oldest first, e.g. ["OK", "AVOID", "CAUTION"] """
-        entries = self.read().get(username, [])
+        entries = self._read().get(username, [])
         if not isinstance(entries, list):
             return []
         return [entry["verdict"] for entry in entries if isinstance(entry, dict) and "verdict" in entry]
 
     def delete(self, username):
-        log = self.read()
+        log = self._read()
         if username in log:
             del log[username]
             self._write(log)

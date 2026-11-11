@@ -26,7 +26,7 @@ class ProgressTrackingEngine:
         self._record(step)
         return step
 
-    def delete_check(self):
+    def delete_account(self):
         username = self._username()
         self._engine.delete_account()
         self._log.delete(username) # history gone when account gone
