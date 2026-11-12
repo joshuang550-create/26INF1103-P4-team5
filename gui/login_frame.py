@@ -19,3 +19,6 @@ class LoginFrame(ttk.Frame):
         ttk.Label(box, text="Password").grid(row=3, column=0, sticky="w", pady=4)
         self.password = ttk.Entry(box, width=28, show="•")
         self.password.grid(row=3, column=1, pady=4)
+
+        ttk.Button(box, text="Log in").grid(row=4, column=0, columnspan=2, sticky="ew", pady=(16, 4))
+        ttk.Button(box, text="Create an account", command=lambda: app.show("register")).grid(row=5, column=0, columnspan=2, sticky="ew")
