@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from gui.login_frame import LoginFrame
 
 
 class SmartBiteApp(tk.Tk):
@@ -10,7 +11,7 @@ class SmartBiteApp(tk.Tk):
         self.app.show(name)  -> switch screen ("login", "register", "home", "dashboard")
     """
 
-    SCREENS = {} # name -> screen class. Each screen is added here as it gets built
+    SCREENS = {"login": LoginFrame} # name -> screen class. Each screen is added here as it gets built
 
     def __init__(self, engine):
         super().__init__()
