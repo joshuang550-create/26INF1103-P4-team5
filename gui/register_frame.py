@@ -1,5 +1,6 @@
 from tkinter import ttk
 from models.errors import InvalidInputError
+from gui.popups import show_error
 
 
 class RegisterFrame(ttk.Frame):
@@ -35,7 +36,7 @@ class RegisterFrame(ttk.Frame):
         
         buttons = ttk.Frame(self)
         buttons.grid(row=len(rows) + 1, column=0, columnspan=3, sticky="w", pady=(20, 0))
-        ttk.Button(buttons, text="Create account").pack(side="left")
+        ttk.Button(buttons, text="Create account", command=self._register).pack(side="left")
         ttk.Button(buttons, text="Back to login", command=lambda: app.show("login")).pack(side="left", padx=8)
 
 
@@ -49,3 +50,23 @@ class RegisterFrame(ttk.Frame):
             return kind(text.strip())
         except ValueError:
             raise InvalidInputError(f"{label} must be a number.") from None
+
+    
+    def _register(self):
+        get = lambda key: self.fields[key].get() # noqa: E731
+        try:
+            self.app.engine.register(
+                username=get("username"),
+                plain_password=get("password"),
+                gender=get("gender"),
+                age=self._number(get("age"), "Age", int),
+                ethnicity=get("ethnicity"),
+                country=get("country"),
+                height=self._number(get("height"), "Height", float),
+                weight=self._number(get("weight"), "Weight", float),
+                medical_conditions=self._conditions() or None,
+            )
+        except Exception as error: # noqa: BLE001
+            show_error(error, self)
+            return
+        self.app.show("home") # register() also logs the user in
