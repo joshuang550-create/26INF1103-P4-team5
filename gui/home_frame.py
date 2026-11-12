@@ -41,6 +41,7 @@ class HomeFrame(ttk.Frame):
 
     # ---- result ----
         self.verdict = tk.Label(self, font=("Helvetica", 22, "bold"), fg="white", padx=14, pady=6)
+        self.result = tk.Text(self, wrap="word", height=16, relief="flat", font=("Helvetica", 12), padx=10, pady=10)
     
     # =========== Food Check Flow ===========
     def _start_check(self):
@@ -74,3 +75,11 @@ class HomeFrame(ttk.Frame):
         headline = outcome.headline
         self.verdict.config(text=f"{headline} – {VERDICT_MEANING.get(headline, '')}", bg=VERDICT_COLOURS.get(headline, "#8a9099"))
         self.verdict.pack(anchor="w")
+        self.result.pack(fill="both", expand=True, pady=(10, 0))
+        
+        details = outcome.details()
+        self.result.config(state="normal")
+        self.result.delete("1.0", "end")
+        self.result.insert("end", details["reason"] + "\n")
+        self.result.insert("end", f"\nAI confidence: {details['confidence']}/10")
+        self.result.config(state="disabled") # read only
