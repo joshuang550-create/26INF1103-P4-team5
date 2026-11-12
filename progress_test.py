@@ -1,14 +1,17 @@
 import tempfile
 import unittest
+from dataclasses import FrozenInstanceError
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 from matplotlib.figure import Figure
 
 from managers.logic_manager import Verdict
-from models.errors import DataError, InvalidActionError
-from progress.chart import Chart
+from models.errors import DataError, InvalidActionError, UnexpectedError
+from progress.chart import FALLBACK_TEXT, Chart
+from progress.chart_result import ChartResult
 from progress.health_trend import HealthTrend
 from progress.tracking_engine import ProgressTrackingEngine
 from progress.trend_chart import TrendChart
@@ -267,6 +270,116 @@ class TrackerWeeklyTests(TempFolderTestCase):
         tracker.check_food("Apple")
         weeks = tracker.weekly_breakdown().weeks
         self.assertEqual(sum(weeks[0][1].values()), 1)
+
+class BrokenChart(Chart):
+    """A chart that can never be drawn but can still describe itself in words."""
+
+    def render(self):
+        raise RuntimeError("matplotlib exploded")
+
+    def _describe(self):
+        return "Plain text version"
+
+
+class VeryBrokenChart(BrokenChart):
+    def _describe(self):
+        raise RuntimeError("the text version failed too")
+
+
+class ExplodingEngine:
+    """An engine that fails in a way nobody planned for."""
+
+    @property
+    def profile(self):
+        raise RuntimeError("engine exploded")
+
+
+class ChartResultTests(unittest.TestCase):
+    def test_a_working_chart_gives_a_graph_and_no_text(self):
+        result = TrendChart(HealthTrend(["OK", "AVOID"])).result()
+        self.assertIsInstance(result.graph, Figure)
+        self.assertEqual(result.default, "")
+        self.assertTrue(result.has_graph)
+
+    def test_a_chart_that_cannot_be_drawn_gives_its_own_text(self):
+        result = BrokenChart().result()
+        self.assertIsNone(result.graph)
+        self.assertEqual(result.default, "Plain text version")
+        self.assertFalse(result.has_graph)
+
+    def test_a_chart_that_cannot_even_describe_itself_gives_the_generic_message(self):
+        self.assertEqual(VeryBrokenChart().result().default, FALLBACK_TEXT)
+
+    def test_the_text_for_a_real_chart_comes_from_its_data(self):
+        trend = HealthTrend(["AVOID", "AVOID", "OK", "OK"])
+        with mock.patch.object(TrendChart, "render", side_effect=RuntimeError("boom")):
+            result = TrendChart(trend).result()
+        self.assertIsNone(result.graph)
+        self.assertEqual(result.default, trend.summary())
+
+    def test_the_result_cannot_be_changed(self):
+        with self.assertRaises(FrozenInstanceError):
+            ChartResult().default = "changed"
+
+
+class SummaryTests(unittest.TestCase):
+    def test_trend_summary_with_no_or_few_checks(self):
+        self.assertIn("No food checks yet", HealthTrend([]).summary())
+        self.assertIn("1 food check so far", HealthTrend(["OK"]).summary())
+        self.assertIn("3 food checks so far", HealthTrend(["OK", "OK", "AVOID"]).summary())
+
+    def test_trend_summary_describes_the_direction_and_counts(self):
+        improving = HealthTrend(["AVOID", "AVOID", "OK", "OK"]).summary()
+        self.assertIn("improving", improving)
+        self.assertIn("2 OK, 0 CAUTION and 0 AVOID", improving)   # latest two
+        self.assertIn("0 OK, 0 CAUTION and 2 AVOID", improving)   # earliest two
+        self.assertIn("less healthy", HealthTrend(["OK", "OK", "AVOID", "AVOID"]).summary())
+        self.assertIn("steady", HealthTrend(["OK", "CAUTION", "OK", "CAUTION"]).summary())
+
+    def test_weekly_summary(self):
+        self.assertIn("No food checks yet", WeeklyBreakdown([]).summary())
+        summary = WeeklyBreakdown([(at(11, 3), "OK"), (at(11, 4), "AVOID"), (at(11, 10), "OK")]).summary()
+        self.assertIn("3 food checks", summary)
+        self.assertIn("2 OK, 0 CAUTION and 1 AVOID", summary)
+        self.assertIn("starting 09 Nov", summary)
+
+
+class TrackerChartTests(TempFolderTestCase):
+    def setUp(self):
+        super().setUp()
+        self.log = VerdictLog(self.path)
+
+    def tracker(self, engine=None):
+        return ProgressTrackingEngine(FakeEngine([]) if engine is None else engine, self.log)
+
+    def test_both_charts_come_back_as_graphs_when_everything_works(self):
+        self.log.add("jane", "Apple", "OK")
+        tracker = self.tracker()
+        for result in (tracker.trend_chart(), tracker.weekly_chart()):
+            self.assertIsInstance(result.graph, Figure)
+
+    def test_a_user_with_no_checks_still_gets_a_graph(self):
+        self.assertIsInstance(self.tracker().trend_chart().graph, Figure)
+
+    def test_logged_out_gives_text_instead_of_raising(self):
+        engine = FakeEngine([])
+        engine.profile = None
+        result = self.tracker(engine).trend_chart()
+        self.assertIsNone(result.graph)
+        self.assertIn("log in first", result.default)
+
+    def test_unreadable_history_gives_text_instead_of_raising(self):
+        self.path.parent.mkdir(parents=True)
+        self.path.write_text("{corrupt", encoding="utf-8")
+        result = self.tracker().weekly_chart()
+        self.assertIsNone(result.graph)
+        self.assertIn("corrupted", result.default)
+
+    def test_an_unexpected_failure_gives_the_default_error_text(self):
+        result = self.tracker(ExplodingEngine()).trend_chart()
+        self.assertIsNone(result.graph)
+        self.assertEqual(result.default, UnexpectedError().description)
+
 
 if __name__ == "__main__":
     unittest.main()
