@@ -25,6 +25,8 @@ class DashboardFrame(ttk.Frame):
 
     def on_show(self): # redraw every time, so new checks appear
         self._draw(self.trend_tab, self.app.engine.trend_chart())
+        self._draw(self.weekly_tab, self.app.engine.weekly_chart())
+        
 
     @staticmethod
     def _draw(tab, chart_result):
