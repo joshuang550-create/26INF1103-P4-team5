@@ -80,18 +80,23 @@ class HomeFrame(ttk.Frame):
         details = outcome.details()
         self.result.config(state="normal")
         self.result.delete("1.0", "end")
-        self.result.insert("end", details["reason"] + "\n")
-        if details["allergens_found"]:
-            self.result.insert("end", "\nAllergens found:\n")
-            for category, words in details["allergens_found"].items():
-                self.result.insert("end", f"  • {category.replace('_', ' ')}: {', '.join(words)}\n")
-        if details["flags"]:
-            self.result.insert("end", "\nFlagged nutrients:\n")
-            for flag in details["flags"]:
-                self.result.insert("end", f"  • {flag['nutrient']}: {flag['value']} ({flag['level']})\n")
-        if details["nutrients"]:
-            self.result.insert("end", f"\nNutrients per {details['portion_g']} g:\n")
-            for nutrient, value in details["nutrients"].items():
-                self.result.insert("end", f"  • {nutrient}: {value}\n")
-        self.result.insert("end", f"\nAI confidence: {details['confidence']}/10")
+        if outcome.severity is None: # RecommendationOutcome (fallback)
+            self.result.insert("end", details["message"] + "\n\nYou could try instead:\n")
+            for item in details.get("recommendations", []):
+                self.result.insert("end", f"  • {item.get('food', '')}: {item.get('reason', '')}\n")
+        else: # AssessmentOutcome
+            self.result.insert("end", details["reason"] + "\n")
+            if details["allergens_found"]:
+                self.result.insert("end", "\nAllergens found:\n")
+                for category, words in details["allergens_found"].items():
+                    self.result.insert("end", f"  • {category.replace('_', ' ')}: {', '.join(words)}\n")
+            if details["flags"]:
+                self.result.insert("end", "\nFlagged nutrients:\n")
+                for flag in details["flags"]:
+                    self.result.insert("end", f"  • {flag['nutrient']}: {flag['value']} ({flag['level']})\n")
+            if details["nutrients"]:
+                self.result.insert("end", f"\nNutrients per {details['portion_g']} g:\n")
+                for nutrient, value in details["nutrients"].items():
+                    self.result.insert("end", f"  • {nutrient}: {value}\n")
+            self.result.insert("end", f"\nAI confidence: {details['confidence']}/10")
         self.result.config(state="disabled") # read only
