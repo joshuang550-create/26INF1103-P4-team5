@@ -1,6 +1,9 @@
-from models.errors import DataError, InvalidActionError
+from models.errors import DataError, InvalidActionError, as_app_error
+from progress.chart_result import ChartResult
 from progress.health_trend import HealthTrend
+from progress.trend_chart import TrendChart
 from progress.weekly_breakdown import WeeklyBreakdown
+from progress.weekly_chart import WeeklyChart
 
 
 class ProgressTrackingEngine:
@@ -39,6 +42,13 @@ class ProgressTrackingEngine:
     def weekly_breakdown(self):
         return WeeklyBreakdown(self._log.entries(self._username()))
 
+    # =========== Charts for GUI (these never raise) ===========
+    def trend_chart(self):
+        return self._chart_result(lambda: TrendChart(self.progress_trend()))
+
+    def weekly_chart(self):
+        return self._chart_result(lambda: WeeklyChart(self.weekly_breakdown()))
+    
     # ========== Everyth else goes to real engine ==========
     def __getattr__(self, name):
         return getattr(self._engine, name)
@@ -49,6 +59,12 @@ class ProgressTrackingEngine:
         if profile is None:
             raise InvalidActionError("No account logged in. Please log in first.")
         return profile.username
+
+    def _chart_result(self, make_chart):
+        try:
+            return make_chart().result()  # result() never raises; making the chart can (not logged in, unreadable history)
+        except Exception as error:  # GUI always get something to show
+            return ChartResult(default=as_app_error(error).description)
 
     def _record(self, step):
         outcome = step.outcome
