@@ -49,3 +49,6 @@ class TrendChart(Chart):
     @staticmethod
     def _dot_colour(score):
         return COLORS["OK"] if score == 100 else COLORS["CAUTION"] if score == 50 else COLORS["AVOID"]
+
+    def _describe(self):
+        return self._trend.summary()

@@ -2,10 +2,14 @@ from abc import ABC, abstractmethod
 
 from matplotlib.figure import Figure
 
+from progress.chart_result import ChartResult
+
 COLORS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B"}
 TEXT = "#2b2f36"
 MUTED = "#8a9099"
 GRID = "#e6e8ec"
+
+FALLBACK_TEXT = "There was an issue generating your dashboard, please try again later."
 
 
 class Chart(ABC):
@@ -15,10 +19,27 @@ class Chart(ABC):
     def render(self):
         pass # returns matplotlib fig
 
+    @abstractmethod
+    def _describe(self):
+        pass # text if graph cannot be drawn
+
+    def result(self):
+        """ GUI - nvr raises: a ChartResult with graph, or text to show instead """
+        try:
+            return ChartResult(graph=self.render())
+        except Exception: # GUI always get smtg back, so nth escape
+            return self._text_result()
+
     def save(self, path):
         self.render().savefig(path, dpi=150, bbox_inches="tight", facecolor="white")
 
-    # ========== subclass helpers ==========
+    # ========== helpers ==========
+    def _text_result(self):
+        try:
+            return ChartResult(default=self._describe())
+        except Exception: # text version fail
+            return ChartResult(default=FALLBACK_TEXT)
+
     def _blank_axes(self, title):
         figure = Figure(figsize=(7.5, 4.6), layout="constrained")
         axes = figure.subplots()

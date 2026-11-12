@@ -32,3 +32,6 @@ class WeeklyChart(Chart):
         axes.yaxis.get_major_locator().set_params(integer=True)
         figure.legend(loc="outside lower center", ncols=3, frameon=False)
         return figure
+
+    def _describe(self):
+        return self._breakdow.summary()
