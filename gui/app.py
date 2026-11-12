@@ -1,5 +1,7 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
+from gui.popups import show_error
 from gui.login_frame import LoginFrame
 from gui.register_frame import RegisterFrame
 
@@ -41,3 +43,8 @@ class SmartBiteApp(tk.Tk):
         if hasattr(screen, "on_show"): # lets a screen refresh itself (eg. dashboard redraws charts)
             screen.on_show()
         screen.tkraise()
+
+    
+    def logout(self):
+        self.engine.logout()
+        self.show("login")
