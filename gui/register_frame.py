@@ -1,4 +1,5 @@
 from tkinter import ttk
+from models.errors import InvalidInputError
 
 
 class RegisterFrame(ttk.Frame):
@@ -31,3 +32,8 @@ class RegisterFrame(ttk.Frame):
                 widget = ttk.Entry(self, width=36, show="•" if key == "password" else "")
             widget.grid(row=row, column=1, sticky="w", pady=4)
             self.fields[key] = widget
+        
+        buttons = ttk.Frame(self)
+        buttons.grid(row=len(rows) + 1, column=0, columnspan=3, sticky="w", pady=(20, 0))
+        ttk.Button(buttons, text="Create account").pack(side="left")
+        ttk.Button(buttons, text="Back to login", command=lambda: app.show("login")).pack(side="left", padx=8)
