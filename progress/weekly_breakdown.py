@@ -15,6 +15,18 @@ class WeeklyBreakdown:
         """[(monday, {"OK":2, "CAUTION": 1, "AVOID": 0}), ...] oldest first, weeks with no checks included. """
         return [(monday, dict(counts)) for monday, counts in self._weeks]
 
+    def summary(self):
+        """A plain-English description of the weeks, for when the chart cannot be shown."""
+        if not self._weeks:
+            return "No food checks yet. Check a food to start your progress history."
+
+        totals = {name: sum(counts[name] for _monday, counts in self._weeks) for name in VERDICTS}
+        latest_monday, latest = self._weeks[-1]
+        return (f"Over the last {len(self._weeks)} week{'' if len(self._weeks) == 1 else 's'} you made "
+                f"{sum(totals.values())} food checks: {totals['OK']} OK, {totals['CAUTION']} CAUTION and {totals['AVOID']} AVOID. "
+                f"The week starting {latest_monday.strftime('%d %b')} had "
+                f"{latest['OK']} OK, {latest['CAUTION']} CAUTION and {latest['AVOID']} AVOID.")
+
     # ========== Private Methods ==========
     def _group(self, entries):
         by_week = {}

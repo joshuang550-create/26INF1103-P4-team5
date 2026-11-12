@@ -37,4 +37,26 @@ class HealthTrend:
         if earlier - recent >= self.CHANGE_NEEDED:
             return "declining"
         return "steady"
-        
+
+    def summary(self):
+        """ description of trend, when chart cannot be shown """
+        total = len(self._scores)
+        if total == 0:
+            return "No food checks recorded. Start cheking to start progress history."
+        if total < self.MIN_CHECKS:
+            return (f"You have {total} food check{'' if total == 1 else 's'} so far."
+                    "Check a few more to see how your choices are trending.")
+
+        half = total // 2
+        opening = {"improving": "Your food checks are improving.", 
+                   "declining": "Your food checks are getting less helathy.",
+                   "steady": "Your food checks have been steady"}[self.direction()]
+        return (f"{opening} Your latest {half} checks had {self._counts_text(self._scores[-half:])}, "
+                f"compared with {self._counts_text(self._scores[:half])} in your earliest {half}.")
+
+    # ========== Private Methods ==========
+    @staticmethod
+    def _counts_text(scores):
+        return (f"{scores.count(VERDICT_SCORES['OK'])} OK, "
+                f"{scores.count(VERDICT_SCORES['CAUTION'])} CAUTION and "
+                f"{scores.count(VERDICT_SCORES['AVOID'])} AVOID")
