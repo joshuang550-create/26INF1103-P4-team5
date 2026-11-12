@@ -37,3 +37,15 @@ class RegisterFrame(ttk.Frame):
         buttons.grid(row=len(rows) + 1, column=0, columnspan=3, sticky="w", pady=(20, 0))
         ttk.Button(buttons, text="Create account").pack(side="left")
         ttk.Button(buttons, text="Back to login", command=lambda: app.show("login")).pack(side="left", padx=8)
+
+
+    # =========== Submit ===========
+    def _conditions(self):
+        return [part.strip() for part in self.fields["conditions"].get().split(",") if part.strip()]
+
+    @staticmethod
+    def _number(text, label, kind):
+        try:
+            return kind(text.strip())
+        except ValueError:
+            raise InvalidInputError(f"{label} must be a number.") from None
