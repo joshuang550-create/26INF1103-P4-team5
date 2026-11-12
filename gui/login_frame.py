@@ -1,4 +1,5 @@
 from tkinter import ttk
+from gui.popups import show_error
 
 
 class LoginFrame(ttk.Frame):
@@ -19,6 +20,19 @@ class LoginFrame(ttk.Frame):
         ttk.Label(box, text="Password").grid(row=3, column=0, sticky="w", pady=4)
         self.password = ttk.Entry(box, width=28, show="•")
         self.password.grid(row=3, column=1, pady=4)
+        self.password.bind("<Return>", lambda _event: self._login())
 
-        ttk.Button(box, text="Log in").grid(row=4, column=0, columnspan=2, sticky="ew", pady=(16, 4))
+        ttk.Button(box, text="Log in", command=self._login).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(16, 4))
         ttk.Button(box, text="Create an account", command=lambda: app.show("register")).grid(row=5, column=0, columnspan=2, sticky="ew")
+
+    def on_show(self):
+        self.password.delete(0, "end")
+        self.username.focus_set()
+
+    def _login(self):
+        try:
+            self.app.engine.login(self.username.get().strip(), self.password.get())
+        except Exception as error: # noqa: BLE001 - LoginFailedError, DataError, ...
+            show_error(error, self)
+            return
+        self.app.show("home")
