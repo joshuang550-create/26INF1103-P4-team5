@@ -35,7 +35,7 @@ class RegisterFrame(ttk.Frame):
             self.fields[key] = widget
         
                 # live validation hints, uses the engine's is_valid_* helpers
-        self.hints = {key: ttk.Label(self, foreground="#E5534B") for key in ("username", "country", "ethnicity")}
+        self.hints = {key: ttk.Label(self, foreground="#E5534B") for key in ("username", "country", "ethnicity", "conditions")}
         for key, hint in self.hints.items():
             hint.grid(row=[r[0] for r in rows].index(key) + 1, column=2, sticky="w", padx=8)
             self.fields[key].bind("<FocusOut>", lambda _event, k=key: self._check_field(k))
@@ -56,6 +56,9 @@ class RegisterFrame(ttk.Frame):
             message = "Not a recognised country"
         elif key == "ethnicity" and value and not engine.is_valid_ethnicity(value):
             message = "Not a recognised ethnicity"
+        elif key == "conditions":
+            unknown = [c for c in self._conditions() if not engine.is_valid_condition(c)]
+            message = f"Not recognised: {', '.join(unknown)}" if unknown else ""
         self.hints[key].config(text=message)
 
     # =========== Submit ===========
