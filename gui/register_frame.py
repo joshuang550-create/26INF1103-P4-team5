@@ -34,11 +34,29 @@ class RegisterFrame(ttk.Frame):
             widget.grid(row=row, column=1, sticky="w", pady=4)
             self.fields[key] = widget
         
+                # live validation hints, uses the engine's is_valid_* helpers
+        self.hints = {key: ttk.Label(self, foreground="#E5534B") for key in ("username", "country", "ethnicity")}
+        for key, hint in self.hints.items():
+            hint.grid(row=[r[0] for r in rows].index(key) + 1, column=2, sticky="w", padx=8)
+            self.fields[key].bind("<FocusOut>", lambda _event, k=key: self._check_field(k))
+
         buttons = ttk.Frame(self)
         buttons.grid(row=len(rows) + 1, column=0, columnspan=3, sticky="w", pady=(20, 0))
         ttk.Button(buttons, text="Create account", command=self._register).pack(side="left")
         ttk.Button(buttons, text="Back to login", command=lambda: app.show("login")).pack(side="left", padx=8)
 
+    # =========== Live Validation ===========
+    def _check_field(self, key):
+        value = self.fields[key].get().strip()
+        engine = self.app.engine
+        message = ""
+        if key == "username" and value and engine.is_username_taken(value):
+            message = "Username taken"
+        elif key == "country" and value and not engine.is_valid_country(value):
+            message = "Not a recognised country"
+        elif key == "ethnicity" and value and not engine.is_valid_ethnicity(value):
+            message = "Not a recognised ethnicity"
+        self.hints[key].config(text=message)
 
     # =========== Submit ===========
     def _conditions(self):
