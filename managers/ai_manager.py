@@ -9,7 +9,7 @@ from models.errors import AIResponseError
 
 # =========== Helper Types ===========
 @dataclass(frozen=True)
-class Assessment: # this is the final output of ai manager. returned by (AIResponseValidator's validate method)? maybe, maybe not
+class Assessment:
     information_needed: list
     portion_g: float
     nutrients: dict
