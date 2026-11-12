@@ -63,7 +63,7 @@ class ProgressTrackingEngine:
     def _chart_result(self, make_chart):
         try:
             return make_chart().result()  # result() never raises; making the chart can (not logged in, unreadable history)
-        except Exception as error:  # GUI always get something to show
+        except Exception as error:  # noqa: BLE001
             return ChartResult(default=as_app_error(error).description)
 
     def _record(self, step):

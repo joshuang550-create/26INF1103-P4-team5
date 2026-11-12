@@ -27,7 +27,8 @@ class Chart(ABC):
         """ GUI - nvr raises: a ChartResult with graph, or text to show instead """
         try:
             return ChartResult(graph=self.render())
-        except Exception: # GUI always get smtg back, so nth escape
+        # GUI always get something back, so nth escape
+        except Exception: # noqa: BLE001
             return self._text_result()
 
     def save(self, path):
@@ -37,7 +38,8 @@ class Chart(ABC):
     def _text_result(self):
         try:
             return ChartResult(default=self._describe())
-        except Exception: # text version fail
+        # text version fail not escape
+        except Exception: # noqa: BLE001
             return ChartResult(default=FALLBACK_TEXT)
 
     def _blank_axes(self, title):
