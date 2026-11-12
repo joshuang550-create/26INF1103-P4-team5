@@ -31,6 +31,7 @@ class SmartBiteApp(tk.Tk):
             screen = screen_class(container, self)
             screen.grid(row=0, column=0, sticky="nsew") # all stacked on top of each other, show() raises one
             self._screens[name] = screen
+        self.show("login")
 
     
     # =========== Navigation ===========
