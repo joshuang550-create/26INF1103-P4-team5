@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+
 from gui.popups import show_error
 from gui.questions_dialog import QuestionsDialog
 
 VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
 VERDICT_MEANING = {"OK": "Okay to eat", "CAUTION": "Eat with caution", "AVOID": "Best to avoid", "UNDETERMINED": "Could not decide"}
+
 
 class HomeFrame(ttk.Frame):
     """ Main screen: type a food (+ optional barcode) -> check_food -> maybe follow-up questions -> show Outcome. """
@@ -21,10 +23,7 @@ class HomeFrame(ttk.Frame):
         ttk.Button(top, text="Log out", command=app.logout).pack(side="right")
         ttk.Button(top, text="My progress", command=lambda: app.show("dashboard")).pack(side="right", padx=8)
 
-    def on_show(self):
-        profile = self.app.engine.profile
-        self.welcome.config(text=f"Hi, {profile.username}" if profile else "")
-    
+        # ---- input ----
         form = ttk.LabelFrame(self, text="Check a food", padding=12)
         form.pack(fill="x", pady=16)
         ttk.Label(form, text="Food name").grid(row=0, column=0, sticky="w")
@@ -38,12 +37,8 @@ class HomeFrame(ttk.Frame):
         self.food.bind("<Return>", lambda _event: self._start_check())
         self.status = ttk.Label(form, foreground="#8a9099")
         self.status.grid(row=2, column=0, columnspan=3, sticky="w", pady=(6, 0))
-        self.food.delete(0, "end")
-        self.barcode.delete(0, "end")
-        self.verdict.pack_forget()
-        self.result.pack_forget()
-        self.status.config(text="")
 
+        # ---- result ----
     # ---- result ----
         self.verdict = tk.Label(self, font=("Helvetica", 22, "bold"), fg="white", padx=14, pady=6)
         self.result = tk.Text(self, wrap="word", height=16, relief="flat", font=("Helvetica", 12), padx=10, pady=10)
