@@ -38,6 +38,11 @@ class HomeFrame(ttk.Frame):
         self.food.bind("<Return>", lambda _event: self._start_check())
         self.status = ttk.Label(form, foreground="#8a9099")
         self.status.grid(row=2, column=0, columnspan=3, sticky="w", pady=(6, 0))
+        self.food.delete(0, "end")
+        self.barcode.delete(0, "end")
+        self.verdict.pack_forget()
+        self.result.pack_forget()
+        self.status.config(text="")
 
     # ---- result ----
         self.verdict = tk.Label(self, font=("Helvetica", 22, "bold"), fg="white", padx=14, pady=6)
