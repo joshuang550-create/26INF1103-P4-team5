@@ -1,7 +1,10 @@
+import tkinter as tk
 from tkinter import ttk
 from gui.popups import show_error
 from gui.questions_dialog import QuestionsDialog
 
+VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
+VERDICT_MEANING = {"OK": "Okay to eat", "CAUTION": "Eat with caution", "AVOID": "Best to avoid", "UNDETERMINED": "Could not decide"}
 
 class HomeFrame(ttk.Frame):
     """ Main screen: type a food (+ optional barcode) -> check_food -> maybe follow-up questions -> show Outcome. """
@@ -36,6 +39,8 @@ class HomeFrame(ttk.Frame):
         self.status = ttk.Label(form, foreground="#8a9099")
         self.status.grid(row=2, column=0, columnspan=3, sticky="w", pady=(6, 0))
 
+    # ---- result ----
+        self.verdict = tk.Label(self, font=("Helvetica", 22, "bold"), fg="white", padx=14, pady=6)
     
     # =========== Food Check Flow ===========
     def _start_check(self):
@@ -57,8 +62,15 @@ class HomeFrame(ttk.Frame):
             self._busy("Thinking about your answers...")
             self.app.run_in_background(lambda: self.app.engine.answer_questions(dialog.answers), self._handle_step)
             return
-        self.status.config(text=f"Verdict: {step.outcome.headline}") # proper result display comes next
+        self._show_outcome(step.outcome)        
 
     def _busy(self, message):
         self.status.config(text=message or "")
         self.check_button.config(state="disabled" if message else "normal")
+
+    
+    # =========== Showing the Outcome ===========
+    def _show_outcome(self, outcome):
+        headline = outcome.headline
+        self.verdict.config(text=f"{headline} – {VERDICT_MEANING.get(headline, '')}", bg=VERDICT_COLOURS.get(headline, "#8a9099"))
+        self.verdict.pack(anchor="w")
