@@ -45,6 +45,17 @@ class RegisterFrame(ttk.Frame):
         ttk.Button(buttons, text="Create account", command=self._register).pack(side="left")
         ttk.Button(buttons, text="Back to login", command=lambda: app.show("login")).pack(side="left", padx=8)
 
+
+    def on_show(self):
+        for widget in self.fields.values():
+            if isinstance(widget, ttk.Combobox):
+                widget.set("") # readonly combobox can't use delete()
+            else:
+                widget.delete(0, "end")
+        for hint in self.hints.values():
+            hint.config(text="")
+
+
     # =========== Live Validation ===========
     def _check_field(self, key):
         value = self.fields[key].get().strip()
