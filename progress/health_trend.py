@@ -42,14 +42,14 @@ class HealthTrend:
         """ description of trend, when chart cannot be shown """
         total = len(self._scores)
         if total == 0:
-            return "No food checks recorded. Start cheking to start progress history."
+            return "No food checks yet. Check a food to start your progress history."
         if total < self.MIN_CHECKS:
             return (f"You have {total} food check{'' if total == 1 else 's'} so far."
                     "Check a few more to see how your choices are trending.")
 
         half = total // 2
         opening = {"improving": "Your food checks are improving.", 
-                   "declining": "Your food checks are getting less helathy.",
+                   "declining": "Your food checks are getting less healthy.",
                    "steady": "Your food checks have been steady"}[self.direction()]
         return (f"{opening} Your latest {half} checks had {self._counts_text(self._scores[-half:])}, "
                 f"compared with {self._counts_text(self._scores[:half])} in your earliest {half}.")
