@@ -1,10 +1,21 @@
 """Business rules, severity scoring, confidence routing and outcome objects."""
 import unittest
 
-from managers.ai_manager import Assessment
-from managers.logic_manager import (AllergenDetector, AllergenRule, AIConcernRule, AssessmentOutcome, ConfidencePolicy,
-                                    LogicManager, NutrientThresholdRule, RecommendationOutcome, ResponseAction,
-                                    RiskContext, RiskRule, RuleResult, Verdict)
+from ai.assessment import Assessment
+from managers.logic_manager import LogicManager
+from logic.allergen_detector import AllergenDetector
+from logic.confidence_policy import ConfidencePolicy
+from logic.response_action import ResponseAction
+from logic.rules.ai_concern_rule import AIConcernRule
+from logic.rules.allergen_rule import AllergenRule
+from logic.rules.nutrient_threshold_rule import NutrientThresholdRule
+from logic.rules.risk_context import RiskContext
+from logic.rules.risk_rule import RiskRule
+from logic.rules.rule_result import RuleResult
+from logic.outcomes.assessment_outcome import AssessmentOutcome
+from logic.outcomes.recommendation_outcome import RecommendationOutcome
+from logic.verdict import Verdict
+
 from tests.helpers import NUTRIENT_KEYS, make_profile
 
 THRESHOLDS = {

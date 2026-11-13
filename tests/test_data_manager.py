@@ -8,7 +8,8 @@ from unittest import mock
 from cryptography.fernet import Fernet
 
 from managers.data_manager import DataManager
-from models.errors import ConfigurationError, DataError
+from exceptions.configuration_error import ConfigurationError
+from exceptions.data_error import DataError
 from tests.helpers import TempDataTestCase, make_profile
 
 

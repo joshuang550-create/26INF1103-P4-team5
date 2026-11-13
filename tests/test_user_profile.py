@@ -1,8 +1,9 @@
 """UserProfile and MedicalConditions: validation and behaviour."""
 import unittest
 
-from models.errors import InvalidInputError
-from models.user_profile import MedicalConditions, UserProfile
+from exceptions.invalid_input_error import InvalidInputError
+from models.user_profile import UserProfile
+from models.medical_conditions import MedicalConditions
 from tests.helpers import make_profile
 
 

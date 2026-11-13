@@ -2,7 +2,8 @@
 import unittest
 from types import SimpleNamespace
 
-from models.openfoodfacts import FoodLookupError, OpenFoodFactsSearcher
+from services.openfoodfacts.food_lookup_error import FoodLookupError
+from services.openfoodfacts.openfoodfacts_searcher import OpenFoodFactsSearcher
 
 
 def searcher_returning(raw=None, error=None):

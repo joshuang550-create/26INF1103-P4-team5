@@ -1,8 +1,10 @@
 """AIManager: prompt building, retrying on malformed output, fallback and chat history."""
 import unittest
 
-from managers.ai_manager import AIManager, PromptBuilder
-from models.errors import AIConnectionError, AIResponseError
+from managers.ai_manager import AIManager
+from ai.prompt_builder import PromptBuilder
+from exceptions.ai_connection_error import AIConnectionError
+from exceptions.ai_response_error import AIResponseError
 from tests.helpers import FakeModel, TempDataTestCase, ai_reply, fallback_reply, make_profile, sample_product
 
 

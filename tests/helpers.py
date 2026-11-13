@@ -6,10 +6,11 @@ import tempfile
 import unittest
 from unittest import mock
 
-from app.engine import AppEngine
+from app.app_engine import AppEngine
 from managers.data_manager import DataManager
-from models.ai_models import AIModel, ModelResponse
-from models.openfoodfacts import FoodProduct
+from ai.providers.ai_model import AIModel
+from ai.providers.model_response import ModelResponse
+from services.openfoodfacts.food_product import FoodProduct
 from models.user_profile import UserProfile
 
 NUTRIENT_KEYS = ("sodium_mg", "sugar_g", "saturated_fat_g", "trans_fat_g")
