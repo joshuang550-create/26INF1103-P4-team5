@@ -1,2 +1,88 @@
 {
+    "mary": [
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"banana\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, prawn allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 118,\n  \"nutrients\": {\n    \"sodium_mg\": 1.2,\n    \"sugar_g\": 14.4,\n    \"saturated_fat_g\": 0.1,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"You are considering a medium raw banana weighing about 118 grams. This fruit is naturally very low in sodium, which fits well with your high blood pressure. It contains no ingredients related to your allergies.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 90\n}"
+        }
+    ],
+    "ride": [
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"cake\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 190.0 cm\n- Weight: 80.0 kg\n- BMI: 22.16\n- Country: Singapore\n- Ethnicity: caucasian\n- Medical conditions: diabetes, high blood pressure, peanut allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [\n    \"Which kind of cake is it? (e.g. sponge cake, fruit cake, chocolate cake)\",\n    \"Roughly how much will you eat? (e.g. one slice, half a slice, a small piece)\"\n  ],\n  \"portion_g\": 0,\n  \"nutrients\": {\n    \"sodium_mg\": 0,\n    \"sugar_g\": 0,\n    \"saturated_fat_g\": 0,\n    \"trans_fat_g\": 0\n  },\n  \"reason\": \"I need to know which specific kind of cake you are considering and the portion size to assess it properly.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 0\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nANSWERS TO YOUR QUESTIONS\nQ: Which kind of cake is it? (e.g. sponge cake, fruit cake, chocolate cake)\nA: oreo cheesecake, non baked.\nQ: Roughly how much will you eat? (e.g. one slice, half a slice, a small piece)\nA: one slice\n\nContinue the same food check using these answers and reply in the food-check format. If an answer is too vague, ask again only if it is essential and you have not yet used 2 rounds of questions; otherwise use the most cautious reasonable assumption and say so in the reason.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 120,\n  \"nutrients\": {\n    \"sodium_mg\": 320,\n    \"sugar_g\": 28,\n    \"saturated_fat_g\": 14,\n    \"trans_fat_g\": 0.5\n  },\n  \"reason\": \"You plan to eat one slice of no-bake Oreo cheesecake, estimated at 120 grams. This dessert is high in sugar and saturated fat, which can affect your diabetes and high blood pressure. Also, please note that this food may contain traces that could trigger your allergies.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 85\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"popeyes 4 piece chicken\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 190.0 cm\n- Weight: 80.0 kg\n- BMI: 22.16\n- Country: Singapore\n- Ethnicity: caucasian\n- Medical conditions: diabetes, high blood pressure, peanut allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [\n    \"Which parts of the chicken are included in your 4-piece meal? (e.g. mixed pieces like breast, thigh, wing, leg)\",\n    \"Are these chicken pieces regular fried or spicy?\"\n  ],\n  \"portion_g\": 0,\n  \"nutrients\": {\n    \"sodium_mg\": 0,\n    \"sugar_g\": 0,\n    \"saturated_fat_g\": 0,\n    \"trans_fat_g\": 0\n  },\n  \"reason\": \"I need to know the specific chicken pieces and the preparation style to assess this food.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 0\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nANSWERS TO YOUR QUESTIONS\nQ: Which parts of the chicken are included in your 4-piece meal? (e.g. mixed pieces like breast, thigh, wing, leg)\nA: 2 thighs, 1 wing, 1 leg\nQ: Are these chicken pieces regular fried or spicy?\nA: regular\n\nContinue the same food check using these answers and reply in the food-check format. If an answer is too vague, ask again only if it is essential and you have not yet used 2 rounds of questions; otherwise use the most cautious reasonable assumption and say so in the reason.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 380,\n  \"nutrients\": {\n    \"sodium_mg\": 2200,\n    \"sugar_g\": 1.5,\n    \"saturated_fat_g\": 9,\n    \"trans_fat_g\": 0.5\n  },\n  \"reason\": \"You plan to eat four pieces of regular fried chicken consisting of two thighs, one wing, and one leg, estimated at 380 grams. This meal is very high in sodium, which can impact your high blood pressure. Also, please note that this food may pose a risk to your allergies.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 85\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"bigmac\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 190.0 cm\n- Weight: 80.0 kg\n- BMI: 22.16\n- Country: Singapore\n- Ethnicity: caucasian\n- Medical conditions: diabetes, high blood pressure, peanut allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 219,\n  \"nutrients\": {\n    \"sodium_mg\": 1010,\n    \"sugar_g\": 9,\n    \"saturated_fat_g\": 10,\n    \"trans_fat_g\": 1\n  },\n  \"reason\": \"You plan to eat one standard McDonald's Big Mac, estimated at 219 grams. This burger is high in sodium, which can impact your high blood pressure. Also, please note that this food may contain traces that could trigger your allergies.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"cake\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 190.0 cm\n- Weight: 80.0 kg\n- BMI: 22.16\n- Country: Singapore\n- Ethnicity: caucasian\n- Medical conditions: diabetes, high blood pressure, peanut allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [\n    \"Which kind of cake is it? (e.g. sponge cake, fruit cake, chocolate cake)\",\n    \"Roughly how much will you eat? (e.g. one slice, half a slice, a small piece)\"\n  ],\n  \"portion_g\": 0,\n  \"nutrients\": {\n    \"sodium_mg\": 0,\n    \"sugar_g\": 0,\n    \"saturated_fat_g\": 0,\n    \"trans_fat_g\": 0\n  },\n  \"reason\": \"I need to know which specific kind of cake you are considering and the portion size to assess it properly.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 0\n}"
+        }
+    ],
+    "test": [
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"1 slice of mango sponge cake\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 160.0 cm\n- Weight: 75.0 kg\n- BMI: 29.3\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 80,\n  \"nutrients\": {\n    \"sodium_mg\": 150,\n    \"sugar_g\": 22,\n    \"saturated_fat_g\": 4,\n    \"trans_fat_g\": 0.1\n  },\n    \"reason\": \"You are considering 1 slice (about 80g) of mango sponge cake. This food contains added sugars and carbohydrates that can raise your blood sugar, which is important to manage with your type 1 diabetes. It also contains some sodium, which you watch with your hypertension.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"1 kitkat bar chunky. original\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 160.0 cm\n- Weight: 75.0 kg\n- BMI: 29.3\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 40,\n  \"nutrients\": {\n    \"sodium_mg\": 35,\n    \"sugar_g\": 20.5,\n    \"saturated_fat_g\": 6.1,\n    \"trans_fat_g\": 0.1\n  },\n  \"reason\": \"You are considering 1 KitKat Chunky original bar (about 40g). This chocolate bar is high in sugar, which can impact your blood sugar levels with your type 1 diabetes, and contains saturated fat that is relevant to manage with your hypertension.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 95\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"1 kitkat bar chunky. original\"\n\nUser profile:\n- Age: 22\n- Gender: male\n- Height: 160.0 cm\n- Weight: 75.0 kg\n- BMI: 29.3\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: type 1 diabetes, hypertension\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 40,\n  \"nutrients\": {\n    \"sodium_mg\": 35,\n    \"sugar_g\": 20.5,\n    \"saturated_fat_g\": 6.1,\n    \"trans_fat_g\": 0.1\n  },\n  \"reason\": \"You are considering 1 KitKat Chunky original bar (about 40g). This chocolate bar contains a high amount of sugar, which will raise your blood sugar levels and requires careful management with your type 1 diabetes, as well as saturated fat to consider alongside your hypertension.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 95\n}"
+        }
+    ]
 }
