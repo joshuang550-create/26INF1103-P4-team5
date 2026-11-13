@@ -1,4 +1,4 @@
-from app.engine import AppEngine
+from app.app_engine import AppEngine
 from progress.tracking_engine import ProgressTrackingEngine
 from progress.verdict_log import VerdictLog
 from gui.app import SmartBiteApp

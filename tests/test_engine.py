@@ -1,7 +1,14 @@
 """End-to-end behaviour of AppEngine (the facade the GUI uses) with a scripted fake AI."""
-from models.errors import AIConnectionError, AIResponseError, InvalidActionError, InvalidInputError, LoginFailedError
-from models.openfoodfacts import FoodLookupError
-from managers.logic_manager import RecommendationOutcome, Verdict
+from exceptions.ai_connection_error import AIConnectionError
+from exceptions.ai_response_error import AIResponseError
+from exceptions.invalid_action_error import InvalidActionError
+from exceptions.invalid_input_error import InvalidInputError
+from exceptions.login_failed_error import LoginFailedError
+
+from services.openfoodfacts.food_lookup_error import FoodLookupError
+from logic.outcomes.recommendation_outcome import RecommendationOutcome
+from logic.verdict import Verdict
+
 from tests.helpers import FakeSearcher, TempDataTestCase, ai_reply, fallback_reply, sample_product
 import json
 

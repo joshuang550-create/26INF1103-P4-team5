@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from models.errors import as_app_error
-
+from exceptions.as_app_error import as_app_error
 
 def center_on_screen(window):
     """ Moves a window to the middle of the screen. Call it after the window's widgets are built. """

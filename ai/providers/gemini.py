@@ -1,28 +1,16 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-
 from google import genai
 from google.genai import errors, types
 import httpx
 
-from models.errors import SmartBiteError, AIError, AIConnectionError, AIServiceError, AIResponseError
+from ai.providers.ai_model import AIModel
+from ai.providers.model_response import ModelResponse
+from exceptions.smart_bite_error import SmartBiteError
+from exceptions.ai_error import AIError
+from exceptions.ai_connection_error import AIConnectionError
+from exceptions.ai_service_error import AIServiceError
+from exceptions.ai_response_error import AIResponseError
 
 
-# =========== Helper Type ===========
-@dataclass(frozen=True)
-class ModelResponse:
-    text: str # the most recent response from the AI
-    history: list # chat history of the user [{}, {}, {}]
-
-
-# =========== Interface ===========
-class AIModel(ABC):
-    @abstractmethod
-    def send(self, prompt, history, system_instruction): # system_instruction is a string that gets sent automatically to the ai with the prompt, basically rules for the ai to follow
-        pass # returns ModelResponse object
-
-
-# =========== AI Models ===========
 class Gemini(AIModel):
     def __init__(self, api_key_supplier, model="gemini-3.5-flash-lite"):
         self._api_key_supplier = api_key_supplier # this will be provided during app build, api_key_supplier=data_manager_instance.get_api_key

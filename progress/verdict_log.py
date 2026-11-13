@@ -3,7 +3,7 @@ import time
 from contextlib import suppress
 from pathlib import Path
 
-from models.errors import DataError
+from exceptions.data_error import DataError
 
 Default_Path = Path(__file__).resolve().parent.parent / "data" / "verdict_log.json"
 

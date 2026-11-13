@@ -1,24 +1,25 @@
-from dataclasses import dataclass
-
 from models.user_profile import UserProfile
-from models.ai_models import Gemini
-from models.openfoodfacts import OpenFoodFactsSearcher
-from models.errors import InvalidInputError, LoginFailedError, InvalidActionError, AIResponseError
+
+from ai.providers.gemini import Gemini
+
+from services.openfoodfacts.openfoodfacts_searcher import OpenFoodFactsSearcher
+
+from logic.rules.allergen_rule import AllergenRule
+from logic.rules.nutrient_threshold_rule import NutrientThresholdRule
+from logic.rules.ai_concern_rule import AIConcernRule
+from logic.allergen_detector import AllergenDetector
+from logic.response_action import ResponseAction
+
+from exceptions.invalid_input_error import InvalidInputError
+from exceptions.login_failed_error import LoginFailedError
+from exceptions.invalid_action_error import InvalidActionError
+from exceptions.ai_response_error import AIResponseError
+
+from app.food_check_step import FoodCheckStep
 
 from managers.data_manager import DataManager
 from managers.ai_manager import AIManager
-from managers.logic_manager import LogicManager, AllergenRule, NutrientThresholdRule, AIConcernRule, AllergenDetector, ResponseAction
-
-
-# =========== Helper Type ===========
-@dataclass(frozen=True)
-class FoodCheckStep: # what the GUI gets back after running check_food and answer_questions
-    questions: tuple = () # questions the AI needs answered first. empty when the check is finished
-    outcome: object = None # an Outcome object when the check is finished, else None
-
-    @property
-    def needs_answers(self):
-        return bool(self.questions) # True or False that it needs answers
+from managers.logic_manager import LogicManager
 
 
 # =========== App Engine ===========

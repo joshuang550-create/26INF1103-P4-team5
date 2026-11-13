@@ -6,8 +6,12 @@ from unittest import mock
 import httpx
 from google.genai import errors
 
-import models.ai_models as ai_models
-from models.errors import AIConnectionError, AIError, AIResponseError, AIServiceError, ConfigurationError
+import ai.providers.ai_model as ai_models
+from exceptions.ai_connection_error import AIConnectionError
+from exceptions.ai_error import AIError
+from exceptions.ai_response_error import AIResponseError
+from exceptions.ai_service_error import AIServiceError
+from exceptions.configuration_error import ConfigurationError
 
 
 class FakeApiError(errors.APIError):

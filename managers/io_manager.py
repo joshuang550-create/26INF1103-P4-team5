@@ -10,8 +10,7 @@ import pathlib
 from dataclasses import dataclass
 
 from rapidfuzz import fuzz, process, utils
-from models.errors import InvalidInputError
-
+from exceptions.invalid_input_error import InvalidInputError
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
