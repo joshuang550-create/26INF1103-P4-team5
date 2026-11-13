@@ -1,7 +1,7 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
-from gui.popups import show_error
+from gui.popups import show_error, center_on_screen
 from gui.login_frame import LoginFrame
 from gui.register_frame import RegisterFrame
 from gui.home_frame import HomeFrame
@@ -38,6 +38,8 @@ class SmartBiteApp(tk.Tk):
             screen.grid(row=0, column=0, sticky="nsew") # all stacked on top of each other, show() raises one
             self._screens[name] = screen
         self.show("login")
+        self.show("login")
+        center_on_screen(self)
 
     
     # =========== Navigation ===========
