@@ -8,8 +8,10 @@ from unittest import mock
 
 from matplotlib.figure import Figure
 
-from managers.logic_manager import Verdict
-from models.errors import DataError, InvalidActionError, UnexpectedError
+from logic.verdict import Verdict
+from exceptions.data_error import DataError
+from exceptions.invalid_action_error import InvalidActionError
+from exceptions.unexpected_error import UnexpectedError
 from progress.chart import FALLBACK_TEXT, Chart
 from progress.chart_result import ChartResult
 from progress.health_trend import HealthTrend
