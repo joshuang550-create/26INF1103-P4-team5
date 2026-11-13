@@ -42,7 +42,16 @@ class HomeFrame(ttk.Frame):
     # ---- result ----
         self.verdict = tk.Label(self, font=("Helvetica", 22, "bold"), fg="white", padx=14, pady=6)
         self.result = tk.Text(self, wrap="word", height=16, relief="flat", font=("Helvetica", 12), padx=10, pady=10)
-    
+
+    def on_show(self): # runs every time this screen opens, so nothing carries over from the last user
+        profile = self.app.engine.profile
+        self.welcome.config(text=f"Hi, {profile.username}" if profile else "")
+        self.food.delete(0, "end")
+        self.barcode.delete(0, "end")
+        self.verdict.pack_forget()
+        self.result.pack_forget()
+        self.status.config(text="")
+
     # =========== Food Check Flow ===========
     def _start_check(self):
         food, barcode = self.food.get(), self.barcode.get()
