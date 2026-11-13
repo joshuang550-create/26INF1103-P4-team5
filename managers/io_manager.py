@@ -9,11 +9,21 @@ from dataclasses import dataclass
 from models.errors import InvalidInputError
 
 
+VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
+VERDICT_MEANING = {"OK": "Okay to eat", "CAUTION": "Eat with caution", "AVOID": "Best to avoid", "UNDETERMINED": "Could not decide"}
+
+
 @dataclass(frozen=True)
 class FieldCheck: # result of checking one form field
     message: str = "" # hint to show next to the field, "" when the field is fine
     fix: str | None = None # corrected text the user can accept with one click, None when there is no suggestion
 
+
+@dataclass(frozen=True)
+class OutcomeView: # an Outcome turned into what the screen shows
+    title: str
+    colour: str
+    text: str
 
 class IOManager:
     def __init__(self, engine):
@@ -69,6 +79,28 @@ class IOManager:
 
     def cancel_food_check(self):
         self._engine.cancel_food_check()
+
+    @staticmethod
+    def describe_outcome(outcome): # turns an Outcome into a title, a colour and text lines for the screen
+        details = outcome.details()
+        if outcome.severity is None: # RecommendationOutcome (fallback)
+            lines = [details["message"], "", "You could try instead:"]
+            lines += [f"  • {item.get('food', '')}: {item.get('reason', '')}" for item in details.get("recommendations", [])]
+        else: # AssessmentOutcome
+            lines = [details["reason"]]
+            if details["allergens_found"]:
+                lines += ["", "Allergens found:"]
+                lines += [f"  • {category.replace('_', ' ')}: {', '.join(words)}" for category, words in details["allergens_found"].items()]
+            if details["flags"]:
+                lines += ["", "Flagged nutrients:"]
+                lines += [f"  • {flag['nutrient']}: {flag['value']} ({flag['level']})" for flag in details["flags"]]
+            if details["nutrients"]:
+                lines += ["", f"Nutrients per {details['portion_g']} g:"]
+                lines += [f"  • {nutrient}: {value}" for nutrient, value in details["nutrients"].items()]
+            lines += ["", f"AI confidence: {details['confidence']}/10"]
+        headline = outcome.headline
+        return OutcomeView(f"{headline} – {VERDICT_MEANING.get(headline, '')}", VERDICT_COLOURS.get(headline, "#8a9099"), "\n".join(lines))
+
 
     # =========== Converting Text ===========
     @staticmethod
