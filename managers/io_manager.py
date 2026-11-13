@@ -60,6 +60,15 @@ class IOManager:
                 return FieldCheck(f"Not recognised: {', '.join(unknown)}")
         return FieldCheck()
 
+    # =========== Food Check ===========
+    def check_food(self, food_name, barcode=""):
+        return self._engine.check_food(food_name, barcode)
+
+    def answer_questions(self, answers):
+        return self._engine.answer_questions(answers)
+
+    def cancel_food_check(self):
+        self._engine.cancel_food_check()
 
     # =========== Converting Text ===========
     @staticmethod
