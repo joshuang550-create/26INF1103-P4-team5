@@ -1,4 +1,6 @@
-from models.errors import DataError, InvalidActionError, as_app_error
+from exceptions.data_error import DataError
+from exceptions.invalid_action_error import InvalidActionError
+from exceptions.as_app_error import as_app_error
 from progress.chart_result import ChartResult
 from progress.health_trend import HealthTrend
 from progress.trend_chart import TrendChart
