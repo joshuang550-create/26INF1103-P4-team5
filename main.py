@@ -1,15 +1,13 @@
-from app.engine import AppEngine
-from models.errors import as_app_error
+from app.app_engine import AppEngine
+from progress.tracking_engine import ProgressTrackingEngine
+from progress.verdict_log import VerdictLog
+from gui.app import SmartBiteApp
 
 
 def main():
-    try:
-        engine = AppEngine()
-    except Exception as error:
-        problem = as_app_error(error)
-        print(problem) # dont keep as print(), the GUI should show a popup, then once the user clicks the close button in the popup, the whole app will terminate cleanly.
-        return
+    engine = ProgressTrackingEngine(AppEngine(), VerdictLog()) # same API as AppEngine, plus charts
+    SmartBiteApp(engine).mainloop()
 
 
 if __name__ == "__main__":
-    main()
+    main() # add to terminal env vars -    $env:FERNET_SECRET_KEY="vYTFX1ni17MptleqMTz1hCspMZEaqlaLPG91boo55-Q="

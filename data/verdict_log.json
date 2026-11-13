@@ -1,0 +1,36 @@
+{
+    "ride": [
+        {
+            "time": 1794548537.3730125,
+            "food": "cake",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1794548698.7582853,
+            "food": "popeyes 4 piece chicken",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1794548736.9442701,
+            "food": "bigmac",
+            "verdict": "AVOID"
+        }
+    ],
+    "test": [
+        {
+            "time": 1794549459.2622693,
+            "food": "1 slice of mango sponge cake",
+            "verdict": "CAUTION"
+        },
+        {
+            "time": 1794549547.1620462,
+            "food": "1 kitkat bar chunky. original",
+            "verdict": "CAUTION"
+        },
+        {
+            "time": 1794549560.8554885,
+            "food": "1 kitkat bar chunky. original",
+            "verdict": "CAUTION"
+        }
+    ]
+}

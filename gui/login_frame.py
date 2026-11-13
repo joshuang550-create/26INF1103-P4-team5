@@ -1,0 +1,38 @@
+from tkinter import ttk
+from gui.popups import show_error
+
+
+class LoginFrame(ttk.Frame):
+    def __init__(self, parent, app):
+        super().__init__(parent, padding=40)
+        self.app = app
+
+        box = ttk.Frame(self)
+        box.place(relx=0.5, rely=0.45, anchor="center")
+
+        ttk.Label(box, text="SmartBite", font=("Helvetica", 26, "bold")).grid(row=0, column=0, columnspan=2, pady=(0, 4))
+        ttk.Label(box, text="Check if a food suits your health profile").grid(row=1, column=0, columnspan=2, pady=(0, 20))
+
+        ttk.Label(box, text="Username").grid(row=2, column=0, sticky="w", pady=4)
+        self.username = ttk.Entry(box, width=28)
+        self.username.grid(row=2, column=1, pady=4)
+
+        ttk.Label(box, text="Password").grid(row=3, column=0, sticky="w", pady=4)
+        self.password = ttk.Entry(box, width=28, show="•")
+        self.password.grid(row=3, column=1, pady=4)
+        self.password.bind("<Return>", lambda _event: self._login())
+
+        ttk.Button(box, text="Log in", command=self._login).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(16, 4))
+        ttk.Button(box, text="Create an account", command=lambda: app.show("register")).grid(row=5, column=0, columnspan=2, sticky="ew")
+
+    def on_show(self):
+        self.password.delete(0, "end")
+        self.username.focus_set()
+
+    def _login(self):
+        try:
+            self.app.io.login(self.username.get(), self.password.get())
+        except Exception as error: # noqa: BLE001 - LoginFailedError, DataError, ...
+            show_error(error, self)
+            return
+        self.app.show("home")
