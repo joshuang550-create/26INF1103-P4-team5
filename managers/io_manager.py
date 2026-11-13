@@ -101,6 +101,12 @@ class IOManager:
         headline = outcome.headline
         return OutcomeView(f"{headline} – {VERDICT_MEANING.get(headline, '')}", VERDICT_COLOURS.get(headline, "#8a9099"), "\n".join(lines))
 
+    # =========== Progress ===========
+    def trend_chart(self):
+        return self._engine.trend_chart()
+
+    def weekly_chart(self):
+        return self._engine.weekly_chart()
 
     # =========== Converting Text ===========
     @staticmethod
