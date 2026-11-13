@@ -3,3 +3,4 @@ httpx
 openfoodfacts
 cryptography
 matplotlib
+rapidfuzz
