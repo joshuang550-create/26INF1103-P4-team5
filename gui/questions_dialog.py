@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from gui.popups import center_on_screen
 
 
 class QuestionsDialog(tk.Toplevel):
@@ -31,6 +32,9 @@ class QuestionsDialog(tk.Toplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.destroy) # closing the window = cancel
         next(iter(self._entries.values())).focus_set()
+        center_on_screen(self)
+        self.grab_set() # modal: block the main window until answered        
+        
         self.grab_set() # modal: block the main window until answered
 
     def _submit(self):
