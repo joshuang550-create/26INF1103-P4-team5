@@ -4,7 +4,15 @@ The GUI hands IOManager raw text from the screen. IOManager turns it into the ty
 expects, checks it, calls the engine, and hands back results the GUI can show.
 """
 
+from dataclasses import dataclass
+
 from models.errors import InvalidInputError
+
+
+@dataclass(frozen=True)
+class FieldCheck: # result of checking one form field
+    message: str = "" # hint to show next to the field, "" when the field is fine
+    fix: str | None = None # corrected text the user can accept with one click, None when there is no suggestion
 
 
 class IOManager:
@@ -35,6 +43,23 @@ class IOManager:
 
     def logout(self):
         self._engine.logout()
+
+    # =========== Live Field Checks ===========
+    def check_field(self, key, text):
+        value = text.strip()
+        engine = self._engine
+        if key == "username" and value and engine.is_username_taken(value):
+            return FieldCheck("Username taken")
+        if key == "country" and value and not engine.is_valid_country(value):
+            return FieldCheck("Not a recognised country")
+        if key == "ethnicity" and value and not engine.is_valid_ethnicity(value):
+            return FieldCheck("Not a recognised ethnicity")
+        if key == "conditions":
+            unknown = [c for c in self.split_conditions(value) if not engine.is_valid_condition(c)]
+            if unknown:
+                return FieldCheck(f"Not recognised: {', '.join(unknown)}")
+        return FieldCheck()
+
 
     # =========== Converting Text ===========
     @staticmethod
