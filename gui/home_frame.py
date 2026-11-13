@@ -20,8 +20,12 @@ class HomeFrame(ttk.Frame):
         top.pack(fill="x")
         self.welcome = ttk.Label(top, font=("Helvetica", 18, "bold"))
         self.welcome.pack(side="left")
-        ttk.Button(top, text="Log out", command=app.logout).pack(side="right")
-        ttk.Button(top, text="My progress", command=lambda: app.show("dashboard")).pack(side="right", padx=8)
+        self.nav_buttons = [
+        ttk.Button(top, text="Log out", command=app.logout),
+        ttk.Button(top, text="My progress", command=lambda: app.show("dashboard")),
+        ]
+        for button in self.nav_buttons:
+            button.pack(side="right", padx=(8, 0))
 
         # ---- input ----
         form = ttk.LabelFrame(self, text="Check a food", padding=12)
@@ -74,9 +78,12 @@ class HomeFrame(ttk.Frame):
             return
         self._show_outcome(step.outcome)        
 
-    def _busy(self, message):
+    def _busy(self, message): # while a check runs, nothing can log out or leave this screen
+        state = "disabled" if message else "normal"
         self.status.config(text=message or "")
-        self.check_button.config(state="disabled" if message else "normal")
+        self.check_button.config(state=state)
+        for button in self.nav_buttons:
+            button.config(state=state)
 
     
     # =========== Showing the Outcome ===========
