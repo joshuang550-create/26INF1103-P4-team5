@@ -1,6 +1,7 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
+from managers.io_manager import IOManager
 from gui.popups import show_error, center_on_screen
 from gui.login_frame import LoginFrame
 from gui.register_frame import RegisterFrame
@@ -22,6 +23,7 @@ class SmartBiteApp(tk.Tk):
     def __init__(self, engine):
         super().__init__()
         self.engine = engine
+        self.io = IOManager(engine)
         self.title("SmartBite")
         self.geometry("900x650")
         self.minsize(760, 560)
@@ -51,7 +53,7 @@ class SmartBiteApp(tk.Tk):
 
     
     def logout(self):
-        self.engine.logout()
+        self.io.logout()
         self.show("login")
 
 
