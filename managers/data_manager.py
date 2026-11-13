@@ -7,7 +7,8 @@ from contextlib import suppress
 from cryptography.fernet import Fernet, InvalidToken
 
 from models.user_profile import UserProfile
-from models.errors import DataError, ConfigurationError
+from exceptions.data_error import DataError
+from exceptions.configuration_error import ConfigurationError
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
