@@ -1,7 +1,7 @@
 """Error hierarchy: every error the GUI can receive has a title and a description."""
 import unittest
 
-from models import errors
+from models import errors # need to fix. no more errors.py file
 
 
 class ErrorTests(unittest.TestCase):

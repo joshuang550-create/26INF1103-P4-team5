@@ -2,7 +2,7 @@
 import json
 import unittest
 
-from managers.ai_manager import AIResponseValidator
+from ai.ai_response_validator import AIResponseValidator
 from tests.helpers import ai_reply, fallback_reply
 
 
