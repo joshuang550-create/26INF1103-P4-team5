@@ -31,7 +31,7 @@ class LoginFrame(ttk.Frame):
 
     def _login(self):
         try:
-            self.app.engine.login(self.username.get().strip(), self.password.get())
+            self.app.io.login(self.username.get(), self.password.get())
         except Exception as error: # noqa: BLE001 - LoginFailedError, DataError, ...
             show_error(error, self)
             return
