@@ -4,9 +4,23 @@ The GUI hands IOManager raw text from the screen. IOManager turns it into the ty
 expects, checks it, calls the engine, and hands back results the GUI can show.
 """
 
+import csv
+import os
+import pathlib
 from dataclasses import dataclass
 
+from rapidfuzz import fuzz, process, utils
 from models.errors import InvalidInputError
+
+
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+LOOKUP_FILES = { # same files and environment variables as DataManager
+    "country": os.getenv("COUNTRIES", str(BASE_DIR / "lookup" / "countries.csv")),
+    "ethnicity": os.getenv("ETHNICITIES", str(BASE_DIR / "lookup" / "ethnicities.csv")),
+    "conditions": os.getenv("CONDITIONS", str(BASE_DIR / "lookup" / "conditions.csv")),
+}
+MATCH_CUTOFF = 80 # rapidfuzz score out of 100. Below this, the guess is too far off to suggest
 
 
 VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
@@ -26,8 +40,9 @@ class OutcomeView: # an Outcome turned into what the screen shows
     text: str
 
 class IOManager:
-    def __init__(self, engine):
+    def __init__(self, engine, lookups=None): # lookups is optional, for the test suite
         self._engine = engine
+        self._lookups = lookups or {kind: self._read_lookup(path) for kind, path in LOOKUP_FILES.items()}
 
     # =========== Account ===========
     @property
@@ -39,6 +54,7 @@ class IOManager:
 
     def register(self, form): # form = {field: text} straight from the register screen
         conditions = self.split_conditions(form.get("conditions", ""))
+        self._require_known_conditions(conditions)
         return self._engine.register(
             username=form.get("username", ""),
             plain_password=form.get("password", ""),
@@ -57,18 +73,20 @@ class IOManager:
     # =========== Live Field Checks ===========
     def check_field(self, key, text):
         value = text.strip()
-        engine = self._engine
-        if key == "username" and value and engine.is_username_taken(value):
+        if key == "username" and value and self._engine.is_username_taken(value):
             return FieldCheck("Username taken")
-        if key == "country" and value and not engine.is_valid_country(value):
-            return FieldCheck("Not a recognised country")
-        if key == "ethnicity" and value and not engine.is_valid_ethnicity(value):
-            return FieldCheck("Not a recognised ethnicity")
+        if key in ("country", "ethnicity") and value and not self._is_known(key, value):
+            suggestion = self.suggest(key, value)
+            if suggestion:
+                return FieldCheck(f"Did you mean {suggestion}?", fix=suggestion)
+            return FieldCheck(f"Not a recognised {key}")
         if key == "conditions":
-            unknown = [c for c in self.split_conditions(value) if not engine.is_valid_condition(c)]
-            if unknown:
-                return FieldCheck(f"Not recognised: {', '.join(unknown)}")
+            return self._check_conditions(self.split_conditions(value))
         return FieldCheck()
+
+    def suggest(self, kind, text): # closest entry in the lookup list, or None if nothing is close enough
+        match = process.extractOne(text, self._lookups[kind], scorer=fuzz.ratio, processor=utils.default_process, score_cutoff=MATCH_CUTOFF)
+        return match[0] if match else None
 
     # =========== Food Check ===========
     def check_food(self, food_name, barcode=""):
@@ -119,3 +137,30 @@ class IOManager:
     @staticmethod
     def split_conditions(text): # "Asthma, Diabetes" -> ["Asthma", "Diabetes"]
         return [part.strip() for part in text.split(",") if part.strip()]
+
+
+    # =========== Private Helpers ===========
+    @staticmethod
+    def _read_lookup(path):
+        try:
+            with open(path, newline="", encoding="utf-8") as file:
+                return [row[0].strip() for row in csv.reader(file) if row and row[0].strip()]
+        except OSError:
+            return [] # no list means no suggestions. The engine still does the real check
+
+    def _is_known(self, kind, value):
+        return value.lower() in (item.lower() for item in self._lookups[kind])
+
+    def _check_conditions(self, conditions):
+        unknown = [c for c in conditions if not self._is_known("conditions", c)]
+        if not unknown:
+            return FieldCheck()
+        fixes = {c: self.suggest("conditions", c) for c in unknown}
+        if all(fixes.values()):
+            return FieldCheck(f"Did you mean {', '.join(fixes.values())}?", fix=", ".join(fixes.get(c, c) for c in conditions))
+        return FieldCheck(f"Not recognised: {', '.join(unknown)}")
+
+    def _require_known_conditions(self, conditions): # the engine saves conditions as typed, so unknown ones are stopped here
+        problem = self._check_conditions(conditions)
+        if problem.message:
+            raise InvalidInputError(problem.message)
