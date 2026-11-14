@@ -237,7 +237,7 @@ class WeeklyChartTests(unittest.TestCase):
         breakdown = WeeklyBreakdown([(at(11, 3), "OK"), (at(11, 4), "OK"), (at(11, 5), "AVOID"), (at(11, 10), "CAUTION")])
         axes = WeeklyChart(breakdown).render().axes[0]
         # bars are drawn OK, then CAUTION, then AVOID (2 weeks each)
-        self.assertEqual([bar.get_height() for bar in axes.patches], [1, 0, 0, 1, 1, 0])
+        self.assertEqual([bar.get_height() for bar in axes.patches], [2, 0, 0, 1, 1, 0])
 
     def test_empty_history_shows_a_message(self):
         axes = WeeklyChart(WeeklyBreakdown([])).render().axes[0]

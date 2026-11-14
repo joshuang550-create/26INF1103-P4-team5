@@ -34,4 +34,4 @@ class WeeklyChart(Chart):
         return figure
 
     def _describe(self):
-        return self._breakdow.summary()
+        return self._breakdown.summary()

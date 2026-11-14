@@ -36,7 +36,7 @@ class WeeklyBreakdown:
             day = datetime.fromtimestamp(timestamp).date()
             monday = day - timedelta(days=day.weekday())
             counts = by_week.setdefault(monday, {name: 0 for name in VERDICTS})
-            counts[verdict] =+ 1
+            counts[verdict] += 1
 
         if not by_week:
             return []
