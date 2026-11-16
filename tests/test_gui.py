@@ -13,8 +13,9 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
-
-import tests  
+# lets this file also be run directly (python tests/test_gui.py) by putting the project root on the path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import tests  # noqa: E402,F401  (installs stand-ins for missing third-party libraries)
 
 from matplotlib.figure import Figure
 
@@ -95,9 +96,47 @@ def send(widget, sequence):
     widget.event_generate(sequence)
 
 
-def press(window, text):
-    """Click one of a Popup's flat text buttons (they are Labels showing the text in capitals)."""
-    find_text(window, text.upper(), tk.Label).event_generate("<Button-1>")
+def press(window, text, key=None):
+    """Click one of a Popup's flat text buttons (Labels showing the text in capitals), or send a key to the popup card.
+
+    Meant to be run from window.after(): the popup may not be on screen yet (slower on Windows), so it waits until it
+    is, and if it never appears or never reacts it closes the card so a test fails instead of hanging.
+    """
+    def attempt(tries=0):
+        try:
+            label = find_text(window, text.upper() if key is None else text, tk.Label)
+        except AssertionError:
+            return  # popup already closed
+        if not label.winfo_viewable() and tries < 200:
+            window.after(25, attempt, tries + 1)
+            return
+        if tries >= 200:  # never became visible: close the card so the test cannot hang
+            holder = label
+            while holder.master is not window:
+                holder = holder.master
+            holder.destroy()
+            return
+        if key is None:
+            label.event_generate("<Button-1>", x=1, y=1)
+        else:
+            holder = label
+            while holder.master is not window:
+                holder = holder.master
+            holder.focus_force()
+            holder.update()
+            holder.event_generate(key)
+        window.after(1000, lambda: giveup(label))  # still open a second after our click: close it, the test will fail
+
+    def giveup(label):
+        try:
+            holder = label
+            while holder.master is not window:
+                holder = holder.master
+            holder.destroy()
+        except tk.TclError:
+            pass
+
+    attempt()
 
 
 class GuiTestCase(unittest.TestCase):
@@ -151,16 +190,8 @@ class PopupTests(GuiTestCase):
         self.assertEqual(self.ask(("No", "Yes"), lambda: press(self.app, "Yes")).answer, "Yes")
 
     def test_escape_closes_with_no_answer_and_enter_picks_the_first_button(self):
-        def key(sequence):
-            def send():
-                holder = find_text(self.app, "Title", tk.Label)
-                while holder.master is not self.app:
-                    holder = holder.master
-                holder.focus_force()
-                holder.event_generate(sequence)
-            return send
-        self.assertIsNone(self.ask(("No", "Yes"), key("<Escape>")).answer)
-        self.assertEqual(self.ask(("No", "Yes"), key("<Return>")).answer, "No")
+        self.assertIsNone(self.ask(("No", "Yes"), lambda: press(self.app, "Title", key="<Escape>")).answer)
+        self.assertEqual(self.ask(("No", "Yes"), lambda: press(self.app, "Title", key="<Return>")).answer, "No")
 
     def test_ask_yes_no_is_true_only_for_yes(self):
         self.app.after(50, lambda: press(self.app, "Yes"))
