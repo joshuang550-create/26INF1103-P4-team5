@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from gui.popups import show_error, show_info
+from gui.popups import show_error, show_info, ask_yes_no
 from gui.hint_label import HintLabel
 
 
@@ -41,17 +41,19 @@ class ProfileFrame(ttk.Frame):
         conditions.pack(fill="x", pady=8)
         self.ticks_box = ttk.Frame(conditions) # checkboxes are rebuilt in on_show
         self.ticks_box.pack(fill="x")
-        ttk.Button(conditions, text="Remove ticked").pack(anchor="w", pady=(6, 12))
-
+        ttk.Button(conditions, text="Remove ticked", command=self._remove_conditions).pack(anchor="w", pady=(6, 12))
+        
         add_row = ttk.Frame(conditions)
         add_row.pack(fill="x")
         ttk.Label(add_row, text="Add (comma separated)").pack(side="left")
         self.new_conditions = ttk.Entry(add_row, width=36)
         self.new_conditions.pack(side="left", padx=8)
-        ttk.Button(add_row, text="Add").pack(side="left")
-
+        ttk.Button(add_row, text="Add", command=self._add_conditions).pack(side="left")
+        self.conditions_hint = HintLabel(conditions, on_accept=self._accept_conditions, wraplength=600)
+        self.conditions_hint.pack(anchor="w", pady=(4, 0))
+        self.new_conditions.bind("<FocusOut>", lambda _event: self._check_conditions())
         # ---- account ----
-        ttk.Button(self, text="Delete my account").pack(anchor="w", pady=(12, 0))
+        ttk.Button(self, text="Delete my account", command=self._delete_account).pack(anchor="w", pady=(12, 0))
 
     def on_show(self): # fill everything in from the logged-in profile
         profile = self.app.io.profile
@@ -61,6 +63,7 @@ class ProfileFrame(ttk.Frame):
         values = {"age": profile.age, "height": profile.height, "weight": profile.weight, "country": profile.country}
         for key, entry in self.fields.items():
             entry.delete(0, "end")
+            self.conditions_hint.clear()
             entry.insert(0, str(values[key]))
         self.country_hint.clear()
         self.new_conditions.delete(0, "end")
@@ -94,3 +97,41 @@ class ProfileFrame(ttk.Frame):
             ttk.Label(self.ticks_box, text="None added yet.", foreground="#8a9099").pack(anchor="w")
         for condition, tick in zip(conditions, self._ticks):
             ttk.Checkbutton(self.ticks_box, text=condition.title(), variable=tick).pack(anchor="w")
+
+
+    def _remove_conditions(self):
+        ticked = [i for i, tick in enumerate(self._ticks) if tick.get()]
+        try:
+            self.app.io.remove_conditions(ticked)
+        except Exception as error: # noqa: BLE001
+            show_error(error, self)
+            return
+        self.on_show()
+
+    def _check_conditions(self):
+        self.conditions_hint.show(self.app.io.check_field("conditions", self.new_conditions.get()))
+
+    def _accept_conditions(self, fix):
+        self.new_conditions.delete(0, "end")
+        self.new_conditions.insert(0, fix)
+        self._check_conditions()
+
+    def _add_conditions(self):
+        try:
+            self.app.io.add_conditions(self.new_conditions.get())
+        except Exception as error: # noqa: BLE001
+            show_error(error, self)
+            return
+        self.on_show()
+
+    # =========== Account ===========
+    def _delete_account(self):
+        if not ask_yes_no("Delete account?", "This permanently deletes your profile and food check history. This cannot be undone.", self):
+            return
+        try:
+            self.app.io.delete_account()
+        except Exception as error: # noqa: BLE001
+            show_error(error, self)
+            return
+        show_info("Account deleted", "Your account has been deleted.", self)
+        self.app.show("login")
