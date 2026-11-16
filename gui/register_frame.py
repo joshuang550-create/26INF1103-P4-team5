@@ -1,9 +1,12 @@
 from tkinter import ttk
 from gui.popups import show_error
+from gui.hint_label import HintLabel
 
 
 class RegisterFrame(ttk.Frame):
     """ Sign-up form. Hands the raw text to IOManager, which converts and checks it. """
+
+    LIVE_CHECKS = ("username", "country", "ethnicity", "conditions") # fields checked as the user leaves them
 
     def __init__(self, parent, app):
         super().__init__(parent, padding=30)
@@ -33,10 +36,13 @@ class RegisterFrame(ttk.Frame):
             self.fields[key] = widget
         
                 # live validation hints, uses the engine's is_valid_* helpers
-        self.hints = {key: ttk.Label(self, foreground="#E5534B") for key in ("username", "country", "ethnicity", "conditions")}
-        for key, hint in self.hints.items():
+                # live validation hints. A blue hint is a suggestion: clicking it fills in the field
+        self.hints = {}
+        for key in self.LIVE_CHECKS:
+            hint = HintLabel(self, on_accept=lambda fix, k=key: self._accept_fix(k, fix), wraplength=260)
             hint.grid(row=[r[0] for r in rows].index(key) + 1, column=2, sticky="w", padx=8)
             self.fields[key].bind("<FocusOut>", lambda _event, k=key: self._check_field(k))
+            self.hints[key] = hint
 
         buttons = ttk.Frame(self)
         buttons.grid(row=len(rows) + 1, column=0, columnspan=3, sticky="w", pady=(20, 0))
@@ -51,13 +57,16 @@ class RegisterFrame(ttk.Frame):
             else:
                 widget.delete(0, "end")
         for hint in self.hints.values():
-            hint.config(text="")
-
+            hint.clear()
 
     # =========== Live Validation ===========
     def _check_field(self, key):
-        self.hints[key].config(text=self.app.io.check_field(key, self.fields[key].get()).message)
+        self.hints[key].show(self.app.io.check_field(key, self.fields[key].get()))
 
+    def _accept_fix(self, key, fix):
+        self.fields[key].delete(0, "end")
+        self.fields[key].insert(0, fix)
+        self._check_field(key)
 
     # =========== Submit ===========
     def _conditions(self):
