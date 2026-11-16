@@ -7,6 +7,7 @@ from gui.login_frame import LoginFrame
 from gui.register_frame import RegisterFrame
 from gui.home_frame import HomeFrame
 from gui.dashboard_frame import DashboardFrame
+from gui.profile_frame import ProfileFrame
 
 
 class SmartBiteApp(tk.Tk):
@@ -18,7 +19,7 @@ class SmartBiteApp(tk.Tk):
         self.app.run_in_background(work, on_done) -> run slow AI calls without freezing the window
     """
 
-    SCREENS = {"login": LoginFrame, "register": RegisterFrame, "home": HomeFrame, "dashboard": DashboardFrame} # name -> screen class. Each screen is added here as it gets built
+    SCREENS = {"login": LoginFrame, "register": RegisterFrame, "home": HomeFrame, "dashboard": DashboardFrame, "profile": ProfileFrame} # name -> screen class. Each screen is added here as it gets built
 
     def __init__(self, engine):
         super().__init__()
