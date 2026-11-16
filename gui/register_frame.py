@@ -41,7 +41,7 @@ class RegisterFrame(ttk.Frame):
         for key in self.LIVE_CHECKS:
             hint = HintLabel(self, on_accept=lambda fix, k=key: self._accept_fix(k, fix), wraplength=260)
             hint.grid(row=[r[0] for r in rows].index(key) + 1, column=2, sticky="w", padx=8)
-            self.fields[key].bind("<FocusOut>", lambda _event, k=key: self._check_field(k))
+            hint.watch(self.fields[key], lambda k=key: self._check_field(k))
             self.hints[key] = hint
 
         buttons = ttk.Frame(self)

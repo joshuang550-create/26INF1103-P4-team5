@@ -4,6 +4,7 @@ from models.field_check import FieldCheck
 
 PROBLEM_COLOUR = "#E5534B"
 SUGGESTION_COLOUR = "#2f6fb5"
+TYPING_PAUSE_MS = 700 # check this long after the user stops typing
 
 
 class HintLabel(ttk.Label):
@@ -14,6 +15,8 @@ class HintLabel(ttk.Label):
         super().__init__(parent, foreground=PROBLEM_COLOUR, **options)
         self._fix = None
         self._on_accept = on_accept # function(fix) called when the user clicks a suggestion
+        self._check = None # function that checks the watched field, set by watch()
+        self._pending = None # the countdown started by the last key press
         self._plain_font = font.nametofont("TkDefaultFont")
         self._link_font = self._plain_font.copy()
         self._link_font.configure(underline=True)
@@ -26,9 +29,27 @@ class HintLabel(ttk.Label):
         else:
             self.config(text=check.message, foreground=PROBLEM_COLOUR, font=self._plain_font, cursor="")
 
+    def watch(self, entry, check):
+        """ Run check() once the user stops typing for a moment, or leaves the field. """
+        self._check = check
+        entry.bind("<KeyRelease>", lambda _event: self._wait_then_check())
+        entry.bind("<FocusOut>", lambda _event: self._check_now())
+
     def clear(self):
         self.show(FieldCheck())
 
     def _accept(self):
         if self._fix and self._on_accept:
             self._on_accept(self._fix)
+
+    def _wait_then_check(self):
+        if self._pending:
+            self.after_cancel(self._pending) # still typing: start the countdown again
+        self._pending = self.after(TYPING_PAUSE_MS, self._check_now)
+
+    def _check_now(self):
+        if self._pending:
+            self.after_cancel(self._pending)
+            self._pending = None
+        if self._check:
+            self._check()
