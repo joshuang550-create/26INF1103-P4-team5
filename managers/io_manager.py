@@ -144,10 +144,6 @@ class IOManager:
             if details["flags"]:
                 lines += ["", "Flagged nutrients:"]
                 lines += [f"  • {flag['nutrient']}: {flag['value']} ({flag['level']})" for flag in details["flags"]]
-            if details["nutrients"]:
-                lines += ["", f"Nutrients per {details['portion_g']} g:"]
-                lines += [f"  • {nutrient}: {value}" for nutrient, value in details["nutrients"].items()]
-            lines += ["", f"AI confidence: {details['confidence']}/10"]
         headline = outcome.headline
         return OutcomeView(f"{headline} – {VERDICT_MEANING.get(headline, '')}", VERDICT_COLOURS.get(headline, "#8a9099"), "\n".join(lines))
 
