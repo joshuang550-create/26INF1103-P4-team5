@@ -35,12 +35,14 @@ class ProfileFrame(ttk.Frame):
         self.country_hint = HintLabel(details, on_accept=self._accept_country, wraplength=260)
         self.country_hint.grid(row=len(self.EDITABLE), column=2, sticky="w", padx=8)
         self.country_hint.watch(self.fields["country"], self._check_country)
+
         # ---- medical conditions ----
-        self.conditions_hint.watch(self.new_conditions, self._check_conditions)
+        conditions = ttk.LabelFrame(self, text="Medical conditions / allergies", padding=12)
+        conditions.pack(fill="x", pady=8)
         self.ticks_box = ttk.Frame(conditions) # checkboxes are rebuilt in on_show
         self.ticks_box.pack(fill="x")
         ttk.Button(conditions, text="Remove ticked", command=self._remove_conditions).pack(anchor="w", pady=(6, 12))
-        
+
         add_row = ttk.Frame(conditions)
         add_row.pack(fill="x")
         ttk.Label(add_row, text="Add (comma separated)").pack(side="left")
@@ -49,7 +51,9 @@ class ProfileFrame(ttk.Frame):
         ttk.Button(add_row, text="Add", command=self._add_conditions).pack(side="left")
         self.conditions_hint = HintLabel(conditions, on_accept=self._accept_conditions, wraplength=600)
         self.conditions_hint.pack(anchor="w", pady=(4, 0))
-        self.country_hint.watch(self.fields["country"], self._check_country)        # ---- account ----
+        self.conditions_hint.watch(self.new_conditions, self._check_conditions)
+
+        # ---- account ----
         ttk.Button(self, text="Delete my account", command=self._delete_account).pack(anchor="w", pady=(12, 0))
 
     def on_show(self): # fill everything in from the logged-in profile
