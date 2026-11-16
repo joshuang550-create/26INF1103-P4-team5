@@ -69,6 +69,39 @@ class IOManager:
     def logout(self):
         self._engine.logout()
 
+
+    def delete_account(self):
+        self._engine.delete_account()
+
+    # =========== Profile Editing ===========
+    def update_profile(self, form): # form = {"age": text, "height": text, "weight": text, "country": text}. Only changed fields are saved
+        current = self._engine.profile
+        age = self.to_number(form["age"], "Age", int)
+        height = self.to_number(form["height"], "Height", float)
+        weight = self.to_number(form["weight"], "Weight", float)
+        country = form["country"].strip()
+        if age != current.age:
+            self._engine.update_age(age)
+        if height != current.height:
+            self._engine.update_height(height)
+        if weight != current.weight:
+            self._engine.update_weight(weight)
+        if country.lower() != current.country.lower():
+            self._engine.update_country(country)
+        return self._engine.profile
+
+    def add_conditions(self, text):
+        conditions = self.split_conditions(text)
+        if not conditions:
+            raise InvalidInputError("Type at least one medical condition to add.")
+        self._require_known_conditions(conditions)
+        return self._engine.add_medical_conditions(conditions)
+
+    def remove_conditions(self, indices): # positions in profile.medical_conditions, from the ticked checkboxes
+        if not indices:
+            raise InvalidInputError("Tick at least one medical condition to remove.")
+        return self._engine.remove_medical_conditions(list(indices))
+
     # =========== Live Field Checks ===========
     def check_field(self, key, text):
         value = text.strip()
