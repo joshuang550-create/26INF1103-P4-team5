@@ -7,10 +7,11 @@ expects, checks it, calls the engine, and hands back results the GUI can show.
 import csv
 import os
 import pathlib
-from dataclasses import dataclass
 
 from rapidfuzz import fuzz, process, utils
 from exceptions.invalid_input_error import InvalidInputError
+from models.field_check import FieldCheck
+from models.outcome_view import OutcomeView
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -25,18 +26,6 @@ MATCH_CUTOFF = 80 # rapidfuzz score out of 100. Below this, the guess is too far
 VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
 VERDICT_MEANING = {"OK": "Okay to eat", "CAUTION": "Eat with caution", "AVOID": "Best to avoid", "UNDETERMINED": "Could not decide"}
 
-
-@dataclass(frozen=True)
-class FieldCheck: # result of checking one form field
-    message: str = "" # hint to show next to the field, "" when the field is fine
-    fix: str | None = None # corrected text the user can accept with one click, None when there is no suggestion
-
-
-@dataclass(frozen=True)
-class OutcomeView: # an Outcome turned into what the screen shows
-    title: str
-    colour: str
-    text: str
 
 class IOManager:
     def __init__(self, engine, lookups=None): # lookups is optional, for the test suite
@@ -68,6 +57,39 @@ class IOManager:
 
     def logout(self):
         self._engine.logout()
+
+
+    def delete_account(self):
+        self._engine.delete_account()
+
+    # =========== Profile Editing ===========
+    def update_profile(self, form): # form = {"age": text, "height": text, "weight": text, "country": text}. Only changed fields are saved
+        current = self._engine.profile
+        age = self.to_number(form["age"], "Age", int)
+        height = self.to_number(form["height"], "Height", float)
+        weight = self.to_number(form["weight"], "Weight", float)
+        country = form["country"].strip()
+        if age != current.age:
+            self._engine.update_age(age)
+        if height != current.height:
+            self._engine.update_height(height)
+        if weight != current.weight:
+            self._engine.update_weight(weight)
+        if country.lower() != current.country.lower():
+            self._engine.update_country(country)
+        return self._engine.profile
+
+    def add_conditions(self, text):
+        conditions = self.split_conditions(text)
+        if not conditions:
+            raise InvalidInputError("Type at least one medical condition to add.")
+        self._require_known_conditions(conditions)
+        return self._engine.add_medical_conditions(conditions)
+
+    def remove_conditions(self, indices): # positions in profile.medical_conditions, from the ticked checkboxes
+        if not indices:
+            raise InvalidInputError("Tick at least one medical condition to remove.")
+        return self._engine.remove_medical_conditions(list(indices))
 
     # =========== Live Field Checks ===========
     def check_field(self, key, text):
@@ -111,10 +133,6 @@ class IOManager:
             if details["flags"]:
                 lines += ["", "Flagged nutrients:"]
                 lines += [f"  • {flag['nutrient']}: {flag['value']} ({flag['level']})" for flag in details["flags"]]
-            if details["nutrients"]:
-                lines += ["", f"Nutrients per {details['portion_g']} g:"]
-                lines += [f"  • {nutrient}: {value}" for nutrient, value in details["nutrients"].items()]
-            lines += ["", f"AI confidence: {details['confidence']}/10"]
         headline = outcome.headline
         return OutcomeView(f"{headline} – {VERDICT_MEANING.get(headline, '')}", VERDICT_COLOURS.get(headline, "#8a9099"), "\n".join(lines))
 

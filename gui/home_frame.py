@@ -23,6 +23,7 @@ class HomeFrame(ttk.Frame):
         self.nav_buttons = [
         ttk.Button(top, text="Log out", command=app.logout),
         ttk.Button(top, text="My progress", command=lambda: app.show("dashboard")),
+        ttk.Button(top, text="My profile", command=lambda: app.show("profile")),
         ]
         for button in self.nav_buttons:
             button.pack(side="right", padx=(8, 0))
