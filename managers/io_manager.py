@@ -7,10 +7,11 @@ expects, checks it, calls the engine, and hands back results the GUI can show.
 import csv
 import os
 import pathlib
-from dataclasses import dataclass
 
 from rapidfuzz import fuzz, process, utils
 from exceptions.invalid_input_error import InvalidInputError
+from models.field_check import FieldCheck
+from models.outcome_view import OutcomeView
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -25,18 +26,6 @@ MATCH_CUTOFF = 80 # rapidfuzz score out of 100. Below this, the guess is too far
 VERDICT_COLOURS = {"OK": "#3ba776", "CAUTION": "#f2b134", "AVOID": "#E5534B", "UNDETERMINED": "#8a9099"} # same as progress/chart.py
 VERDICT_MEANING = {"OK": "Okay to eat", "CAUTION": "Eat with caution", "AVOID": "Best to avoid", "UNDETERMINED": "Could not decide"}
 
-
-@dataclass(frozen=True)
-class FieldCheck: # result of checking one form field
-    message: str = "" # hint to show next to the field, "" when the field is fine
-    fix: str | None = None # corrected text the user can accept with one click, None when there is no suggestion
-
-
-@dataclass(frozen=True)
-class OutcomeView: # an Outcome turned into what the screen shows
-    title: str
-    colour: str
-    text: str
 
 class IOManager:
     def __init__(self, engine, lookups=None): # lookups is optional, for the test suite

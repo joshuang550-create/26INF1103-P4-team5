@@ -1,6 +1,6 @@
 from tkinter import font, ttk
 
-from managers.io_manager import FieldCheck
+from models.field_check import FieldCheck
 
 PROBLEM_COLOUR = "#E5534B"
 SUGGESTION_COLOUR = "#2f6fb5"
