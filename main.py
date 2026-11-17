@@ -10,4 +10,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() # add to terminal env vars -    $env:FERNET_SECRET_KEY="vYTFX1ni17MptleqMTz1hCspMZEaqlaLPG91boo55-Q="
+    main()
