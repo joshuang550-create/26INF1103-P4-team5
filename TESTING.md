@@ -5,18 +5,43 @@ It needs **no live AI connection, no API key and no internet access**: the AI is
 fake model, Open Food Facts by a fake searcher, and all data files are written to throw-away temp folders
 (your real `data/` folder is never touched).
 
-## Run inside Docker (recommended / how the assessor runs it)
+## Run ALL tests inside Docker (core logic + real Tkinter GUI)
 
-From the project root:
+From the project root (PowerShell, VS Code terminal, or any shell with Docker):
 
 ```bash
-docker build -t smartbite .
+docker build --no-cache -t smartbite .
+docker run --rm -e SMARTBITE_REQUIRE_GUI_TESTS=1 smartbite xvfb-run -a python -m unittest discover -s tests -t . -v
+```
+
+`xvfb-run -a` starts a virtual graphical screen within the container. This
+allows all **66 GUI tests** to create actual Tkinter windows even on a headless
+Docker host. The Dockerfile installs `tk`, `xvfb`, `xauth` and a default font.
+`SMARTBITE_REQUIRE_GUI_TESTS=1` ensures a missing/broken virtual display is
+reported as a **failure**, not a silently skipped GUI test module.
+
+At the time of this update the project contains **231 non-GUI tests and 66 GUI
+tests (297 total)**. Expected result if nothing else changes: `Ran 297 tests ... OK`
+with **no GUI skips**. Counts can change when tests are added or removed.
+
+The same command is used by `.github/workflows/automated_test_suite.yml` on
+GitHub Actions (with the image name `smartbite:test`). GitHub must contain the
+committed Dockerfile, workflow and test changes.
+
+### Run only GUI tests
+
+```bash
+docker run --rm -e SMARTBITE_REQUIRE_GUI_TESTS=1 smartbite xvfb-run -a python -m unittest tests.test_gui -v
+```
+
+### Run core tests without a display
+
+```bash
 docker run --rm smartbite python -m unittest discover -s tests -t . -v
 ```
 
-Expected with the current project: `Ran 231 tests ... OK (skipped=1)` on a headless Docker container. The Tkinter GUI module is intentionally skipped when no display server is available; all non-GUI tests execute. The exact count may change as tests are added.
-
-**GUI test note:** `tests/test_gui.py` creates real Tkinter windows. It runs on a machine with a graphical display, but is skipped on a headless Linux container. If the assessor requires GUI tests to execute inside Docker too, a display server such as Xvfb must be configured separately.
+This last command intentionally skips the GUI module when no display exists;
+**do not use it as evidence that the GUI tests passed**.
 
 ## Run without Docker
 
@@ -24,6 +49,9 @@ Expected with the current project: `Ran 231 tests ... OK (skipped=1)` on a headl
 pip install -r requirements.txt
 python -m unittest discover -s tests -t . -v
 ```
+
+For GUI coverage on headless Linux outside Docker, install Xvfb and run:
+`xvfb-run -a python -m unittest discover -s tests -t . -v`.
 
 Run a single file or test:
 

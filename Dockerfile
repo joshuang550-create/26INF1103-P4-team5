@@ -5,8 +5,15 @@ WORKDIR /smartbite
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Tkinter uses native Tcl/Tk libraries; xvfb and xauth provide a virtual
+# display so real GUI tests can run on headless Docker / GitHub runners.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tk \
+    xvfb \
+    xauth \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -27,5 +34,5 @@ RUN mkdir -p /smartbite/data
 
 # Default: run the application.
 # To run the tests instead:
-#   docker run --rm <image> python -m unittest discover -s tests -t . -v
+#   docker run --rm <image> xvfb-run -a python -m unittest discover -s tests -t . -v
 CMD ["python", "main.py"]

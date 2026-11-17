@@ -21,6 +21,7 @@ jobs:
         run: docker build -t smartbite:test .
 
       # No API key or internet needed: the AI is faked in the tests.
-      - name: Run test suite inside the container
-        run: docker run --rm smartbite:test python -m unittest discover -s tests -t . -v
+      - name: Run test suite including GUI 
+        run: - name: Run all tests including GUI
+  run: docker run --rm -e SMARTBITE_REQUIRE_GUI_TESTS=1 smartbite:test timeout 90s xvfb-run -a python -u -m unittest discover -s tests -t . -v
   

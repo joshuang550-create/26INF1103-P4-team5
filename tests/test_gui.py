@@ -35,6 +35,11 @@ def setUpModule():
     try:
         root = tk.Tk()
     except tk.TclError as error:
+        if os.environ.get("SMARTBITE_REQUIRE_GUI_TESTS") == "1":
+            raise RuntimeError(
+                "GUI tests require a working display. Run with xvfb-run -a "
+                "and ensure that Tk/Tcl libraries are installed."
+            ) from error
         raise unittest.SkipTest(f"no display available for tkinter: {error}")
     root.destroy()
 
