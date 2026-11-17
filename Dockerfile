@@ -5,11 +5,12 @@ WORKDIR /smartbite
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Install Tcl/Tk and Xvfb inside the Docker container
+# Install Tcl/Tk libraries, Xvfb, and xauth for headless GUI testing
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-tk \
     libtk8.6 \
     xvfb \
+    xauth \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
