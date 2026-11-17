@@ -17,14 +17,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Tcl/Tk dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-tk libtk8.6
-
       - name: Build Docker image
         run: docker build -t smartbite:test .
 
       # No API key or internet needed: the AI is faked in the tests.
       - name: Run test suite inside the container
-        run: docker run --rm smartbite:test python -m unittest discover -s tests -t . -v
+        run: docker run --rm smartbite:test xvfb-run -a python -m unittest discover -s tests -t . -v
+        
