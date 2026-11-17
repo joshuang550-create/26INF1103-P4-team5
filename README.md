@@ -11,3 +11,12 @@ docker run --rm -it -v smartbite_data_vol_2:/smartbite/data -e FERNET_SECRET_KEY
 
 To run the tests:
 docker run --rm smartbite python -m unittest discover -s tests -t . -v
+
+
+
+
+Phase 2 started with the creation of the Conversion branch.
+
+First phase 2 commit was on Oct 14, 2026.
+The first commit was "Added gitignore and removed secrets." 
+Commit 6df9b02
