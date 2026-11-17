@@ -14,7 +14,9 @@ docker build -t smartbite .
 docker run --rm smartbite python -m unittest discover -s tests -t . -v
 ```
 
-Expected result: `Ran 176 tests ... OK`.
+Expected with the current project: `Ran 231 tests ... OK (skipped=1)` on a headless Docker container. The Tkinter GUI module is intentionally skipped when no display server is available; all non-GUI tests execute. The exact count may change as tests are added.
+
+**GUI test note:** `tests/test_gui.py` creates real Tkinter windows. It runs on a machine with a graphical display, but is skipped on a headless Linux container. If the assessor requires GUI tests to execute inside Docker too, a display server such as Xvfb must be configured separately.
 
 ## Run without Docker
 
@@ -43,3 +45,9 @@ python -m unittest tests.test_engine.FoodCheckVerdictTests.test_allergen_overrid
 | Failure cases: malformed AI output | `test_ai_response_validator.py`, `MalformedAIOutputTests`, `AIManagerTests` |
 | Failure cases: missing / corrupt persistence files, unwritable folders, bad API key | `test_data_manager.py` (`CorruptFileTests`, `LookupFileTests`, `ApiKeyTests`) |
 | Failure cases: AI / network errors | `test_ai_models.py`, `test_errors.py` |
+
+## Updated feature coverage
+
+The current project also tests progress tracking (`tests/test_progress.py`): saving verdict history for individual users, continuing checks after follow-up questions, trend scoring, weekly breakdowns, chart fallback behaviour, corrupted/missing history files, persistence after reopening, and atomic-write failures.
+
+The tests use `tempfile` and fakes; they do not read or change personal data under the project `data/` folder and do not require a real AI connection.

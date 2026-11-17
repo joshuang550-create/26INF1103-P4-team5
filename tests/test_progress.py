@@ -89,6 +89,20 @@ class VerdictLogTests(TempFolderTestCase):
         with self.assertRaises(DataError):
             self.log.verdicts("jane")
 
+    def test_saved_history_survives_a_new_log_instance(self):
+        self.log.add("jane", "Apple", "OK")
+        reopened = VerdictLog(self.path)
+        self.assertEqual(reopened.verdicts("jane"), ["OK"])
+
+    def test_failed_atomic_write_does_not_corrupt_existing_history(self):
+        self.log.add("jane", "Apple", "OK")
+        old_contents = self.path.read_text(encoding="utf-8")
+        with mock.patch.object(Path, "replace", side_effect=OSError("disk failure")):
+            with self.assertRaises(DataError):
+                self.log.add("jane", "Soup", "CAUTION")
+        self.assertEqual(self.path.read_text(encoding="utf-8"), old_contents)
+        self.assertFalse(self.path.with_name(self.path.name + ".tmp").exists())
+
     def test_delete_removes_only_that_user(self):
         self.log.add("jane", "Apple", "OK")
         self.log.add("ride", "Apple", "OK")
@@ -159,6 +173,23 @@ class ProgressTrackingEngineTests(TempFolderTestCase):
     def test_fallback_has_no_verdict_so_nothing_is_recorded(self):
         self.tracker(FALLBACK).check_food("Mystery food")
         self.assertEqual(self.log.verdicts("jane"), [])
+
+    def test_completed_follow_up_records_original_food_name(self):
+        tracker = self.tracker(ASKING, finished(Verdict.CAUTION))
+        tracker.check_food("  Chicken Rice  ")
+        tracker.answer_questions({"portion": "small"})
+        saved = self.path.read_text(encoding="utf-8")
+        self.assertIn('"food": "Chicken Rice"', saved)
+        self.assertNotIn('"food": "  Chicken Rice  "', saved)
+
+    def test_separate_users_do_not_share_progress(self):
+        engine = FakeEngine([finished(Verdict.AVOID), finished(Verdict.OK)])
+        tracker = ProgressTrackingEngine(engine, self.log)
+        tracker.check_food("Cake")
+        engine.profile = SimpleNamespace(username="other")
+        tracker.check_food("Apple")
+        self.assertEqual(self.log.verdicts("jane"), ["AVOID"])
+        self.assertEqual(self.log.verdicts("other"), ["OK"])
 
     def test_the_step_is_returned_unchanged(self):
         step = finished(Verdict.AVOID)
