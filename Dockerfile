@@ -5,6 +5,15 @@ WORKDIR /smartbite
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Install Tcl/Tk and Xvfb inside the Docker container
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-tk \
+    libtk8.6 \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
