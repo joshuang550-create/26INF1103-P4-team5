@@ -10,8 +10,7 @@ docker run --rm -it -v smartbite_data_vol_2:/smartbite/data -e FERNET_SECRET_KEY
 
 
 To run the tests:
-docker run --rm smartbite python -m unittest discover -s tests -t . -v
-
+docker run --rm -e SMARTBITE_REQUIRE_GUI_TESTS=1 smartbite timeout 90s xvfb-run -a python -u -m unittest discover -s tests -t . -v
 
 
 
