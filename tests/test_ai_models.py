@@ -5,8 +5,8 @@ from unittest import mock
 
 import httpx
 from google.genai import errors
-from google import genai
 
+import ai.providers.gemini as gemini_module
 from ai.providers.gemini import Gemini
 from exceptions.ai_connection_error import AIConnectionError
 from exceptions.ai_error import AIError
@@ -33,8 +33,8 @@ def working_client(reply_text="{}"):
 class GeminiTests(unittest.TestCase):
     def send(self, client=None, client_error=None, key_supplier=lambda: "fake-key"):
         gemini = Gemini(api_key_supplier=key_supplier)
-        patch = mock.patch.object(genai, "Client", side_effect=client_error) if client_error else \
-            mock.patch.object(genai, "Client", return_value=client)
+        patch = mock.patch.object(gemini_module.genai, "Client", side_effect=client_error) if client_error else \
+            mock.patch.object(gemini_module.genai, "Client", return_value=client)
         with patch:
             return gemini.send("prompt", [], "system rules")
 

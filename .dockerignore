@@ -1,0 +1,9 @@
+.git
+.github
+.gitignore
+**/__pycache__
+*.pyc
+secret.key
+*.docx
+*.tar
+data/*.json

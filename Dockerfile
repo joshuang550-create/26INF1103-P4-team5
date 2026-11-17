@@ -8,13 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py encrypted_api_key.bin ./
-COPY app/ ./app/
-COPY managers/ ./managers/
-COPY models/ ./models/
-COPY prompts/ ./prompts/
-COPY lookup/ ./lookup/
-COPY tests/ ./tests/
+# Copy the whole project (app code, lookup files, tests...).
+# .dockerignore keeps secrets, git history and local data out of the image.
+COPY . .
 
 ENV USER_PROFILES="/smartbite/data/user_profiles.json" \
     CHATS="/smartbite/data/chats.json" \
@@ -27,5 +23,7 @@ ENV USER_PROFILES="/smartbite/data/user_profiles.json" \
 
 RUN mkdir -p /smartbite/data
 
-# Default: run the application.  To run the tests instead, see TESTING.md.
+# Default: run the application.
+# To run the tests instead:
+#   docker run --rm <image> python -m unittest discover -s tests -t . -v
 CMD ["python", "main.py"]
