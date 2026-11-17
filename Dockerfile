@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     xauth \
     fonts-dejavu-core \
+    python3-tk \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
