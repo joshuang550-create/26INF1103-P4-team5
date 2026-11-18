@@ -96,7 +96,9 @@ Start XQuartz, allow localhost connections, and run the container:
 
 ```bash
 open -a XQuartz
-xhost +localhost
+xhost +127.0.0.1
+
+lsof -iTCP:6000 -sTCP:LISTEN
 
 docker run -it --rm \
   -e DISPLAY=host.docker.internal:0 \

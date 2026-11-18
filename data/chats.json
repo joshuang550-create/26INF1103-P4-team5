@@ -7,6 +7,78 @@
         {
             "role": "model",
             "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 118,\n  \"nutrients\": {\n    \"sodium_mg\": 1.2,\n    \"sugar_g\": 14.4,\n    \"saturated_fat_g\": 0.1,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"You are considering a medium raw banana weighing about 118 grams. This fruit is naturally very low in sodium, which fits well with your high blood pressure. It contains no ingredients related to your allergies.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"big mac\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 219,\n  \"nutrients\": {\n    \"sodium_mg\": 1010.0,\n    \"sugar_g\": 9.0,\n    \"saturated_fat_g\": 10.0,\n    \"trans_fat_g\": 1.0\n  },\n  \"reason\": \"You are considering one standard McDonald's Big Mac burger weighing about 219 grams. This meal is high in sodium and saturated fat, which requires caution given your high blood pressure. It does not contain any ingredients related to your allergies.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"jambalaya\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [\n    \"Which ingredients are included in your jambalaya? (e.g. chicken, sausage, shrimp)\",\n    \"Roughly how much will you eat? (e.g. one bowl, one plate)\"\n  ],\n  \"portion_g\": 0,\n  \"nutrients\": {\n    \"sodium_mg\": 0,\n    \"sugar_g\": 0,\n    \"saturated_fat_g\": 0,\n    \"trans_fat_g\": 0\n  },\n  \"reason\": \"We need to know the ingredients and portion size of your jambalaya to assess it for you.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 0\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nANSWERS TO YOUR QUESTIONS\nQ: Which ingredients are included in your jambalaya? (e.g. chicken, sausage, shrimp)\nA: sausage and chicken, no shrimp\nQ: Roughly how much will you eat? (e.g. one bowl, one plate)\nA: one bowl\n\nContinue the same food check using these answers and reply in the food-check format. If an answer is too vague, ask again only if it is essential and you have not yet used 2 rounds of questions; otherwise use the most cautious reasonable assumption and say so in the reason.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 350,\n  \"nutrients\": {\n    \"sodium_mg\": 950.0,\n    \"sugar_g\": 5.0,\n    \"saturated_fat_g\": 6.5,\n    \"trans_fat_g\": 0.2\n  },\n  \"reason\": \"You are planning to eat one bowl of sausage and chicken jambalaya weighing about 350 grams. This dish is relatively high in sodium, which requires careful attention given your high blood pressure. We assumed a standard restaurant or homemade recipe preparation since no specific cooking method was provided.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 75\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"har gow\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 120,\n  \"nutrients\": {\n    \"sodium_mg\": 520.0,\n    \"sugar_g\": 1.0,\n    \"saturated_fat_g\": 1.5,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"shrimp is present in this food, which matches your shrimp allergy. You are considering a standard portion of four steamed dumplings weighing about 120 grams. The sodium content is also relatively high, which requires caution given your high blood pressure.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 90\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"seafood boil\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy, prawn allergy, oyster allergy, scallop allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [\n    \"Which seafood items are included in your seafood boil? (e.g. shrimp, crab, mussels)\",\n    \"Roughly how much will you eat? (e.g. one large plate, a small bowl)\"\n  ],\n  \"portion_g\": 0,\n  \"nutrients\": {\n    \"sodium_mg\": 0,\n    \"sugar_g\": 0,\n    \"saturated_fat_g\": 0,\n    \"trans_fat_g\": 0\n  },\n  \"reason\": \"We need to know which seafood ingredients are in your seafood boil and the portion size to assess it for you.\",\n  \"potential_concern\": false,\n  \"confidence_score\": 0\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nANSWERS TO YOUR QUESTIONS\nQ: Which seafood items are included in your seafood boil? (e.g. shrimp, crab, mussels)\nA: lobster, crab, mussels, prawn\nQ: Roughly how much will you eat? (e.g. one large plate, a small bowl)\nA: one large bowl\n\nContinue the same food check using these answers and reply in the food-check format. If an answer is too vague, ask again only if it is essential and you have not yet used 2 rounds of questions; otherwise use the most cautious reasonable assumption and say so in the reason.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 500,\n  \"nutrients\": {\n    \"sodium_mg\": 1450.0,\n    \"sugar_g\": 2.0,\n    \"saturated_fat_g\": 8.0,\n    \"trans_fat_g\": 0.0\n  },\n  \"reason\": \"shrimp, prawn, oyster are present in this food, which matches your shrimp allergy, prawn allergy, oyster allergy. You are planning to eat one large bowl of seafood boil containing lobster, crab, mussels, and prawn, weighing about 500 grams. This dish is very high in sodium, which requires careful management given your high blood pressure. We assumed a standard seasoned boil preparation based on your portion description.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 80\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"lobster roll without lobster\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy, prawn allergy, oyster allergy, scallop allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 160,\n  \"nutrients\": {\n    \"sodium_mg\": 580.0,\n    \"sugar_g\": 4.0,\n    \"saturated_fat_g\": 3.5,\n    \"trans_fat_g\": 0.1\n  },\n  \"reason\": \"You are considering a lobster roll prepared without lobster, weighing about 160 grams. This dish contains a moderate amount of sodium and saturated fat, which requires attention given your high blood pressure. We assumed a standard buttered bun and mayonnaise dressing preparation since no other details were provided.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 75\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"salted egg crab without crab\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy, prawn allergy, oyster allergy, scallop allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 200,\n  \"nutrients\": {\n    \"sodium_mg\": 980.0,\n    \"sugar_g\": 3.0,\n    \"saturated_fat_g\": 12.0,\n    \"trans_fat_g\": 0.2\n  },\n  \"reason\": \"You are considering a salted egg sauce dish prepared without crab, weighing about 200 grams. This food is very high in sodium and saturated fat, which requires careful attention given your high blood pressure. We assumed a standard restaurant-style preparation with salted egg yolks, butter, and curry leaves.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 75\n}"
+        },
+        {
+            "role": "user",
+            "text": "\nNEW FOOD CHECK\nFood (as typed by the user): \"coquilles st. jacques without scallops\"\n\nUser profile:\n- Age: 50\n- Gender: female\n- Height: 160.0 cm\n- Weight: 60.0 kg\n- BMI: 23.44\n- Country: singapore\n- Ethnicity: chinese\n- Medical conditions: high blood pressure, shrimp allergy, prawn allergy, oyster allergy, scallop allergy\n\nAssess this food for this user. Ask for any missing details before assessing.\n"
+        },
+        {
+            "role": "model",
+            "text": "{\n  \"information_needed\": [],\n  \"portion_g\": 250,\n  \"nutrients\": {\n    \"sodium_mg\": 650.0,\n    \"sugar_g\": 3.0,\n    \"saturated_fat_g\": 9.0,\n    \"trans_fat_g\": 0.3\n  },\n  \"reason\": \"You are considering Coquilles St. Jacques prepared without scallops, weighing about 250 grams. This dish contains a moderate amount of sodium and is relatively high in saturated fat due to the creamy sauce and cheese topping, which requires caution given your high blood pressure. We assumed a standard baked recipe preparation since no specific cooking details were provided.\",\n  \"potential_concern\": true,\n  \"confidence_score\": 75\n}"
         }
     ],
     "ride": [

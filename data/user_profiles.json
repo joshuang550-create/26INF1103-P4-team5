@@ -55,7 +55,10 @@
         "gender": "female",
         "medical_conditions": [
             "high blood pressure",
-            "prawn allergy"
+            "shrimp allergy",
+            "prawn allergy",
+            "oyster allergy",
+            "scallop allergy"
         ]
     },
     "wig": {

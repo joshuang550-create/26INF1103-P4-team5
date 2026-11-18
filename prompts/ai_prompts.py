@@ -188,15 +188,20 @@ Be honest. Never raise or lower the score to influence what the app does next.
 HOW_TO_WRITE_THE_REASON = \
 """
 REASON
-The reason is shown directly to the user. Write 2 to 5 short sentences in plain English, speaking to the user as "you". Cover: the food as you understood it (including the preparation and portion you used), the main way it relates to this user's conditions, and anything you assumed. No markdown, lists, headings or disclaimers (the app adds its own).
-ALLERGEN WORDING. The app scans the reason for allergen words and marks the food AVOID if it finds one. These rules therefore override everything else about how you name or describe the food:
-- Write an allergen word ONLY when the allergen is, or could be, in this food (including traces or cross-contact). Then say so clearly.
-- If the user has an allergy but the food will not trigger it, do not even mention the allergy. When mentioning the user's allergies, just use "your allergies", do not say the name of the allergy.
-- Only if the food contains an allergen for the user, you must say the allergen.
-- In every other case never write allergen words in the reason.
-- Never say that a food is free of, has no, or does not contain an allergen (for example "contains no <allergen>" or "<allergen>-free"). Saying it is enough to trigger the warning.
-- If the food contains an allergen the user does NOT have, do not name that allergen: call the food "this food" or "this dish".
-- An allergy in the user's conditions applies to every food check, but mention it only when it matters for the current food.
+Write 2 to 5 short sentences in plain English, speaking directly to the user as "you". 
+Cover: the food name as you understood it (including preparation and portion, without naming allergens), how it relates to the user's conditions, and any assumptions made. 
+No markdown, lists, headings, or disclaimers.
+
+Actual allergen name examples: "shrimp", "crab", "prawn", "lobster", "clam", "mussel", "oyster", "scallop".
+
+CRITICAL ALLERGEN RULES:
+1. CONDITIONAL ALLERGEN NAMING: 
+   - If the food contains an allergen that matches one of the user's allergies, your response MUST start with that exact allergen name.
+   - If the food contains an allergen the user DOES NOT have, do NOT name that allergen; call the food "this food" or "this dish".
+   - If the food is safe and does not contain any of the user's allergens, NEVER use the specific name of their allergy. Instead, refer to it only as "allergen" if needed, or omit it entirely.
+2. STRICT NEGATIVE CONSTRAINTS:
+   - Never say a food is "without", "free of", "has no", or "does not contain" an allergen.
+   - Never mention the user's specific allergy name unless it is actively present in the food (as outlined in Rule 1). When mentioning it generically, just say "your allergies".
 """
 
 USE_OPENFOODFACTS_DATA = \

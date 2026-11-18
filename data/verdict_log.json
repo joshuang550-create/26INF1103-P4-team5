@@ -32,5 +32,52 @@
             "food": "1 kitkat bar chunky. original",
             "verdict": "CAUTION"
         }
+    ],
+    "mary": [
+        {
+            "time": 1795011172.6449265,
+            "food": "big mac",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795011251.921214,
+            "food": "jambalaya",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795011489.7115252,
+            "food": "jambalaya",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795011629.853644,
+            "food": "jambalaya",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795011664.0280218,
+            "food": "har gow",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795011882.5608847,
+            "food": "seafood boil",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795012132.5160077,
+            "food": "lobster roll without lobster",
+            "verdict": "CAUTION"
+        },
+        {
+            "time": 1795012158.6121943,
+            "food": "salted egg crab without crab",
+            "verdict": "AVOID"
+        },
+        {
+            "time": 1795012363.6354795,
+            "food": "coquilles st. jacques without scallops",
+            "verdict": "AVOID"
+        }
     ]
 }
